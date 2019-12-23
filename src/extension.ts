@@ -1,0 +1,29 @@
+// The module 'vscode' contains the VS Code extensibility API
+// Import the module and reference it with the alias vscode in your code below
+import * as vscode from 'vscode';
+
+import { DevicesProvider, ProviderType } from './providers/devices';
+
+export function activate(context: vscode.ExtensionContext) {
+	let NEXT_TERM_ID = 1;
+
+	const appsProvider = new DevicesProvider(ProviderType.Apps);
+	vscode.window.registerTreeDataProvider('fridaApps', appsProvider);
+	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.refresh.apps', () => appsProvider.refresh()));
+	
+	const psProvider = new DevicesProvider(ProviderType.Processes);
+	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
+	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.refresh.ps', () => psProvider.refresh()));
+
+	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.repl', () => {
+		vscode.window.createTerminal(`Frida Terminal #${NEXT_TERM_ID++}`, 'frida', ['Finder']);
+	}));
+
+	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.run', () => {
+		// TODO:
+		vscode.window.createTerminal(`Frida Terminal #${NEXT_TERM_ID++}`, 'frida', ['Finder']);
+	}));
+}
+
+// this method is called when your extension is deactivated
+export function deactivate() {}

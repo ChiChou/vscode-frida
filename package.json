@@ -1,0 +1,100 @@
+{
+	"name": "vscode-frida",
+	"displayName": "vscode-frida",
+	"description": "Unofficial frida workbench for VSCode",
+	"version": "0.0.1",
+	"engines": {
+		"vscode": "^1.41.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onView:fridaApps",
+		"onView:fridaPs"
+	],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "extension.frida.run",
+				"title": "Run frida script"
+			},
+			{
+				"command": "extension.frida.ps.refresh",
+				"title": "Refresh Processes",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "extension.frida.apps.refresh",
+				"title": "Refresh Apps",
+				"icon": {
+					"light": "resources/light/refresh.svg",
+					"dark": "resources/dark/refresh.svg"
+				}
+			},
+			{
+				"command": "extension.frida.repl",
+				"title": "Open frida REPL"
+			}
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "frida-sidebar",
+					"title": "Frida Utilities",
+					"icon": "resources/icon.svg"
+				}
+			]
+		},
+		"views": {
+			"frida-sidebar": [
+				{
+					"id": "fridaApps",
+					"name": "Apps"
+				},
+				{
+					"id": "fridaPs",
+					"name": "Processes"
+				}
+			]
+		},
+		"menus": {
+			"view/title": [
+				{
+					"command": "extension.frida.apps.refresh",
+					"when": "view == fridaApps",
+					"group": "navigation@1"
+				},
+				{
+					"command": "extension.frida.ps.refresh",
+					"when": "view == fridaPs",
+					"group": "navigation@1"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile",
+		"test": "node ./out/test/runTest.js"
+	},
+	"devDependencies": {
+		"@types/glob": "^7.1.1",
+		"@types/mocha": "^5.2.7",
+		"@types/node": "^12.11.7",
+		"@types/vscode": "^1.41.0",
+		"electron-rebuild": "^1.8.8",
+		"glob": "^7.1.5",
+		"mocha": "^6.2.2",
+		"tslint": "^5.20.0",
+		"typescript": "^3.6.4",
+		"vscode-test": "^1.2.2"
+	},
+	"dependencies": {}
+}
