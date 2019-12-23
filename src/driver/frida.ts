@@ -1,7 +1,7 @@
 import { join } from 'path';
 
 import { execFile } from 'child_process';
-import { Device, App, Process } from '../providers/devices';
+import { Device, App, Process } from '../types';
 
 const py: string = join(__dirname, '..', '..', 'cmds', 'driver.py');
 

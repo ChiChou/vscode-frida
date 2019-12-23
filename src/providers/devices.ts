@@ -3,8 +3,13 @@ import * as path from 'path';
 
 import * as driver from '../driver/frida';
 import { resource } from '../utils';
+import { ProviderType, App, Process, Device } from '../types';
 
 export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
+
+  private _onDidChangeTreeData: vscode.EventEmitter<TargetItem | undefined> = new vscode.EventEmitter<TargetItem | undefined>();
+	readonly onDidChangeTreeData: vscode.Event<TargetItem | undefined> = this._onDidChangeTreeData.event;
+
   constructor(
     public readonly type: ProviderType
   ) {
@@ -12,7 +17,7 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
   }
   
   refresh(): void {
-    
+    this._onDidChangeTreeData.fire();
 	}
 
 	getTreeItem(element: TargetItem): vscode.TreeItem {
@@ -26,41 +31,6 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
       return driver.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
     }
 	}
-}
-
-export enum ProviderType {
-  Apps = 'apps',
-  Processes = 'ps',
-}
-
-export enum DeviceType {
-  Local = 'local',
-  Remote = 'remote',
-  USB = 'usb',
-}
-
-export class Device {
-  id: string = '';
-  name: string = '';
-  type: DeviceType = DeviceType.Local;
-  icon: string = '';
-}
-
-export enum ItemType {
-  device = 'Device',
-  app = 'App',
-  process = 'Process'
-}
-
-export class App {
-  identifier: string = '';
-  name: string = '';
-  pid: number = 0;
-}
-
-export class Process {
-  name: string = '';
-  pid: number = 0;
 }
 
 export abstract class TargetItem extends vscode.TreeItem {
@@ -85,8 +55,8 @@ export class DeviceItem extends TargetItem {
 
   get iconPath() {
     return {
-      light: vscode.Uri.file(path.join(__dirname, '..', '..', 'resources', 'light', `${this.data.type}.svg`)),
-      dark: vscode.Uri.file(path.join(__dirname, '..', '..', 'resources', 'dark', `${this.data.type}.svg`)),
+      light: resource('light', `${this.data.type}.svg`),
+      dark: resource('dark', `${this.data.type}.svg`),
     };
   }
 
