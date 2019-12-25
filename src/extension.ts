@@ -17,12 +17,14 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.ps.refresh', () => psProvider.refresh()));
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.repl', () => {
-		vscode.window.createTerminal(`Frida Terminal #${NEXT_TERM_ID++}`, 'frida', ['Finder']);
+		const term = vscode.window.createTerminal(`Frida Terminal #${NEXT_TERM_ID++}`, 'frida', ['Finder']);
+		term.show();
 	}));
 
 	context.subscriptions.push(vscode.commands.registerCommand('extension.frida.run', () => {
 		// TODO:
-		vscode.window.createTerminal(`Frida Terminal #${NEXT_TERM_ID++}`, 'frida', ['Finder']);
+		const term = vscode.window.createTerminal(`Frida Terminal #${NEXT_TERM_ID++}`, 'frida', ['Finder']);
+		term.show();
 	}));
 }
 

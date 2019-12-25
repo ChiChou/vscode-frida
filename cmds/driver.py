@@ -66,7 +66,11 @@ if __name__ == '__main__':
     driver = Driver()
     if hasattr(driver, args.action):
         method = getattr(driver, args.action)
-        result = method(*args.args)
-        print(json.dumps(result))
-    else:
-        sys.exit(-1)
+        try:
+            result = method(*args.args)
+            print(json.dumps(result))
+            sys.exit(0)
+        except Exception as e:
+            print(e)
+
+    sys.exit(-1)

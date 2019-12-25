@@ -8,49 +8,49 @@ import { ProviderType, App, Process, Device } from '../types';
 export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
 
   private _onDidChangeTreeData: vscode.EventEmitter<TargetItem | undefined> = new vscode.EventEmitter<TargetItem | undefined>();
-	readonly onDidChangeTreeData: vscode.Event<TargetItem | undefined> = this._onDidChangeTreeData.event;
+  readonly onDidChangeTreeData: vscode.Event<TargetItem | undefined> = this._onDidChangeTreeData.event;
 
   constructor(
     public readonly type: ProviderType
   ) {
 
   }
-  
+
   refresh(): void {
     this._onDidChangeTreeData.fire();
-	}
-
-	getTreeItem(element: TargetItem): vscode.TreeItem {
-		return element;
   }
-  
+
+  getTreeItem(element: TargetItem): vscode.TreeItem {
+    return element;
+  }
+
   getChildren(element?: TargetItem): Thenable<TargetItem[]> {
     if (element) {
       return element.children();
     } else {
       return driver.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
     }
-	}
+  }
 }
 
 export abstract class TargetItem extends vscode.TreeItem {
-  abstract children() : Thenable<TargetItem[]>;
+  abstract children(): Thenable<TargetItem[]>;
 }
 
 export class DeviceItem extends TargetItem {
-	constructor(
+  constructor(
     public readonly data: Device,
     public readonly type: ProviderType,
-	) {
+  ) {
     super(data.name, vscode.TreeItemCollapsibleState.Collapsed);
-	}
+  }
 
-	get tooltip(): string {
-		return `${this.data.id} (${this.data.type})`;
-	}
+  get tooltip(): string {
+    return `${this.data.id} (${this.data.type})`;
+  }
 
-	get description(): string {
-		return this.data.id;
+  get description(): string {
+    return this.data.id;
   }
 
   get iconPath() {
@@ -62,14 +62,35 @@ export class DeviceItem extends TargetItem {
 
   children(): Thenable<TargetItem[]> {
     if (this.type === ProviderType.Apps) {
-      return driver.apps(this.data.id).then(apps => apps.map(app => new AppItem(app)));
+      return driver.apps(this.data.id).then(apps => apps.map(app => new AppItem(app))).catch(e => [new NotFound(e)]);
     } else if (this.type === ProviderType.Processes) {
-      return driver.ps(this.data.id).then(ps => ps.map(p => new ProcessItem(p)));
+      return driver.ps(this.data.id).then(ps => ps.map(p => new ProcessItem(p))).catch(e => [new NotFound(e)]);
     }
     return Promise.resolve([]);
   }
 
-	contextValue = 'device';
+  contextValue = 'device';
+}
+
+export class NotFound extends TargetItem {
+  constructor(
+    public readonly reason: Error,
+  ) {
+    super(reason.message, vscode.TreeItemCollapsibleState.None);
+  }
+
+  children(): Thenable<TargetItem[]> {
+    return Promise.resolve([]);
+  }
+
+  get tooltip() { return this.reason.message; }
+
+  iconPath = {
+      dark: resource('dark', 'error.svg'),
+      light: resource('light', 'error.svg')
+  };
+
+  contextValue = 'empty';
 }
 
 export class AppItem extends TargetItem {

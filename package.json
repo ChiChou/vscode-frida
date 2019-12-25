@@ -11,14 +11,19 @@
 	],
 	"activationEvents": [
 		"onView:fridaApps",
-		"onView:fridaPs"
+		"onView:fridaPs",
+		"onCommand:extension.frida.run",
+		"onCommand:extension.frida.repl",
+		"onCommand:extension.frida.ps.refresh",
+		"onCommand:extension.frida.app.refresh"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
 				"command": "extension.frida.run",
-				"title": "Run frida script"
+				"title": "Run Script",
+				"category": "Frida"
 			},
 			{
 				"command": "extension.frida.ps.refresh",
@@ -26,7 +31,8 @@
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
-				}
+				},
+				"category": "Frida"
 			},
 			{
 				"command": "extension.frida.apps.refresh",
@@ -34,7 +40,8 @@
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
-				}
+				},
+				"category": "Frida"
 			},
 			{
 				"command": "extension.frida.repl",
