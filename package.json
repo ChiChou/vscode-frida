@@ -11,22 +11,17 @@
 	],
 	"activationEvents": [
 		"onView:fridaApps",
-		"onView:fridaPs",
-		"onCommand:extension.frida.run",
-		"onCommand:extension.frida.repl",
-		"onCommand:extension.frida.ps.refresh",
-		"onCommand:extension.frida.app.refresh"
+		"onView:fridaPs",		
+		"onCommand:frida.attach",
+		"onCommand:frida.spawn",
+		"onCommand:frida.ps.refresh",
+		"onCommand:frida.app.refresh"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "extension.frida.run",
-				"title": "Run Script",
-				"category": "Frida"
-			},
-			{
-				"command": "extension.frida.ps.refresh",
+				"command": "frida.ps.refresh",
 				"title": "Refresh Processes",
 				"icon": {
 					"light": "resources/light/refresh.svg",
@@ -35,7 +30,7 @@
 				"category": "Frida"
 			},
 			{
-				"command": "extension.frida.apps.refresh",
+				"command": "frida.apps.refresh",
 				"title": "Refresh Apps",
 				"icon": {
 					"light": "resources/light/refresh.svg",
@@ -44,8 +39,22 @@
 				"category": "Frida"
 			},
 			{
-				"command": "extension.frida.repl",
-				"title": "Open frida REPL"
+				"command": "frida.attach",
+				"title": "Attach to",
+				"icon": {
+					"light": "resources/light/attach.svg",
+					"dark": "resources/dark/attach.svg"
+				},
+				"category": "Frida"
+			},
+			{
+				"command": "frida.spawn",
+				"title": "Spawn",
+				"icon": {
+					"light": "resources/light/statusRun.svg",
+					"dark": "resources/dark/statusRun.svg"
+				},
+				"category": "Frida"
 			}
 		],
 		"viewsContainers": {
@@ -72,14 +81,31 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "extension.frida.apps.refresh",
+					"command": "frida.apps.refresh",
 					"when": "view == fridaApps",
 					"group": "navigation@1"
 				},
 				{
-					"command": "extension.frida.ps.refresh",
+					"command": "frida.ps.refresh",
 					"when": "view == fridaPs",
 					"group": "navigation@1"
+				}
+			],
+			"view/item/context": [
+				{
+					"command": "frida.attach",
+					"when": "view == fridaApps && viewItem == 'app'",
+					"group": "inline"
+				},
+				{
+					"command": "frida.attach",
+					"when": "view == fridaPs && viewItem == 'process'",
+					"group": "inline"
+				},
+				{
+					"command": "frida.spawn",
+					"when": "view == fridaApps && viewItem == 'app'",
+					"group": "inline"
 				}
 			]
 		}

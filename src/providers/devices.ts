@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 import * as driver from '../driver/frida';
 import { resource } from '../utils';
@@ -61,10 +60,15 @@ export class DeviceItem extends TargetItem {
   }
 
   children(): Thenable<TargetItem[]> {
+    const device = this.data;
     if (this.type === ProviderType.Apps) {
-      return driver.apps(this.data.id).then(apps => apps.map(app => new AppItem(app))).catch(e => [new NotFound(e)]);
+      return driver.apps(device.id)
+        .then(apps => apps.map(app => new AppItem(app, device)))
+        .catch(e => [new NotFound(e, device)]);
     } else if (this.type === ProviderType.Processes) {
-      return driver.ps(this.data.id).then(ps => ps.map(p => new ProcessItem(p))).catch(e => [new NotFound(e)]);
+      return driver.ps(device.id)
+        .then(ps => ps.map(p => new ProcessItem(p, device)))
+        .catch(e => [new NotFound(e, device)]);
     }
     return Promise.resolve([]);
   }
@@ -75,6 +79,7 @@ export class DeviceItem extends TargetItem {
 export class NotFound extends TargetItem {
   constructor(
     public readonly reason: Error,
+    public readonly device: Device,
   ) {
     super(reason.message, vscode.TreeItemCollapsibleState.None);
   }
@@ -95,7 +100,8 @@ export class NotFound extends TargetItem {
 
 export class AppItem extends TargetItem {
   constructor(
-    public readonly data: App
+    public readonly data: App,
+    public readonly device: Device,
   ) {
     super(data.name, vscode.TreeItemCollapsibleState.None);
   }
@@ -112,6 +118,14 @@ export class AppItem extends TargetItem {
     return Promise.resolve([]);
   }
 
+  get command() {
+    return {
+      command: 'frida.passionfruit',
+      title: '',
+      arguments: [this]
+    };
+  }
+
   get iconPath() {
     const img = this.data.pid ? 'statusRun.svg' : 'statusStop.svg';
     return {
@@ -125,7 +139,8 @@ export class AppItem extends TargetItem {
 
 export class ProcessItem extends TargetItem {
   constructor(
-    public readonly data: Process
+    public readonly data: Process,
+    public readonly device: Device,
   ) {
     super(data.name, vscode.TreeItemCollapsibleState.None);
   }
