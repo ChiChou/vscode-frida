@@ -11,7 +11,7 @@
 	],
 	"activationEvents": [
 		"onView:fridaApps",
-		"onView:fridaPs",		
+		"onView:fridaPs",
 		"onCommand:frida.attach",
 		"onCommand:frida.spawn",
 		"onCommand:frida.ps.refresh",
@@ -129,5 +129,8 @@
 		"typescript": "^3.6.4",
 		"vscode-test": "^1.2.2"
 	},
-	"dependencies": {}
+	"dependencies": {
+		"axios": "^0.19.1",
+		"ws": "^7.2.1"
+	}
 }

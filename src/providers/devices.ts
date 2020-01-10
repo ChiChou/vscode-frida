@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import * as driver from '../driver/frida';
+import * as ipc from '../driver/ipc';
+
 import { resource } from '../utils';
 import { ProviderType, App, Process, Device } from '../types';
 
@@ -27,7 +28,10 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
     if (element) {
       return element.children();
     } else {
-      return driver.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
+      if (ipc.alive()) {
+        return ipc.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
+      }
+      return Promise.resolve([]);
     }
   }
 }
@@ -62,11 +66,11 @@ export class DeviceItem extends TargetItem {
   children(): Thenable<TargetItem[]> {
     const device = this.data;
     if (this.type === ProviderType.Apps) {
-      return driver.apps(device.id)
+      return ipc.apps(device.id)
         .then(apps => apps.map(app => new AppItem(app, device)))
         .catch(e => [new NotFound(e, device)]);
     } else if (this.type === ProviderType.Processes) {
-      return driver.ps(device.id)
+      return ipc.ps(device.id)
         .then(ps => ps.map(p => new ProcessItem(p, device)))
         .catch(e => [new NotFound(e, device)]);
     }
@@ -91,8 +95,8 @@ export class NotFound extends TargetItem {
   get tooltip() { return this.reason.message; }
 
   iconPath = {
-      dark: resource('dark', 'error.svg'),
-      light: resource('light', 'error.svg')
+    dark: resource('dark', 'error.svg'),
+    light: resource('light', 'error.svg')
   };
 
   contextValue = 'empty';
@@ -127,6 +131,10 @@ export class AppItem extends TargetItem {
   }
 
   get iconPath() {
+    if (this.data.largeIcon) {
+      return vscode.Uri.parse(this.data.largeIcon);
+    }
+
     const img = this.data.pid ? 'statusRun.svg' : 'statusStop.svg';
     return {
       dark: resource('dark', img),
@@ -158,6 +166,10 @@ export class ProcessItem extends TargetItem {
   }
 
   get iconPath() {
+    if (this.data.largeIcon) {
+      return vscode.Uri.parse(this.data.largeIcon);
+    }
+
     const img = this.data.pid ? 'statusRun.svg' : 'statusStop.svg';
     return {
       dark: resource('dark', img),

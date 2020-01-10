@@ -5,6 +5,8 @@ import * as vscode from 'vscode';
 import { DevicesProvider, TargetItem, AppItem, ProcessItem } from './providers/devices';
 import { ProviderType, Process } from './types';
 
+import { init, teardown } from './driver/ipc';
+
 export function activate(context: vscode.ExtensionContext) {
 	let NEXT_TERM_ID = 1;
 
@@ -20,6 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
 	const psProvider = new DevicesProvider(ProviderType.Processes);
 	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
 	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
+
+	init().then(() => {
+		appsProvider.refresh();
+		psProvider.refresh();
+	});
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', (node?: TargetItem) => {
 		if (!node) {
@@ -70,4 +77,6 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // this method is called when your extension is deactivated
-export function deactivate() {}
+export function deactivate() {
+	teardown();
+}
