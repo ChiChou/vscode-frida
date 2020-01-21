@@ -16,30 +16,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', repl.spawn));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', repl.attach));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.passionfruit', (node?: AppItem) => {
-		if (!node) {
-			return;
-		}
-
-		const webview = vscode.window.createWebviewPanel(
-			'passionfruit',
-			`${node.data.identifier} - Passionfruit`,
-			vscode.ViewColumn.One,
-			{
-				enableScripts: true
-			});
-		webview.webview.html = `
-			<style>
-			body{ height:100vh; }
-			html, body {
-				overflow: auto;
-				min-height: 100%;
-			}
-			</style>
-			<embed type="text/html" width="100%" height="100%"
-				src="http://localhost:31337/app/${node.device.id}/${node.data.identifier}/general">
-		`;
-	}));
 }
 
 // this method is called when your extension is deactivated

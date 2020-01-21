@@ -119,13 +119,6 @@ export class AppItem extends TargetItem {
     return Promise.resolve([]);
   }
 
-  get command() {
-    return {
-      command: 'frida.passionfruit',
-      title: '',
-      arguments: [this]
-    };
-  }
 
   get iconPath() {
     if (this.data.largeIcon) {
