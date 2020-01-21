@@ -37,7 +37,8 @@ class Driver(object):
 
         def wrap(app):
             obj = {prop: getattr(app, prop) for prop in props}
-            obj['icon'] = png.to_uri(app.get_small_icon())
+            obj['largeIcon'] = png.to_uri(app.get_large_icon())
+            obj['smallIcon'] = png.to_uri(app.get_small_icon())
             return obj
 
         return [wrap(app) for app in dev.enumerate_applications()]
@@ -48,7 +49,8 @@ class Driver(object):
 
         def wrap(p):
             obj = {prop: getattr(p, prop) for prop in props}
-            obj['icon'] = icon_str(p.get_small_icon())
+            obj['largeIcon'] = png.to_uri(p.get_large_icon())
+            obj['smallIcon'] = png.to_uri(p.get_small_icon())
             return obj
 
         return [wrap(p) for p in dev.enumerate_processes()]

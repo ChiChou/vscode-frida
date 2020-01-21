@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import * as ipc from '../driver/ipc';
+import * as ipc from '../driver/frida';
 
 import { resource } from '../utils';
 import { ProviderType, App, Process, Device } from '../types';
@@ -28,10 +28,7 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
     if (element) {
       return element.children();
     } else {
-      if (ipc.alive()) {
-        return ipc.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
-      }
-      return Promise.resolve([]);
+      return ipc.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
     }
   }
 }
