@@ -4,15 +4,9 @@ import * as vscode from 'vscode';
 
 import { DevicesProvider, TargetItem, AppItem, ProcessItem } from './providers/devices';
 import { ProviderType, Process } from './types';
+import * as repl from './commands/repl';
 
 export function activate(context: vscode.ExtensionContext) {
-	let NEXT_TERM_ID = 1;
-
-	function repl(args: string[]) {
-		const term = vscode.window.createTerminal(`Frida REPL #${NEXT_TERM_ID++}`, 'frida', args);
-		term.show();
-	}
-
 	const appsProvider = new DevicesProvider(ProviderType.Apps);
 	vscode.window.registerTreeDataProvider('fridaApps', appsProvider);
 	context.subscriptions.push(vscode.commands.registerCommand('frida.apps.refresh', () => appsProvider.refresh()));
@@ -20,28 +14,8 @@ export function activate(context: vscode.ExtensionContext) {
 	const psProvider = new DevicesProvider(ProviderType.Processes);
 	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
 	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', (node?: TargetItem) => {
-		if (!node) {
-			// todo: select from list
-			return;
-		}
-
-		if (node instanceof AppItem) {
-			repl(['-f', node.data.identifier, '--device', node.device.id]);
-		}
-	}));
-
-	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', (node?: TargetItem) => {
-		if (!node) {
-			// todo: select from list
-			return;
-		}
-
-		if (node instanceof AppItem || node instanceof ProcessItem) {
-			repl([node.data.pid.toString(), '--device', node.device.id]);
-		}
-	}));
-
+	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', repl.spawn));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', repl.attach));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.passionfruit', (node?: AppItem) => {
 		if (!node) {
 			return;
