@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
-import base64
 import json
 import sys
+
+from io import BytesIO
 
 try:
     import frida
@@ -10,12 +11,10 @@ except ImportError:
     print('Unable to import frida. Please ensure you have installed frida-tools via pip')
     sys.exit(-1)
 
+# from pathlib import Path
+# sys.path.insert(0, str(Path(__file__).parent))
 
-def icon_str(icon):
-    if not icon:
-        return None
-
-    return base64.b64encode(icon.pixels).decode('ascii')
+import png
 
 
 class Driver(object):
@@ -27,7 +26,7 @@ class Driver(object):
 
         def wrap(dev):
             obj = {prop: getattr(dev, prop) for prop in props}
-            obj['icon'] = icon_str(dev.icon)
+            obj['icon'] = png.to_uri(dev.icon)
             return obj
 
         return [wrap(dev) for dev in frida.enumerate_devices()]
@@ -38,11 +37,10 @@ class Driver(object):
 
         def wrap(app):
             obj = {prop: getattr(app, prop) for prop in props}
-            obj['icon'] = icon_str(app.get_small_icon())
+            obj['icon'] = png.to_uri(app.get_small_icon())
             return obj
 
         return [wrap(app) for app in dev.enumerate_applications()]
-
 
     def ps(self, id):
         dev = frida.get_device(id)
@@ -66,11 +64,11 @@ if __name__ == '__main__':
     driver = Driver()
     if hasattr(driver, args.action):
         method = getattr(driver, args.action)
-        try:
-            result = method(*args.args)
-            print(json.dumps(result))
-            sys.exit(0)
-        except Exception as e:
-            print(e)
+    # try:
+        result = method(*args.args)
+        print(json.dumps(result))
+        sys.exit(0)
+    # except Exception as e:
+    #     print(e)
 
     sys.exit(-1)
