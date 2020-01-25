@@ -1,0 +1,17 @@
+{
+  "name": "vscode-frida-agent",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "main": "src/index.ts",
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "frida-compile src/index.ts -o _agent.js",
+    "watch": "npm run build -- -w"
+  },
+  "devDependencies": {
+    "@types/frida-gum": "^15.0.0",
+    "@types/node": "^13.1.7",
+    "frida-compile": "^9.0.8"
+  }
+}

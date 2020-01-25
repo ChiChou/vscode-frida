@@ -8,8 +8,11 @@ const py: string = join(__dirname, '..', '..', 'cmds', 'driver.py');
 function driver(...args: string[]) {
   return new Promise((resolve, reject) => {
     execFile('python3', [py, ...args], {}, (err, stdout, stderr) => {
-      if (err) { reject(new Error(stdout)); }
-      resolve(JSON.parse(stdout.toString()));
+      if (err) { 
+        reject(new Error(stdout));
+      } else {
+        resolve(JSON.parse(stdout));
+      }
     });
   });
 }

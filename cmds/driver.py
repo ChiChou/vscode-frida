@@ -17,10 +17,20 @@ except ImportError:
 import png
 
 
+allowed = set()
+
+def cli(f):
+    allowed.add(f.__name__)
+    def wrapper(*args):
+        return f(*args)
+    return wrapper
+
+
 class Driver(object):
     def __init__(self):
         pass
 
+    @cli
     def devices(self):
         props = ['id', 'name', 'type']
 
@@ -31,8 +41,9 @@ class Driver(object):
 
         return [wrap(dev) for dev in frida.enumerate_devices()]
 
-    def apps(self, id):
-        dev = frida.get_device(id)
+    @cli
+    def apps(self, device):
+        dev = frida.get_device(device)
         props = ['identifier', 'name', 'pid']
 
         def wrap(app):
@@ -43,8 +54,9 @@ class Driver(object):
 
         return [wrap(app) for app in dev.enumerate_applications()]
 
-    def ps(self, id):
-        dev = frida.get_device(id)
+    @cli
+    def ps(self, device):
+        dev = frida.get_device(device)
         props = ['name', 'pid']
 
         def wrap(p):
@@ -54,23 +66,49 @@ class Driver(object):
             return obj
 
         return [wrap(p) for p in dev.enumerate_processes()]
+    
+    @cli
+    def ls(self, device, bundle, path):
+        self.attach(device, bundle)
+        self.load_agent()
+        return self.agent.ls(path)
 
+    def attach(self, device, target):
+        self.dev = frida.get_device(device)
+        self.session = self.dev.attach(target)
+        
+    def load_agent(self):
+        from pathlib import Path
+        with (Path(__file__).parent.parent / 'agent' / '_agent.js').open('r') as fp:
+            source = fp.read()
+
+        script = self.session.create_script(source)
+        script.load()
+        self.agent = script.exports
+        
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='frida driver')
     parser.add_argument('action')
     parser.add_argument('args', metavar='N', nargs='*', default=[])
+    parser.add_argument('--test', default=False, action='store_true')
     args = parser.parse_args()
 
     driver = Driver()
-    if hasattr(driver, args.action):
+    if args.action in allowed:
         method = getattr(driver, args.action)
-    # try:
-        result = method(*args.args)
-        print(json.dumps(result))
-        sys.exit(0)
-    # except Exception as e:
-    #     print(e)
+    else:
+        raise ValueError('Unknown action "%s"' % args.action)
 
-    sys.exit(-1)
+    if not args.test:
+        try:
+            result = method(*args.args)
+            print(json.dumps(result))
+            sys.exit(0)
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
+    else:
+        result = method(*args.args)
+        print(result)

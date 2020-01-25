@@ -17,6 +17,7 @@
 	"exclude": [
 		"node_modules",
 		".vscode-test",
-		"server"
+		"server",
+		"agent"
 	]
 }
