@@ -5,13 +5,13 @@ type Uri = String;
 
 export abstract class FileSystem {
   public abstract copy(source: Uri, target: Uri, options?: { overwrite: boolean }): Thenable<void>;
-  public abstract createDirectory(uri: Uri): Thenable<void>;
-  public abstract delete(uri: Uri, options?: { recursive: boolean, useTrash: boolean }): Thenable<void>;
-  public abstract readDirectory(uri: Uri): Thenable<[string, FileType][]>;
-  public abstract readFile(uri: Uri): Thenable<Uint8Array>;
+  public abstract mkdir(uri: Uri): Thenable<void>;
+  public abstract rm(uri: Uri, options?: { recursive: boolean, useTrash: boolean }): Thenable<void>;
+  public abstract ls(uri: Uri): Thenable<[string, FileType][]>;
+  public abstract read(uri: Uri): Thenable<Uint8Array>;
   public abstract rename(source: Uri, target: Uri, options?: { overwrite: boolean }): Thenable<void>;
   public abstract stat(uri: Uri): Thenable<FileStat>;
-  public abstract writeFile(uri: Uri, content: Uint8Array): Thenable<void>;
+  public abstract write(uri: Uri, content: Uint8Array): Thenable<void>;
 }
 
 export class ObjCFileSystem implements FileSystem {
@@ -22,24 +22,24 @@ export class ObjCFileSystem implements FileSystem {
 
   public copy(source: String, target: String, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     if (options!.overwrite && this.manager.fileExistsAtPath_(target)) {
-      this.delete(target);
+      this.rm(target);
     }
     this.manager.copyItemAtPath_toPath_error_(source, target, NULL);
     return Promise.resolve();
   }
 
-  public createDirectory(uri: String): Thenable<void> {
+  public mkdir(uri: String): Thenable<void> {
     const YES = 1;
     this.manager.createDirectoryAtPath_withIntermediateDirectories_attributes_error_(uri, YES, NULL, NULL);
     return Promise.resolve();
   }
 
-  public delete(uri: String, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
+  public rm(uri: String, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
     this.manager.removeItemAtPath_error_(uri, NULL);
     return Promise.resolve();
   }
 
-  public readDirectory(uri: String): Thenable<[string, FileType][]> {
+  public ls(uri: String): Thenable<[string, FileType][]> {
     const arr = this.manager.contentsOfDirectoryAtPath_error_(uri, NULL);
     const length = arr.count();
     const parent = ObjC.classes.NSString.stringWithString_(uri);
@@ -67,14 +67,14 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve(result);
   }
 
-  public readFile(uri: String): Thenable<Uint8Array> {
+  public read(uri: String): Thenable<Uint8Array> {
     // todo: check file size
     throw new Error("Method not implemented.");
   }
 
   public rename(source: String, target: String, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     if (options!.overwrite && this.manager.fileExistsAtPath_(target)) {
-      this.delete(target);
+      this.rm(target);
     }
     this.manager.moveItemAtPath_toPath_error_(source, target, NULL);
     return Promise.resolve();
@@ -107,7 +107,7 @@ export class ObjCFileSystem implements FileSystem {
     });
   }
 
-  public writeFile(uri: String, content: Uint8Array): Thenable<void> {
+  public write(uri: String, content: Uint8Array): Thenable<void> {
     throw new Error("Method not implemented.");
   }
 

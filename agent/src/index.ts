@@ -4,11 +4,11 @@ const fs = getFileSystem();
 
 rpc.exports = {
     copy: fs.copy.bind(fs),
-    mkdir: fs.createDirectory.bind(fs),
-    rm: fs.delete.bind(fs),
-    ls: fs.readDirectory.bind(fs),
-    read: fs.readFile.bind(fs),
+    mkdir: fs.mkdir.bind(fs),
+    rm: fs.rm.bind(fs),
+    ls: fs.ls.bind(fs),
+    read: fs.read.bind(fs),
     mv: fs.rename.bind(fs),
     stat: fs.stat.bind(fs),
-    write: fs.writeFile.bind(fs),
+    write: fs.write.bind(fs),
 };
