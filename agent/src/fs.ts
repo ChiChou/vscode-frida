@@ -21,6 +21,9 @@ export class ObjCFileSystem implements FileSystem {
   }
 
   public copy(source: String, target: String, options?: { overwrite: boolean; } | undefined): Thenable<void> {
+    if (options!.overwrite && this.manager.fileExistsAtPath_(target)) {
+      this.delete(target);
+    }
     this.manager.copyItemAtPath_toPath_error_(source, target, NULL);
     return Promise.resolve();
   }
@@ -70,10 +73,15 @@ export class ObjCFileSystem implements FileSystem {
   }
 
   public rename(source: String, target: String, options?: { overwrite: boolean; } | undefined): Thenable<void> {
-    throw new Error("Method not implemented.");
+    if (options!.overwrite && this.manager.fileExistsAtPath_(target)) {
+      this.delete(target);
+    }
+    this.manager.moveItemAtPath_toPath_error_(source, target, NULL);
+    return Promise.resolve();
   }
 
   public stat(uri: String): Thenable<FileStat> {
+    // TODO: use attributesOfItemAtPath_error_
     const stat = fs.statSync(uri as fs.PathLike);
     const { size, mode } = stat;
     const ctime = stat.ctimeMs;
@@ -98,6 +106,7 @@ export class ObjCFileSystem implements FileSystem {
       size,
     });
   }
+
   public writeFile(uri: String, content: Uint8Array): Thenable<void> {
     throw new Error("Method not implemented.");
   }
