@@ -18,6 +18,7 @@ from utils import read_agent
 # sys.path.insert(0, str(Path(__file__).parent))
 
 import png
+import utils
 
 
 allowed = set()
@@ -61,10 +62,7 @@ class Driver(object):
         self.device = None
 
     def get_device(self):
-        if self.device_id == 'usb':
-            self.device = frida.get_usb_device()
-        else:
-            self.device = frida.get_device(self.device_id)
+        self.device = utils.get_device(self.device_id)
 
     @cli
     def devices(self):

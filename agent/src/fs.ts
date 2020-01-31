@@ -1,18 +1,36 @@
-import { FileStat, FileType } from "../vscode";
-import * as fs from "fs";
+import { FileStat, FileType } from '../vscode';
+import * as fs from 'fs';
 
 export abstract class FileSystem {
   public abstract copy(source: string, target: string, options?: { overwrite: boolean }): Thenable<void>;
   public abstract mkdir(uri: string): Thenable<void>;
   public abstract rm(uri: string, options?: { recursive: boolean, useTrash: boolean }): Thenable<void>;
   public abstract ls(uri: string): Thenable<[string, FileType][]>;
-  public abstract read(uri: string): Thenable<Uint8Array>;
+  public abstract read(uri: string): Thenable<string>;
   public abstract rename(source: string, target: String, options?: { overwrite: boolean }): Thenable<void>;
   public abstract stat(uri: string): Thenable<FileStat>;
-  public abstract write(uri: string, content: Uint8Array): Thenable<void>;
+  public abstract write(uri: string, content: string): Thenable<void>;
+
+  public abstract normalize(uri: string): any;
 }
 
 // export class JavaFileSystem implements FileSystem
+
+function gc() {
+  return function(target: ObjCFileSystem, propertyKey: string, descriptor: PropertyDescriptor) {
+    const method = descriptor.value as Function;
+    descriptor.value = function() {
+      const { NSAutoreleasePool } = ObjC.classes;
+      const pool = NSAutoreleasePool.alloc().init();
+      try {
+        return method.apply(target, arguments);
+      } finally {
+        pool.release();
+      }
+    };
+    return descriptor;
+  };
+}
 
 export class ObjCFileSystem implements FileSystem {
   manager: ObjC.Object;
@@ -20,10 +38,11 @@ export class ObjCFileSystem implements FileSystem {
     this.manager = ObjC.classes.NSFileManager.defaultManager();
   }
 
-  private normalize(uri: string): ObjC.Object {
+  public normalize(uri: string): ObjC.Object {
     return ObjC.classes.NSString.stringWithString_(uri).stringByExpandingTildeInPath();
   }
 
+  @gc()
   public copy(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     const src = this.normalize(source);
     const dst = this.normalize(target);
@@ -34,6 +53,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
+  @gc()
   public mkdir(path: string): Thenable<void> {
     const abs = this.normalize(path);
     const YES = 1;
@@ -41,9 +61,9 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
-  public rm(path: string, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
-    const abs = this.normalize(path);
-    console.log(options);
+  @gc()
+  public rm(uri: string, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
+    const abs = this.normalize(uri);
     if (options?.recursive) {
       this.manager.removeItemAtPath_error_(abs, NULL);
     } else {
@@ -52,9 +72,9 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
+  @gc()
   public ls(uri: string): Thenable<[string, FileType][]> {
     const abs = this.normalize(uri);
-
     const pError = Memory.alloc(Process.pointerSize).writePointer(NULL);
     const arr = this.manager.contentsOfDirectoryAtPath_error_(abs, pError);
     {
@@ -89,11 +109,20 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve(result);
   }
 
-  public read(path: string): Thenable<Uint8Array> {
-    // todo: check file size
-    throw new Error("Method not implemented.");
+  @gc()
+  public read(uri: string): Thenable<string> {
+    const path = this.normalize(uri);
+    const pError = Memory.alloc(Process.pointerSize);
+    pError.writePointer(NULL);
+    const data = ObjC.classes.NSData.dataWithContentsOfFile_options_error_(path, 0, pError);
+    const err = pError.readPointer();
+    if (!err.isNull()) {
+      return Promise.reject(new Error(new ObjC.Object(err).localizedDescription()));
+    }
+    return Promise.resolve(data.base64EncodedStringWithOptions_(0).toString());
   }
 
+  @gc()
   public rename(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     const src = this.normalize(source);
     const dst = this.normalize(target);
@@ -104,10 +133,11 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
-  public stat(path: string): Thenable<FileStat> {
-    const uri = this.normalize(path);
+  @gc()
+  public stat(uri: string): Thenable<FileStat> {
+    const path = this.normalize(uri);
     // TODO: use attributesOfItemAtPath_error_
-    const stat = fs.statSync(uri.toString());
+    const stat = fs.statSync(path.toString());
     const { size, mode } = stat;
     const ctime = stat.ctimeMs;
     const mtime = stat.mtimeMs;
@@ -132,8 +162,12 @@ export class ObjCFileSystem implements FileSystem {
     });
   }
 
-  public write(uri: String, content: Uint8Array): Thenable<void> {
-    throw new Error("Method not implemented.");
+  @gc()
+  public write(uri: string, content: string): Thenable<void> {
+    const path = this.normalize(uri);
+    const data = ObjC.classes.NSData.alloc().initWithBase64EncodedString_options_(content, 0);
+    data.writeToFile_atomically_(path, 0);
+    return Promise.resolve();
   }
 
 }

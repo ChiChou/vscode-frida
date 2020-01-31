@@ -3,15 +3,10 @@
 import frida
 import sys
 
-from utils import read_agent
+from utils import read_agent, get_device
 
 def main(device_id, target):
-    if device_id == 'usb':
-        device = frida.get_usb_device()
-    elif device_id == 'local':
-        device = frida.get_local_device()
-    else:
-        device = frida.get_device(device_id)
+    device = get_device(device_id)
 
     source = read_agent()
     session = device.attach(target)
@@ -23,7 +18,7 @@ def main(device_id, target):
     script.on('message', on_message)
 
     def on_detach(reason):
-        sys.stdout.write('[FATAL Error] target disconnected')
+        sys.stderr.write('[FATAL Error] target disconnected')
         sys.exit(-1)
     session.on('detached', on_detach)
 
