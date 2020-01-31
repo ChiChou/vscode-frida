@@ -2,6 +2,8 @@ import * as cp from 'child_process';
 
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
 import { devtype, launch } from '../driver/frida';
+import { refresh } from '../utils';
+
 import { window, OutputChannel } from 'vscode';
 import { join } from 'path';
 
@@ -25,11 +27,13 @@ export function show(node?: TargetItem) {
     child.stdout.on('data', write);
     child.stderr.on('data', write);
     child.on('close', () =>
-      window.showWarningMessage(`Console ${name} lost connection, close now?`, 'Close', 'Dismiss').then(option => {
-        if (option === 'Close') {
-          channel.dispose();
-        }
-      }));
+      window.showWarningMessage(
+        `Console ${name} lost connection, close now?`, 'Close', 'Dismiss').then(option => {
+          if (option === 'Close') {
+            channel.dispose();
+          }
+          refresh();
+        }));
     return channel;
   }
 
@@ -37,10 +41,12 @@ export function show(node?: TargetItem) {
     const type = await devtype(node.device.id);
     let bundleOrPid: string[] | null = null;
     if (node instanceof AppItem && !node.data.pid) {
-      const selection = await window.showInformationMessage(`App "${node.label}" is not running. Start now?`, 'Yes', 'No');
+      const selection = await window.showInformationMessage(
+        `App "${node.label}" is not running. Start now?`, 'Yes', 'No');
       if (selection === 'Yes') {
         const pid = await launch(node.device.id, node.data.identifier);
         bundleOrPid = ['--pid', pid.toString()];
+        refresh();
       } else {
         return;
       }
@@ -53,7 +59,7 @@ export function show(node?: TargetItem) {
       return;
     }
 
-    if (type === 'iOS' || type === 'Linux') {
+    if (type === 'iOS' || type === 'Linux' || type === 'macOS') {
       const py: string = join(__dirname, '..', '..', 'cmds', 'syslog.py');
       const args = [py, node.device.id.toString(), ...bundleOrPid];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'python3', args).show();

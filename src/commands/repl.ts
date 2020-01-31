@@ -4,6 +4,7 @@ import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
 import { platform } from 'os';
 import { DeviceType } from '../types';
 import { terminate } from '../driver/frida';
+import { refresh } from '../utils';
 
 let NEXT_TERM_ID = 1;
 
@@ -14,11 +15,6 @@ function repl(args: string[]) {
   } else {
     vscode.window.createTerminal(title, 'frida', args).show();
   }
-}
-
-function refresh() {
-  vscode.commands.executeCommand('frida.ps.refresh');
-  vscode.commands.executeCommand('frida.apps.refresh');
 }
 
 export function spawn(node?: AppItem) {
