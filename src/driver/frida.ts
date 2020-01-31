@@ -22,9 +22,17 @@ export function devices() {
 }
 
 export function apps(id: string) {
-  return driver('apps', id) as Promise<App[]>;
+  return driver('apps', '--device', id) as Promise<App[]>;
 }
 
 export function ps(id: string) {
-  return driver('ps', id) as Promise<Process[]>;
+  return driver('ps', '--device', id) as Promise<Process[]>;
+}
+
+export function rpc() {
+  
+}
+
+export function devtype(id: string) {
+  return driver('devtype', '--device', id) as Promise<string>;
 }

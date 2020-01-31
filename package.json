@@ -55,6 +55,15 @@
 					"dark": "resources/dark/statusRun.svg"
 				},
 				"category": "Frida"
+			},
+			{
+				"command": "frida.syslog",
+				"title": "View Logs",
+				"icon": {
+					"light": "resources/light/statusRun.svg",
+					"dark": "resources/dark/statusRun.svg"
+				},
+				"category": "Frida"
 			}
 		],
 		"viewsContainers": {
@@ -106,6 +115,14 @@
 					"command": "frida.spawn",
 					"when": "view == fridaApps && viewItem == 'app'",
 					"group": "inline"
+				},
+				{
+					"command": "frida.syslog",
+					"when": "view == fridaApps && viewItem == 'app'"
+				},
+				{
+					"command": "frida.syslog",
+					"when": "view == fridaPs && viewItem == 'process'"
 				}
 			]
 		}

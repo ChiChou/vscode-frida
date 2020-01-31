@@ -2,9 +2,10 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { DevicesProvider, TargetItem, AppItem, ProcessItem } from './providers/devices';
-import { ProviderType, Process } from './types';
+import { DevicesProvider } from './providers/devices';
+import { ProviderType } from './types';
 import * as repl from './commands/repl';
+import * as syslog from './commands/syslog';
 
 export function activate(context: vscode.ExtensionContext) {
 	const appsProvider = new DevicesProvider(ProviderType.Apps);
@@ -16,6 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', repl.spawn));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', repl.attach));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog', syslog.show));
 }
 
 // this method is called when your extension is deactivated

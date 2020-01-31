@@ -20,8 +20,13 @@ def main(device_id, target):
     def on_message(message, data):
         sys.stdout.buffer.write(data)
         sys.stdout.flush()
-
     script.on('message', on_message)
+
+    def on_detach(reason):
+        sys.stdout.write('[FATAL Error] target disconnected')
+        sys.exit(-1)
+    session.on('detach', on_detach)
+
     script.load()
     script.exports.start()
     try:
