@@ -4,12 +4,15 @@ import json
 import sys
 
 from io import BytesIO
+from functools import wraps
 
 try:
     import frida
 except ImportError:
     print('Unable to import frida. Please ensure you have installed frida-tools via pip')
     sys.exit(-1)
+
+from utils import read_agent
 
 # from pathlib import Path
 # sys.path.insert(0, str(Path(__file__).parent))
@@ -19,16 +22,49 @@ import png
 
 allowed = set()
 
-def cli(f):
-    allowed.add(f.__name__)
-    def wrapper(*args):
-        return f(*args)
-    return wrapper
+
+def cli(fn):
+    allowed.add(fn.__name__)
+
+    @wraps(fn)
+    def wrapped(*args, **kwargs):
+        return fn(*args, **kwargs)
+    return wrapped
+
+
+def agent(fn):
+    @wraps(fn)
+    def wrapped(self, *args, **kwargs):
+        self.load_agent()
+        func = getattr(self.agent, fn.__name__)
+        return func(*args)
+        # result = f(self, *args, **kwargs)
+    return wrapped
+
+
+def device(fn):
+    @wraps(fn)
+    def wrapped(self, *args, **kwargs):
+        self.get_device()
+        return fn(self, *args, **kwargs)
+    return wrapped
 
 
 class Driver(object):
-    def __init__(self):
-        pass
+    def __init__(self, device, app, pid):
+        self.device_id = device
+        if pid:
+            self.target = pid
+        elif app:
+            self.target = app
+
+        self.device = None
+
+    def get_device(self):
+        if self.device_id == 'usb':
+            self.device = frida.get_usb_device()
+        else:
+            self.device = frida.get_device(self.device_id)
 
     @cli
     def devices(self):
@@ -42,8 +78,8 @@ class Driver(object):
         return [wrap(dev) for dev in frida.enumerate_devices()]
 
     @cli
-    def apps(self, device):
-        dev = frida.get_device(device)
+    @device
+    def apps(self):
         props = ['identifier', 'name', 'pid']
 
         def wrap(app):
@@ -52,11 +88,11 @@ class Driver(object):
             obj['smallIcon'] = png.to_uri(app.get_small_icon())
             return obj
 
-        return [wrap(app) for app in dev.enumerate_applications()]
+        return [wrap(app) for app in self.device.enumerate_applications()]
 
     @cli
-    def ps(self, device):
-        dev = frida.get_device(device)
+    @device
+    def ps(self):
         props = ['name', 'pid']
 
         def wrap(p):
@@ -65,37 +101,51 @@ class Driver(object):
             obj['smallIcon'] = png.to_uri(p.get_small_icon())
             return obj
 
-        return [wrap(p) for p in dev.enumerate_processes()]
-    
+        return [wrap(p) for p in self.device.enumerate_processes()]
+
     @cli
-    def ls(self, device, bundle, path):
-        self.attach(device, bundle)
-        self.load_agent()
-        return self.agent.ls(path)
+    @agent
+    def fs(self, method, path):
+        pass
 
-    def attach(self, device, target):
-        self.dev = frida.get_device(device)
-        self.session = self.dev.attach(target)
-        
+    @cli
+    @device
+    def devtype(self):
+        mapping = {
+            'SpringBoard': 'iOS',
+            'Dock': 'macOS',
+            'explorer.exe': 'win32',
+            'zygote': 'Android',
+        }
+
+        for proc in self.device.enumerate_processes():
+            if proc.name in mapping:
+                return mapping[proc.name]
+        else:
+            return 'Linux'
+
     def load_agent(self):
-        from pathlib import Path
-        with (Path(__file__).parent.parent / 'agent' / '_agent.js').open('r') as fp:
-            source = fp.read()
+        self.get_device()
+        self.session = self.device.attach(self.target)
 
+        source = read_agent()
         script = self.session.create_script(source)
         script.load()
         self.agent = script.exports
-        
+
 
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser(description='frida driver')
     parser.add_argument('action')
+    parser.add_argument('--device')
+    parser.add_argument('--app')
+    parser.add_argument('--pid', type=int)
     parser.add_argument('args', metavar='N', nargs='*', default=[])
     parser.add_argument('--test', default=False, action='store_true')
     args = parser.parse_args()
 
-    driver = Driver()
+    driver = Driver(device=args.device, app=args.app, pid=args.pid)
     if args.action in allowed:
         method = getattr(driver, args.action)
     else:

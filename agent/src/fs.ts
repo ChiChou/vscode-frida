@@ -1,18 +1,18 @@
 import { FileStat, FileType } from "../vscode";
 import * as fs from "fs";
 
-type Uri = String;
-
 export abstract class FileSystem {
-  public abstract copy(source: Uri, target: Uri, options?: { overwrite: boolean }): Thenable<void>;
-  public abstract mkdir(uri: Uri): Thenable<void>;
-  public abstract rm(uri: Uri, options?: { recursive: boolean, useTrash: boolean }): Thenable<void>;
-  public abstract ls(uri: Uri): Thenable<[string, FileType][]>;
-  public abstract read(uri: Uri): Thenable<Uint8Array>;
-  public abstract rename(source: Uri, target: Uri, options?: { overwrite: boolean }): Thenable<void>;
-  public abstract stat(uri: Uri): Thenable<FileStat>;
-  public abstract write(uri: Uri, content: Uint8Array): Thenable<void>;
+  public abstract copy(source: string, target: string, options?: { overwrite: boolean }): Thenable<void>;
+  public abstract mkdir(uri: string): Thenable<void>;
+  public abstract rm(uri: string, options?: { recursive: boolean, useTrash: boolean }): Thenable<void>;
+  public abstract ls(uri: string): Thenable<[string, FileType][]>;
+  public abstract read(uri: string): Thenable<Uint8Array>;
+  public abstract rename(source: string, target: String, options?: { overwrite: boolean }): Thenable<void>;
+  public abstract stat(uri: string): Thenable<FileStat>;
+  public abstract write(uri: string, content: Uint8Array): Thenable<void>;
 }
+
+// export class JavaFileSystem implements FileSystem
 
 export class ObjCFileSystem implements FileSystem {
   manager: ObjC.Object;
@@ -20,33 +20,55 @@ export class ObjCFileSystem implements FileSystem {
     this.manager = ObjC.classes.NSFileManager.defaultManager();
   }
 
-  public copy(source: String, target: String, options?: { overwrite: boolean; } | undefined): Thenable<void> {
-    if (options!.overwrite && this.manager.fileExistsAtPath_(target)) {
+  private normalize(uri: string): ObjC.Object {
+    return ObjC.classes.NSString.stringWithString_(uri).stringByExpandingTildeInPath();
+  }
+
+  public copy(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
+    const src = this.normalize(source);
+    const dst = this.normalize(target);
+    if (options!.overwrite && this.manager.fileExistsAtPath_(dst)) {
       this.rm(target);
     }
-    this.manager.copyItemAtPath_toPath_error_(source, target, NULL);
+    this.manager.copyItemAtPath_toPath_error_(src, dst, NULL);
     return Promise.resolve();
   }
 
-  public mkdir(uri: String): Thenable<void> {
+  public mkdir(path: string): Thenable<void> {
+    const abs = this.normalize(path);
     const YES = 1;
-    this.manager.createDirectoryAtPath_withIntermediateDirectories_attributes_error_(uri, YES, NULL, NULL);
+    this.manager.createDirectoryAtPath_withIntermediateDirectories_attributes_error_(abs, YES, NULL, NULL);
     return Promise.resolve();
   }
 
-  public rm(uri: String, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
-    this.manager.removeItemAtPath_error_(uri, NULL);
+  public rm(path: string, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
+    const abs = this.normalize(path);
+    console.log(options);
+    if (options?.recursive) {
+      this.manager.removeItemAtPath_error_(abs, NULL);
+    } else {
+      fs.unlinkSync(abs.toString());
+    }
     return Promise.resolve();
   }
 
-  public ls(uri: String): Thenable<[string, FileType][]> {
-    const arr = this.manager.contentsOfDirectoryAtPath_error_(uri, NULL);
+  public ls(uri: string): Thenable<[string, FileType][]> {
+    const abs = this.normalize(uri);
+
+    const pError = Memory.alloc(Process.pointerSize).writePointer(NULL);
+    const arr = this.manager.contentsOfDirectoryAtPath_error_(abs, pError);
+    {
+      const err = pError.readPointer();
+      if (!err.isNull()) {
+        const reason = new ObjC.Object(err).localizedDescription().toString();
+        return Promise.reject(new Error(reason));
+      }
+    }
+
     const length = arr.count();
-    const parent = ObjC.classes.NSString.stringWithString_(uri);
-    const pError = Memory.alloc(Process.pointerSize);
     const result: [string, FileType][] = [];
 
-    const mapping: {[type: string]: FileType } = {
+    const mapping: { [type: string]: FileType } = {
       NSFileTypeRegular: FileType.File,
       NSFileTypeDirectory: FileType.Directory,
       NSFileTypeSymbolicLink: FileType.SymbolicLink,
@@ -54,35 +76,38 @@ export class ObjCFileSystem implements FileSystem {
 
     for (let i = 0; i < length; i++) {
       const entry = arr.objectAtIndex_(i);
-      const filename = parent.stringByAppendingPathComponent_(entry);
+      const filename = abs.stringByAppendingPathComponent_(entry);
       pError.writePointer(NULL);
       const attr = this.manager.attributesOfItemAtPath_error_(filename, pError);
       const err = pError.readPointer();
       if (!err.isNull()) {
         console.error(new ObjC.Object(err).localizedDescription());
-      } 
+      }
       const type = mapping[attr.objectForKey_('NSFileType').toString()] || FileType.Unknown;
       result.push([entry.toString(), type]);
     }
     return Promise.resolve(result);
   }
 
-  public read(uri: String): Thenable<Uint8Array> {
+  public read(path: string): Thenable<Uint8Array> {
     // todo: check file size
     throw new Error("Method not implemented.");
   }
 
-  public rename(source: String, target: String, options?: { overwrite: boolean; } | undefined): Thenable<void> {
-    if (options!.overwrite && this.manager.fileExistsAtPath_(target)) {
+  public rename(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
+    const src = this.normalize(source);
+    const dst = this.normalize(target);
+    if (options!.overwrite && this.manager.fileExistsAtPath_(dst)) {
       this.rm(target);
     }
-    this.manager.moveItemAtPath_toPath_error_(source, target, NULL);
+    this.manager.moveItemAtPath_toPath_error_(src, dst, NULL);
     return Promise.resolve();
   }
 
-  public stat(uri: String): Thenable<FileStat> {
+  public stat(path: string): Thenable<FileStat> {
+    const uri = this.normalize(path);
     // TODO: use attributesOfItemAtPath_error_
-    const stat = fs.statSync(uri as fs.PathLike);
+    const stat = fs.statSync(uri.toString());
     const { size, mode } = stat;
     const ctime = stat.ctimeMs;
     const mtime = stat.mtimeMs;
@@ -113,7 +138,7 @@ export class ObjCFileSystem implements FileSystem {
 
 }
 
-export function get(): FileSystem {
+export function getApi(): FileSystem {
   if (ObjC.available) {
     return new ObjCFileSystem();
   } /* else if (Java.available) {
@@ -121,4 +146,11 @@ export function get(): FileSystem {
   } */
 
   throw new Error('Not implemented');
+}
+
+export async function invoke(method: string, ...args: string[]) {
+  const api = getApi();
+  if (Reflect.has(api, method)) {
+    return Reflect.get(api, method).apply(api, args);
+  }
 }
