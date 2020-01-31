@@ -136,11 +136,13 @@
 				},
 				{
 					"command": "frida.spawn.suspended",
-					"when": "view == fridaApps && viewItem == 'app'"
+					"when": "view == fridaApps && viewItem == 'app'",
+					"group": "frida_process@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaApps && viewItem == 'app'"
+					"when": "view == fridaApps && viewItem == 'app'",
+					"group": "frida_logger@1"
 				},
 				{
 					"command": "frida.syslog",
@@ -148,11 +150,13 @@
 				},
 				{
 					"command": "frida.kill",
-					"when": "view == fridaApps && viewItem == 'app'"
+					"when": "view == fridaApps && viewItem == 'app'",
+					"group": "frida_process@2"
 				},
 				{
 					"command": "frida.kill",
-					"when": "view == fridaPs && viewItem == 'process'"
+					"when": "view == fridaPs && viewItem == 'process'",
+					"group": "frida_process@3"
 				}
 			]
 		}
