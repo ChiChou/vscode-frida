@@ -14,8 +14,11 @@
 		"onView:fridaPs",
 		"onCommand:frida.attach",
 		"onCommand:frida.spawn",
+		"onCommand:frida.spawn.suspended",
 		"onCommand:frida.ps.refresh",
-		"onCommand:frida.app.refresh"
+		"onCommand:frida.app.refresh",
+		"onCommand:frida.syslog",
+		"onCommand:frida.syslog.vacuum"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -57,12 +60,27 @@
 				"category": "Frida"
 			},
 			{
+				"command": "frida.spawn.suspended",
+				"title": "Spawn Suspended",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.kill",
+				"title": "Kill Process",
+				"category": "Frida"
+			},
+			{
 				"command": "frida.syslog",
 				"title": "View Logs",
 				"icon": {
 					"light": "resources/light/statusRun.svg",
 					"dark": "resources/dark/statusRun.svg"
 				},
+				"category": "Frida"
+			},
+			{
+				"command": "frida.syslog.vacuum",
+				"title": "Close All Console",
 				"category": "Frida"
 			}
 		],
@@ -117,11 +135,23 @@
 					"group": "inline"
 				},
 				{
+					"command": "frida.spawn.suspended",
+					"when": "view == fridaApps && viewItem == 'app'"
+				},
+				{
 					"command": "frida.syslog",
 					"when": "view == fridaApps && viewItem == 'app'"
 				},
 				{
 					"command": "frida.syslog",
+					"when": "view == fridaPs && viewItem == 'process'"
+				},
+				{
+					"command": "frida.kill",
+					"when": "view == fridaApps && viewItem == 'app'"
+				},
+				{
+					"command": "frida.kill",
 					"when": "view == fridaPs && viewItem == 'process'"
 				}
 			]

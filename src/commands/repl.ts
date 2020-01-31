@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
+
 import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
 import { platform } from 'os';
 import { DeviceType } from '../types';
+import { terminate } from '../driver/frida';
 
 let NEXT_TERM_ID = 1;
 
@@ -14,6 +16,11 @@ function repl(args: string[]) {
   }
 }
 
+function refresh() {
+  vscode.commands.executeCommand('frida.ps.refresh');
+  vscode.commands.executeCommand('frida.apps.refresh');
+}
+
 export function spawn(node?: AppItem) {
   if (!node) {
     // todo: select from list
@@ -21,10 +28,30 @@ export function spawn(node?: AppItem) {
   }
 
   repl(['-f', node.data.identifier, '--device', node.device.id, '--no-pause']);
+  refresh();
 }
 
 export function spawnSuspended(node?: AppItem) {
+  if (!node) {
+    // todo: select
+    return;
+  }
 
+  repl(['-f', node.data.identifier, '--device', node.device.id]);
+  refresh();
+}
+
+export function kill(node?: TargetItem) {
+  if (!node) {
+    return;
+  }
+
+  if ((node instanceof AppItem && node.data.pid) || node instanceof ProcessItem) {
+    terminate(node.device.id, node.data.pid.toString());
+    refresh();
+  } else {
+    vscode.window.showWarningMessage(`Target is not running`);
+  }
 }
 
 export function attach(node?: TargetItem) {

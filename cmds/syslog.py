@@ -25,7 +25,7 @@ def main(device_id, target):
     def on_detach(reason):
         sys.stdout.write('[FATAL Error] target disconnected')
         sys.exit(-1)
-    session.on('detach', on_detach)
+    session.on('detached', on_detach)
 
     script.load()
     script.exports.start()

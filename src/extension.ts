@@ -16,8 +16,12 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
 	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', repl.spawn));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn.suspended', repl.spawnSuspended));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', repl.attach));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.kill', repl.kill));
+
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog', syslog.show));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));
 }
 
 // this method is called when your extension is deactivated
