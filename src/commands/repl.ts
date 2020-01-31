@@ -14,15 +14,17 @@ function repl(args: string[]) {
   }
 }
 
-export function spawn(node?: TargetItem) {
+export function spawn(node?: AppItem) {
   if (!node) {
     // todo: select from list
     return;
   }
 
-  if (node instanceof AppItem) {
-    repl(['-f', node.data.identifier, '--device', node.device.id]);
-  }
+  repl(['-f', node.data.identifier, '--device', node.device.id, '--no-pause']);
+}
+
+export function spawnSuspended(node?: AppItem) {
+
 }
 
 export function attach(node?: TargetItem) {
@@ -32,6 +34,10 @@ export function attach(node?: TargetItem) {
   }
 
   if (node instanceof AppItem || node instanceof ProcessItem) {
+    if (!node.data.pid) {
+      vscode.window.showErrorMessage(`App "${node.data.name}" must be running before attaching to it`);
+    }
+
     const device = node.device.type === DeviceType.Local ? [] : ['--device', node.device.id];
     repl([node.data.pid.toString(), ...device]);
   }
