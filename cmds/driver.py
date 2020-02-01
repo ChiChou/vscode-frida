@@ -24,6 +24,9 @@ def main(args):
     if args.action == 'apps':
         return core.apps(device)
 
+    if args.action == 'type':
+        return core.device_type(device)
+
     target = args.pid or args.name
     agent = rpc.ProcessAgent(device, target) if target else \
         rpc.AppAgent(device, args.app)
@@ -70,6 +73,7 @@ if __name__ == '__main__':
     subparsers.add_parser('devices')
     subparsers.add_parser('apps', parents=[requires_device])
     subparsers.add_parser('ps', parents=[requires_device])
+    subparsers.add_parser('type', parents=[requires_device])
 
     rpc_parser = subparsers.add_parser('rpc', parents=[requires_app])
     rpc_parser.add_argument('method')
