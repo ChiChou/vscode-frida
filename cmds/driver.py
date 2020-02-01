@@ -1,162 +1,88 @@
 #!/usr/bin/env python3
 
-import json
 import sys
+from pathlib import Path
 
-from io import BytesIO
-from functools import wraps
-
-try:
-    import frida
-except ImportError:
-    print('Unable to import frida. Please ensure you have installed frida-tools via pip')
-    sys.exit(-1)
-
-from utils import read_agent
-
-# from pathlib import Path
-# sys.path.insert(0, str(Path(__file__).parent))
-
-import png
-import utils
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
-allowed = set()
+def main(args):
+    from cmds import core, rpc, syslog
+    from cmds.file import upload, download
+    from cmds.fs import FileSystem
 
+    if args.action == 'devices':
+        return core.devices()
 
-def cli(fn):
-    allowed.add(fn.__name__)
+    if not args.device:
+        raise RuntimeError('NOTREACHED')
 
-    @wraps(fn)
-    def wrapped(*args, **kwargs):
-        return fn(*args, **kwargs)
-    return wrapped
+    device = core.get_device(args.device)
+    if args.action == 'ps':
+        return core.ps(device)
 
+    if args.action == 'apps':
+        return core.apps(device)
 
-def agent(fn):
-    @wraps(fn)
-    def wrapped(self, *args, **kwargs):
-        self.load_agent()
-        func = getattr(self.agent, fn.__name__)
-        return func(*args)
-        # result = f(self, *args, **kwargs)
-    return wrapped
+    target = args.pid or args.name
+    agent = rpc.ProcessAgent(device, target) if target else \
+        rpc.AppAgent(device, args.app)
+    agent.load()
 
+    if args.action == 'rpc':
+        return agent.invoke(args.method, *args.args)
 
-def device(fn):
-    @wraps(fn)
-    def wrapped(self, *args, **kwargs):
-        self.get_device()
-        return fn(self, *args, **kwargs)
-    return wrapped
+    if args.action == 'syslog':
+        syslog.pipe(agent)
+        return
 
+    fs = FileSystem(agent)
+    if args.action == 'download':
+        download(fs, args.path)
+        return
 
-class Driver(object):
-    def __init__(self, device, app, pid):
-        self.device_id = device
-        if pid:
-            self.target = pid
-        elif app:
-            self.target = app
+    if args.action == 'upload':
+        upload(fs, args.path)
+        return
 
-        self.device = None
-
-    def get_device(self):
-        self.device = utils.get_device(self.device_id)
-
-    @cli
-    def devices(self):
-        props = ['id', 'name', 'type']
-
-        def wrap(dev):
-            obj = {prop: getattr(dev, prop) for prop in props}
-            obj['icon'] = png.to_uri(dev.icon)
-            return obj
-
-        return [wrap(dev) for dev in frida.enumerate_devices()]
-
-    @cli
-    @device
-    def apps(self):
-        props = ['identifier', 'name', 'pid']
-
-        def wrap(app):
-            obj = {prop: getattr(app, prop) for prop in props}
-            obj['largeIcon'] = png.to_uri(app.get_large_icon())
-            obj['smallIcon'] = png.to_uri(app.get_small_icon())
-            return obj
-
-        return [wrap(app) for app in self.device.enumerate_applications()]
-
-    @cli
-    @device
-    def ps(self):
-        props = ['name', 'pid']
-
-        def wrap(p):
-            obj = {prop: getattr(p, prop) for prop in props}
-            obj['largeIcon'] = png.to_uri(p.get_large_icon())
-            obj['smallIcon'] = png.to_uri(p.get_small_icon())
-            return obj
-
-        return [wrap(p) for p in self.device.enumerate_processes()]
-
-    @cli
-    @agent
-    def fs(self, method, path):
-        pass
-
-    @cli
-    @device
-    def devtype(self):
-        mapping = {
-            'SpringBoard': 'iOS',
-            'Dock': 'macOS',
-            'explorer.exe': 'win32',
-            'zygote': 'Android',
-        }
-
-        for proc in self.device.enumerate_processes():
-            if proc.name in mapping:
-                return mapping[proc.name]
-        else:
-            return 'Linux'
-
-    def load_agent(self):
-        self.get_device()
-        self.session = self.device.attach(self.target)
-
-        source = read_agent()
-        script = self.session.create_script(source)
-        script.load()
-        self.agent = script.exports
+    raise RuntimeError('NOTREACHED')
 
 
 if __name__ == '__main__':
     import argparse
+
+    requires_device = argparse.ArgumentParser(add_help=False)
+    requires_device.add_argument('device')
+
+    requires_path = argparse.ArgumentParser(add_help=False)
+    requires_path.add_argument('path')
+
+    requires_app = argparse.ArgumentParser(add_help=False)
+    requires_app.add_argument('--device', required=True)
+    group = requires_app.add_mutually_exclusive_group()
+    group.add_argument('--app')
+    group.add_argument('--pid', type=int)
+    group.add_argument('--name')
+    group.required = True
+
     parser = argparse.ArgumentParser(description='frida driver')
-    parser.add_argument('action')
-    parser.add_argument('--device')
-    parser.add_argument('--app')
-    parser.add_argument('--pid', type=int)
-    parser.add_argument('args', metavar='N', nargs='*', default=[])
-    parser.add_argument('--test', default=False, action='store_true')
+    subparsers = parser.add_subparsers(dest='action', required=True)
+    subparsers.add_parser('devices')
+    subparsers.add_parser('apps', parents=[requires_device])
+    subparsers.add_parser('ps', parents=[requires_device])
+
+    rpc_parser = subparsers.add_parser('rpc', parents=[requires_app])
+    rpc_parser.add_argument('method')
+    rpc_parser.add_argument('args', metavar='N', nargs='*', default=[])
+
+    subparsers.add_parser('syslog', parents=[requires_app])
+    subparsers.add_parser('download', parents=[requires_app, requires_path])
+    subparsers.add_parser('upload', parents=[requires_app, requires_path])
+    subparsers.add_parser('fs', parents=[requires_app])
+
     args = parser.parse_args()
 
-    driver = Driver(device=args.device, app=args.app, pid=args.pid)
-    if args.action in allowed:
-        method = getattr(driver, args.action)
-    else:
-        raise ValueError('Unknown action "%s"' % args.action)
-
-    if not args.test:
-        try:
-            result = method(*args.args)
-            print(json.dumps(result))
-            sys.exit(0)
-        except Exception as e:
-            print(e)
-            sys.exit(-1)
-    else:
-        result = method(*args.args)
-        print(result)
+    result = main(args)
+    import json
+    if args.action not in ['syslog', 'download', 'upload']:
+        print(json.dumps(result))
