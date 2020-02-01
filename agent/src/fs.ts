@@ -7,7 +7,7 @@ export abstract class FileSystem {
   public abstract rm(uri: string, options?: { recursive: boolean, useTrash: boolean }): Thenable<void>;
   public abstract ls(uri: string): Thenable<[string, FileType][]>;
   public abstract read(uri: string): Thenable<string>;
-  public abstract rename(source: string, target: String, options?: { overwrite: boolean }): Thenable<void>;
+  public abstract mv(source: string, target: String, options?: { overwrite: boolean }): Thenable<void>;
   public abstract stat(uri: string): Thenable<FileStat>;
   public abstract write(uri: string, content: string): Thenable<void>;
 
@@ -23,7 +23,7 @@ function gc() {
       const { NSAutoreleasePool } = ObjC.classes;
       const pool = NSAutoreleasePool.alloc().init();
       try {
-        return method.apply(target, arguments);
+        return method.apply(this, arguments);
       } finally {
         pool.release();
       }
@@ -123,7 +123,7 @@ export class ObjCFileSystem implements FileSystem {
   }
 
   @gc()
-  public rename(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
+  public mv(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     const src = this.normalize(source);
     const dst = this.normalize(target);
     if (options!.overwrite && this.manager.fileExistsAtPath_(dst)) {
@@ -187,4 +187,5 @@ export async function invoke(method: string, ...args: string[]) {
   if (Reflect.has(api, method)) {
     return Reflect.get(api, method).apply(api, args);
   }
+  throw new Error(`invalid method ${method}`);
 }
