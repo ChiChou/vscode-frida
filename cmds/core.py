@@ -32,7 +32,7 @@ def get_device(device_id: str) -> frida.core.Device:
         return frida.get_device(device_id)
 
 
-def ps(device: frida.core.Device) -> list:
+def apps(device: frida.core.Device) -> list:
     props = ['identifier', 'name', 'pid']
 
     def wrap(app):
@@ -44,7 +44,7 @@ def ps(device: frida.core.Device) -> list:
     return [wrap(app) for app in device.enumerate_applications()]
 
 
-def apps(device: frida.core.Device) -> list:
+def ps(device: frida.core.Device) -> list:
     props = ['name', 'pid']
 
     def wrap(p):
