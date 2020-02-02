@@ -132,7 +132,9 @@ export class AppItem extends TargetItem {
     };
   }
 
-  contextValue = 'app';
+  get contextValue() {
+    return `app|${this.data.pid ? 'running' : 'dead'}`;
+  }
 }
 
 export class ProcessItem extends TargetItem {
@@ -167,5 +169,7 @@ export class ProcessItem extends TargetItem {
     };
   }
 
-  contextValue = 'process';
+  get contextValue() {
+    return `process|${this.data.pid ? 'running' : 'dead'}`;
+  }
 }
