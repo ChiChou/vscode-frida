@@ -25,7 +25,9 @@ class BaseAgent(object):
         session = self.session
 
         def on_detach(reason):
-            sys.stderr.write('[FATAL Error] target disconnected')
+            if reason == 'application-requested':
+                sys.exit(0)
+            sys.stderr.write('[FATAL Error] target disconnected\n')
             sys.exit(-1)
         session.on('detached', on_detach)
 
