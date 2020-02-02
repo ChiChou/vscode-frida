@@ -1,7 +1,7 @@
 import * as cp from 'child_process';
 
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
-import { devtype, launch } from '../driver/frida';
+import { devtype } from '../driver/frida';
 import { refresh } from '../utils';
 
 import { window, OutputChannel } from 'vscode';
@@ -37,40 +37,27 @@ export function show(node?: TargetItem) {
     return channel;
   }
 
-  async function work(node: AppItem | ProcessItem) {
-    const type = await devtype(node.device.id);
-    let bundleOrPid: string[] | null = null;
-    if (node instanceof AppItem && !node.data.pid) {
-      const selection = await window.showInformationMessage(
-        `App "${node.label}" is not running. Start now?`, 'Yes', 'No');
-      if (selection === 'Yes') {
-        const pid = await launch(node.device.id, node.data.identifier);
-        bundleOrPid = ['--pid', pid.toString()];
-        refresh();
-      } else {
-        return;
-      }
-    } else if ((node instanceof AppItem || node instanceof ProcessItem) && node.data.pid) {
-      bundleOrPid = ['--pid', node.data.pid.toString()];
-    }
-
-    if (!bundleOrPid) {
+  let bundleOrPid: string[];
+  if (node instanceof AppItem) {
+    bundleOrPid = ['--app', node.data.identifier];
+  } else if (node instanceof ProcessItem) {
+    bundleOrPid = ['--pid', node.data.pid.toString()];
+  } else {
+    if (node) {
       window.showErrorMessage(`Invalid target "${node.label}"`);
-      return;
     }
+    return;
+  }
 
+  devtype(node.device.id).then(type => {
     if (type === 'iOS' || type === 'Linux' || type === 'macOS') {
-      const py: string = join(__dirname, '..', '..', 'cmds', 'syslog.py');
-      const args = [py, node.device.id.toString(), ...bundleOrPid];
+      const py: string = join(__dirname, '..', '..', 'cmds', 'driver.py');
+      const args = [py, 'syslog', '--device', node.device.id.toString(), ...bundleOrPid];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'python3', args).show();
     } else if (type === 'Android') {
       // todo: adb logcat
     } else {
       window.showErrorMessage(`Unknown type of device ${node.device.name}`);
     }
-  }
-
-  if (node instanceof AppItem || node instanceof ProcessItem) {
-    work(node);
-  }
+  });
 }
