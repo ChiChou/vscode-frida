@@ -15,6 +15,9 @@ class BaseAgent(object):
         if not self.session:
             raise RuntimeError('invalid state')
 
+        if not self.script:
+            self.load()
+
         invocation = getattr(self.script.exports, method)
         return invocation(*args)
 

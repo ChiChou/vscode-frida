@@ -18,17 +18,17 @@ class FileSystem(object):
     def call(self, *args):
         return self.agent.invoke('fs', *args)
 
-    @stub
-    def copy(self, src: str, dst: str):
-        pass
+    def copy(self, src: str, dst: str, opt_str: str = ''):
+        opt = json.loads(opt_str) if opt_str else {}
+        return self.call('copy', src, dst, opt)
 
     @stub
     def mkdir(self, uri: str):
         pass
 
-    def rm(self, uri: str, opt: str = ''):
-        parsed_opt = json.loads(opt) if opt else {}
-        return self.call('rm', parsed_opt)
+    def rm(self, uri: str, opt_str: str = ''):
+        opt = json.loads(opt_str) if opt_str else {}
+        return self.call('rm', uri, opt)
 
     @stub
     def ls(self, uri: str):
@@ -38,9 +38,9 @@ class FileSystem(object):
         encoded = self.call('read', uri)
         return base64.b64decode(encoded)
 
-    @stub
-    def mv(self, src: str, dst: str):
-        pass
+    def mv(self, src: str, dst: str, opt_str: str = ''):
+        opt = json.loads(opt_str) if opt_str else {}
+        return self.call('mv', src, dst, parsed_opt)
 
     @stub
     def stat(self, uri: str):
