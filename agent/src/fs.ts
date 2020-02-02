@@ -16,20 +16,18 @@ export abstract class FileSystem {
 
 // export class JavaFileSystem implements FileSystem
 
-function gc() {
-  return function(target: ObjCFileSystem, propertyKey: string, descriptor: PropertyDescriptor) {
-    const method = descriptor.value as Function;
-    descriptor.value = function() {
-      const { NSAutoreleasePool } = ObjC.classes;
-      const pool = NSAutoreleasePool.alloc().init();
-      try {
-        return method.apply(this, arguments);
-      } finally {
-        pool.release();
-      }
-    };
-    return descriptor;
+function autorelease(target: ObjCFileSystem, propertyKey: string, descriptor: PropertyDescriptor) {
+  const method = descriptor.value as Function;
+  descriptor.value = function() {
+    const { NSAutoreleasePool } = ObjC.classes;
+    const pool = NSAutoreleasePool.alloc().init();
+    try {
+      return method.apply(this, arguments);
+    } finally {
+      pool.release();
+    }
   };
+  return descriptor;
 }
 
 export class ObjCFileSystem implements FileSystem {
@@ -42,7 +40,7 @@ export class ObjCFileSystem implements FileSystem {
     return ObjC.classes.NSString.stringWithString_(uri).stringByExpandingTildeInPath();
   }
 
-  @gc()
+  @autorelease
   public copy(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     const src = this.normalize(source);
     const dst = this.normalize(target);
@@ -53,7 +51,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
-  @gc()
+  @autorelease
   public mkdir(path: string): Thenable<void> {
     const abs = this.normalize(path);
     const YES = 1;
@@ -61,7 +59,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
-  @gc()
+  @autorelease
   public rm(uri: string, options?: { recursive: boolean; useTrash: boolean; } | undefined): Thenable<void> {
     const abs = this.normalize(uri);
     if (options?.recursive) {
@@ -72,7 +70,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
-  @gc()
+  @autorelease
   public ls(uri: string): Thenable<[string, FileType][]> {
     const abs = this.normalize(uri);
     const pError = Memory.alloc(Process.pointerSize).writePointer(NULL);
@@ -109,7 +107,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve(result);
   }
 
-  @gc()
+  @autorelease
   public read(uri: string): Thenable<string> {
     const path = this.normalize(uri);
     const pError = Memory.alloc(Process.pointerSize);
@@ -122,7 +120,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve(data.base64EncodedStringWithOptions_(0).toString());
   }
 
-  @gc()
+  @autorelease
   public mv(source: string, target: string, options?: { overwrite: boolean; } | undefined): Thenable<void> {
     const src = this.normalize(source);
     const dst = this.normalize(target);
@@ -133,7 +131,7 @@ export class ObjCFileSystem implements FileSystem {
     return Promise.resolve();
   }
 
-  @gc()
+  @autorelease
   public stat(uri: string): Thenable<FileStat> {
     const path = this.normalize(uri);
     // TODO: use attributesOfItemAtPath_error_
@@ -162,7 +160,7 @@ export class ObjCFileSystem implements FileSystem {
     });
   }
 
-  @gc()
+  @autorelease
   public write(uri: string, content: string): Thenable<void> {
     const path = this.normalize(uri);
     const data = ObjC.classes.NSData.alloc().initWithBase64EncodedString_options_(content, 0);
