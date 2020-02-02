@@ -3,7 +3,7 @@
 import frida
 import sys
 
-from cmds.rpc import BaseAgent
+from backend.rpc import BaseAgent
 
 def pipe(agent: BaseAgent):
     agent.invoke('start')

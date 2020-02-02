@@ -1,6 +1,6 @@
 import json
 from functools import wraps
-from cmds.rpc import BaseAgent
+from backend.rpc import BaseAgent
 import base64
 
 

@@ -1,6 +1,6 @@
 import frida
 import sys
-import cmds.core
+import backend.core
 from typing import List, Union
 
 
@@ -34,7 +34,7 @@ class BaseAgent(object):
             sys.exit(-1)
         session.on('detached', on_detach)
 
-        source = cmds.core.read_agent()
+        source = backend.core.read_agent()
         script = session.create_script(source)
         script.load()
         self.script = script
@@ -47,7 +47,7 @@ class BaseAgent(object):
 class AppAgent(BaseAgent):
     def __init__(self, device: frida.core.Device, bundle: str):
         super().__init__(device)
-        self.session = cmds.core.spawn_or_attach(self.device, bundle)
+        self.session = backend.core.spawn_or_attach(self.device, bundle)
 
 
 class ProcessAgent(BaseAgent):

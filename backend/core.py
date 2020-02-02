@@ -8,7 +8,7 @@ except ImportError:
     sys.exit(-1)
 
 
-from cmds import png
+from backend import png
 
 
 def devices() -> list:

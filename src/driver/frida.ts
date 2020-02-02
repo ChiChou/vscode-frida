@@ -7,7 +7,7 @@ import * as os from 'os';
 
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
 
-const py = join(__dirname, '..', '..', 'cmds', 'driver.py');
+const py = join(__dirname, '..', '..', 'backend', 'driver.py');
 
 export function platformize(tool: string, args: string[]): [string, string[]] {
   let bin = tool;

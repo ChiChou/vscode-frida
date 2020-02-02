@@ -51,7 +51,7 @@ export function show(node?: TargetItem) {
 
   devtype(node.device.id).then(type => {
     if (type === 'iOS' || type === 'Linux' || type === 'macOS') {
-      const py: string = join(__dirname, '..', '..', 'cmds', 'driver.py');
+      const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
       const args = [py, 'syslog', '--device', node.device.id.toString(), ...bundleOrPid];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'python3', args).show();
     } else if (type === 'Android') {

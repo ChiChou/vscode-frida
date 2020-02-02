@@ -2,9 +2,9 @@ import unittest
 import json
 import frida
 
-from cmds.fs import FileSystem
-from cmds.rpc import AppAgent
-from cmds.core import device_type
+from backend.fs import FileSystem
+from backend.rpc import AppAgent
+from backend.core import device_type
 
 
 class TestDeviceOperations(unittest.TestCase):

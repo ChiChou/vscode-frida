@@ -1,7 +1,7 @@
 import unittest
 import frida
 
-from cmds import core
+from backend import core
 
 
 class TestDeviceOperations(unittest.TestCase):

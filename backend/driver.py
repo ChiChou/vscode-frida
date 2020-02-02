@@ -7,9 +7,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
 def main(args):
-    from cmds import core, rpc, syslog
-    from cmds.file import upload, download
-    from cmds.fs import FileSystem
+    from backend import core, rpc, syslog
+    from backend.file import upload, download
+    from backend.fs import FileSystem
 
     if args.action == 'devices':
         return core.devices()
