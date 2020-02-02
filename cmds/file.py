@@ -13,7 +13,7 @@ def upload(fs: FileSystem, path: str):
             break
         data.append(buf)
 
-    fs.write(self.path, data)
+    fs.write(path, data)
 
 
 def download(fs: FileSystem, path: str):

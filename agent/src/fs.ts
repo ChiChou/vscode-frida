@@ -55,7 +55,9 @@ export class ObjCFileSystem implements FileSystem {
   public mkdir(path: string): Thenable<void> {
     const abs = this.normalize(path);
     const YES = 1;
-    this.manager.createDirectoryAtPath_withIntermediateDirectories_attributes_error_(abs, YES, NULL, NULL);
+    const attributes = ObjC.classes.NSMutableDictionary.new();
+    attributes.setObject_forKey_(0o755, 'NSFilePosixPermissions');
+    this.manager.createDirectoryAtPath_withIntermediateDirectories_attributes_error_(abs, YES, attributes, NULL);
     return Promise.resolve();
   }
 

@@ -19,7 +19,7 @@ class TestDeviceOperations(unittest.TestCase):
         self.assertIsInstance(fs.ls('/etc'), list)
         self.assertIsInstance(fs.ls('~/tmp'), list)
         self.assertIsInstance(fs.read('/etc/passwd'), bytes)
-        fs.copy('/etc/passwd', '~/tmp/test')
+        fs.cp('/etc/passwd', '~/tmp/test')
         fs.rm('~/tmp/test')
         fs.mkdir('~/tmp/testdir')
         fs.rm('~/tmp/testdir', json.dumps({'recursive': True}))

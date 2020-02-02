@@ -40,6 +40,11 @@ def main(args):
         return
 
     fs = FileSystem(agent)
+
+    if args.action == 'fs':
+        method = getattr(fs, args.method)
+        return method(*args.args)
+
     if args.action == 'download':
         download(fs, args.path)
         return
@@ -82,7 +87,10 @@ if __name__ == '__main__':
     subparsers.add_parser('syslog', parents=[requires_app])
     subparsers.add_parser('download', parents=[requires_app, requires_path])
     subparsers.add_parser('upload', parents=[requires_app, requires_path])
-    subparsers.add_parser('fs', parents=[requires_app])
+
+    fs_parser = subparsers.add_parser('fs', parents=[requires_app])
+    fs_parser.add_argument('method', choices=['cp', 'mkdir', 'rm', 'ls', 'mv', 'stat'])
+    fs_parser.add_argument('args', metavar='N', nargs='*', default=[])
 
     args = parser.parse_args()
 

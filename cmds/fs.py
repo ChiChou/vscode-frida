@@ -18,7 +18,7 @@ class FileSystem(object):
     def call(self, *args):
         return self.agent.invoke('fs', *args)
 
-    def copy(self, src: str, dst: str, opt_str: str = ''):
+    def cp(self, src: str, dst: str, opt_str: str = ''):
         opt = json.loads(opt_str) if opt_str else {}
         return self.call('copy', src, dst, opt)
 
