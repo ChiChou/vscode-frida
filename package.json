@@ -70,6 +70,11 @@
 				"category": "Frida"
 			},
 			{
+				"command": "frida.browse",
+				"title": "Browse Files",
+				"category": "Frida"
+			},
+			{
 				"command": "frida.syslog",
 				"title": "View Logs",
 				"icon": {
@@ -157,6 +162,16 @@
 					"command": "frida.kill",
 					"when": "view == fridaPs && viewItem == 'process|running'",
 					"group": "frida_process@3"
+				},
+				{
+					"command": "frida.browse",
+					"when": "view == fridaApps && viewItem =~ /^app|/",
+					"group": "frida_logger@2"
+				},
+				{
+					"command": "frida.browse",
+					"when": "view == fridaPs && viewItem =~ /^process|/",
+					"group": "frida_logger@3"
 				}
 			]
 		}

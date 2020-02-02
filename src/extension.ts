@@ -6,8 +6,14 @@ import { DevicesProvider } from './providers/devices';
 import { ProviderType } from './types';
 import * as repl from './commands/repl';
 import * as syslog from './commands/syslog';
+import * as file from './commands/file';
+import { FileSystemProvider } from './providers/filesystem';
 
 export function activate(context: vscode.ExtensionContext) {
+	const fs = new FileSystemProvider();
+	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('frida-app', fs, { isCaseSensitive: true }));
+	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('frida-pid', fs, { isCaseSensitive: true }));
+
 	const appsProvider = new DevicesProvider(ProviderType.Apps);
 	vscode.window.registerTreeDataProvider('fridaApps', appsProvider);
 	context.subscriptions.push(vscode.commands.registerCommand('frida.apps.refresh', () => appsProvider.refresh()));
@@ -22,6 +28,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog', syslog.show));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));
+
+	context.subscriptions.push(vscode.commands.registerCommand('frida.browse', file.browse));
 }
 
 // this method is called when your extension is deactivated
