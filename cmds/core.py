@@ -79,11 +79,12 @@ def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Sessio
         raise ValueError('app "%s" not found' % bundle)
 
     if app.pid > 0:
-        if device.get_frontmost_application().identifier != bundle:
-            raise RuntimeError(
-                'Unable to attach to "%s"(%d) as it is a background app.' % (bundle, app.pid))
-        else:
+        front = device.get_frontmost_application()
+        if front and front.identifier == bundle:
             return device.attach(app.pid)
+
+        raise RuntimeError(
+            'Unable to attach to "%s"(%d) as it is a background app.' % (bundle, app.pid))
 
     devtype = device_type(device)
     if devtype == 'Android':
