@@ -14,7 +14,7 @@ export function platformize(tool: string, args: string[]): [string, string[]] {
   let joint = args;
   if (os.platform() === 'win32') {
     bin = 'cmd.exe';
-    joint = ['/c', 'frida', ...args];
+    joint = ['/c', tool, ...args];
   }
   return [bin, joint];
 }
