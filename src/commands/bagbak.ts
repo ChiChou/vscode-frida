@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 
-import { devtype } from '../driver/frida';
-import { platform } from 'os';
+import { devtype, platformize } from '../driver/frida';
 import { AppItem } from "../providers/devices";
 
 export async function dump(target: AppItem) {
@@ -16,12 +15,6 @@ export async function dump(target: AppItem) {
     return;
   }
 
-  // todo: utils.platformize
-  if (platform() === 'win32') {
-    vscode.window.createTerminal(title, 'cmd.exe',
-      ['/c', 'bagbak', '-f', '-u', target.device.id, target.data.identifier]).show();
-  } else {
-    vscode.window.createTerminal(title, 'bagbak',
-      ['-f', '-u', target.device.id, target.data.identifier]).show();
-  }
+  const [bin, args] = platformize('bagbak', ['-f', '-u', target.device.id, target.data.identifier]);
+  vscode.window.createTerminal(title, bin, args).show();
 }
