@@ -18,7 +18,9 @@
 		"onCommand:frida.ps.refresh",
 		"onCommand:frida.app.refresh",
 		"onCommand:frida.syslog",
-		"onCommand:frida.syslog.vacuum"
+		"onCommand:frida.syslog.vacuum",
+		"onCommand:frida.browse",
+		"onCommand:frida.bagbak"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -87,6 +89,11 @@
 				"command": "frida.syslog.vacuum",
 				"title": "Close All Console",
 				"category": "Frida"
+			},
+			{
+				"command": "frida.bagbak",
+				"title": "Dump iOS App",
+				"category": "Frida"
 			}
 		],
 		"viewsContainers": {
@@ -136,22 +143,22 @@
 				},
 				{
 					"command": "frida.spawn",
-					"when": "view == fridaApps && viewItem =~ /^app|/",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
 					"group": "inline"
 				},
 				{
 					"command": "frida.spawn.suspended",
-					"when": "view == fridaApps && viewItem =~ /^app|/",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
 					"group": "frida_process@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaApps && viewItem =~ /^app|/",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
 					"group": "frida_logger@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaPs && viewItem =~ /^process|/"
+					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device"
 				},
 				{
 					"command": "frida.kill",
@@ -165,13 +172,18 @@
 				},
 				{
 					"command": "frida.browse",
-					"when": "view == fridaApps && viewItem =~ /^app|/",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
 					"group": "frida_logger@2"
 				},
 				{
 					"command": "frida.browse",
-					"when": "view == fridaPs && viewItem =~ /^process|/",
+					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device",
 					"group": "frida_logger@3"
+				},
+				{
+					"command": "frida.bagbak",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"group": "frida_dump@3"
 				}
 			]
 		}
