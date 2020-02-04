@@ -23,7 +23,6 @@ def devices() -> list:
 
 
 def get_device(device_id: str) -> frida.core.Device:
-    frida.get_usb_device().spawn
     if device_id == 'usb':
         return frida.get_usb_device()
     elif device_id == 'local':
