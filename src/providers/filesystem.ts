@@ -3,45 +3,6 @@ import * as vscode from 'vscode';
 
 import { exec, fs } from '../driver/frida';
 
-export class File implements vscode.FileStat {
-
-  type: vscode.FileType;
-  ctime: number;
-  mtime: number;
-  size: number;
-
-  name: string;
-  data?: Uint8Array;
-
-  constructor(name: string) {
-    this.type = vscode.FileType.File;
-    this.ctime = Date.now();
-    this.mtime = Date.now();
-    this.size = 0;
-    this.name = name;
-  }
-}
-
-export class Directory implements vscode.FileStat {
-
-  type: vscode.FileType;
-  ctime: number;
-  mtime: number;
-  size: number;
-
-  name: string;
-  entries: Map<string, File | Directory>;
-
-  constructor(name: string) {
-    this.type = vscode.FileType.Directory;
-    this.ctime = Date.now();
-    this.mtime = Date.now();
-    this.size = 0;
-    this.name = name;
-    this.entries = new Map();
-  }
-}
-
 interface TargetInfo {
   pid: number;
   device: string;
@@ -49,12 +10,6 @@ interface TargetInfo {
   path: string;
 }
 
-export interface VSCodeWriteFileOptions {
-  create: boolean;
-  overwrite: boolean;
-}
-
-export type Entry = File | Directory;
 
 function parseRemoteUri(uri: vscode.Uri): TargetInfo {
   /**
@@ -102,13 +57,13 @@ export class FileSystemProvider implements vscode.FileSystemProvider {
     // https://developer.android.com/reference/android/os/FileObserver
     return new vscode.Disposable(() => { });
   }
-  
+
   private _emitter = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
   private _bufferedEvents: vscode.FileChangeEvent[] = [];
   private _fireSoonHandle?: NodeJS.Timer;
   readonly onDidChangeFile: vscode.Event<vscode.FileChangeEvent[]> = this._emitter.event;
-  
-  private pids: {[key: string]: number} = {};
+
+  private pids: { [key: string]: number } = {};
   async ensureRunning(info: TargetInfo): Promise<TargetInfo> {
     const { device, app, pid } = info;
     let result = info;
@@ -120,7 +75,7 @@ export class FileSystemProvider implements vscode.FileSystemProvider {
       } else {
         newPid = await exec('rpc', 'ping', '--device', device, '--app', app);
         this.pids[key] = newPid;
-      }  
+      }
       result = Object.assign(info, { pid: newPid });
     }
     return result;
