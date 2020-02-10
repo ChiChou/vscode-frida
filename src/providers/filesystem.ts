@@ -10,6 +10,10 @@ interface TargetInfo {
   path: string;
 }
 
+export interface VSCodeWriteFileOptions {
+  create: boolean;
+  overwrite: boolean;
+}
 
 function parseRemoteUri(uri: vscode.Uri): TargetInfo {
   /**
