@@ -19,16 +19,22 @@ def devices() -> list:
         obj['icon'] = png.to_uri(dev.icon)
         return obj
 
+    # workaround
+    try:
+        frida.get_usb_device(1)
+    except:
+        pass
+
     return [wrap(dev) for dev in frida.enumerate_devices()]
 
 
 def get_device(device_id: str) -> frida.core.Device:
     if device_id == 'usb':
-        return frida.get_usb_device()
+        return frida.get_usb_device(1)
     elif device_id == 'local':
         return frida.get_local_device()
     else:
-        return frida.get_device(device_id)
+        return frida.get_device(device_id, timeout=1)
 
 
 def apps(device: frida.core.Device) -> list:
