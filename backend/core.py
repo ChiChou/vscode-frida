@@ -5,6 +5,7 @@ try:
     import frida
 except ImportError:
     print('Unable to import frida. Please ensure you have installed frida-tools via pip')
+    import sys
     sys.exit(-1)
 
 
