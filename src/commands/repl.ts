@@ -8,12 +8,12 @@ import { refresh } from '../utils';
 
 let NEXT_TERM_ID = 1;
 
-function repl(args: string[]) {
+function repl(args: string[], tool: string='frida') {
   const title = `Frida REPL #${NEXT_TERM_ID++}`;
   if (platform() === 'win32') {
-    vscode.window.createTerminal(title, 'cmd.exe', ['/c', 'frida', ...args]).show();
+    vscode.window.createTerminal(title, 'cmd.exe', ['/c', tool, ...args]).show();
   } else {
-    vscode.window.createTerminal(title, 'frida', args).show();
+    vscode.window.createTerminal(title, tool, args).show();
   }
 }
 

@@ -8,6 +8,7 @@ export enum DeviceType {
   Local = 'local',
   Remote = 'remote',
   USB = 'usb',
+  TCP = 'tcp', // legacy
 }
 
 export class Device {

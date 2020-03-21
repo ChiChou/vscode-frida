@@ -8,6 +8,7 @@ import * as repl from './commands/repl';
 import * as syslog from './commands/syslog';
 import * as file from './commands/file';
 import * as bagbak from './commands/bagbak';
+import * as objection from './commands/objection';
 import { FileSystemProvider } from './providers/filesystem';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -31,7 +32,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.browse', file.browse));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.bagbak', bagbak.dump));
+
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.bagbak', bagbak.dump));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
 }
 
 // this method is called when your extension is deactivated

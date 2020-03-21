@@ -20,7 +20,8 @@
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.browse",
-		"onCommand:frida.bagbak"
+		"onCommand:frida.external.bagbak",
+		"onCommand:frida.external.objection"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -91,8 +92,13 @@
 				"category": "Frida"
 			},
 			{
-				"command": "frida.bagbak",
+				"command": "frida.external.bagbak",
 				"title": "Dump iOS App",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.external.objection",
+				"title": "Objection",
 				"category": "Frida"
 			}
 		],
@@ -181,9 +187,14 @@
 					"group": "frida_logger@3"
 				},
 				{
-					"command": "frida.bagbak",
+					"command": "frida.external.bagbak",
 					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
-					"group": "frida_dump@3"
+					"group": "frida_external@3"
+				},
+				{
+					"command": "frida.external.objection",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"group": "frida_external@4"
 				}
 			]
 		}
