@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import { platformize } from '../driver/frida';
+import { platformize, launch } from '../driver/frida';
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
 import { DeviceType } from '../types';
 
@@ -29,10 +29,18 @@ export async function explore(target: TargetItem) {
         device = [];        
     }
 
-    const { pid, name } = target.data;
-    const gadget = target.data.pid? pid.toString() : name;
+    let { pid } = target.data;
+    let gadget = pid.toString();
+    if (target instanceof AppItem && !pid) {
+      try {
+        gadget = await launch(target.device.id, target.data.identifier).toString();
+      } catch(e) {
+        vscode.window.showWarningMessage(`Warning: failed to launch App ${target.data.identifier}`);
+        gadget = target.data.name;
+      }
+    }
+
     const [bin, args] = platformize('objection', ['-g', gadget, ...device, 'explore']);
-    console.log(bin, args);
     vscode.window.createTerminal(title, bin, args).show();    
   }
 }
