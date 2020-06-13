@@ -211,9 +211,12 @@
 		"@types/mocha": "^5.2.7",
 		"@types/node": "^12.11.7",
 		"@types/vscode": "^1.41.0",
-		"electron-rebuild": "^1.8.8",
 		"glob": "^7.1.5",
+<<<<<<< HEAD
 		"mocha": "^7.1.1",
+=======
+		"mocha": "^8.0.1",
+>>>>>>> npm audit fix
 		"tslint": "^5.20.0",
 		"typescript": "^3.6.4",
 		"vscode-test": "^1.2.2"
