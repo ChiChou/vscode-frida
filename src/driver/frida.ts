@@ -23,7 +23,12 @@ export function exec(...args: string[]): Promise<any> {
   return new Promise((resolve, reject) => {
     execFile('python3', [py, ...args], {}, (err, stdout, stderr) => {
       if (err) {
-        reject(err);
+        const begin = stdout.lastIndexOf('Error:');
+        if (begin > -1) {
+          reject(new Error(stdout.substr(begin)));
+        } else {
+          reject(err);
+        }
       } else {
         resolve(JSON.parse(stdout));
       }
