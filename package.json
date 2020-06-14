@@ -149,22 +149,22 @@
 				},
 				{
 					"command": "frida.spawn",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
 					"group": "inline"
 				},
 				{
 					"command": "frida.spawn.suspended",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
 					"group": "frida_process@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
 					"group": "frida_logger@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device"
+					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device && viewItem != empty"
 				},
 				{
 					"command": "frida.kill",
@@ -178,18 +178,18 @@
 				},
 				{
 					"command": "frida.browse",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
 					"group": "frida_logger@2"
 				},
 				{
 					"command": "frida.browse",
-					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device",
+					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device && viewItem != empty",
 					"group": "frida_logger@3"
 				},
 				{
 					"command": "frida.external.bagbak",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
-					"group": "frida_external@3"
+					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
+					"group": "frida_dump@3"
 				},
 				{
 					"command": "frida.external.objection",
@@ -212,11 +212,7 @@
 		"@types/node": "^12.11.7",
 		"@types/vscode": "^1.41.0",
 		"glob": "^7.1.5",
-<<<<<<< HEAD
-		"mocha": "^7.1.1",
-=======
 		"mocha": "^8.0.1",
->>>>>>> npm audit fix
 		"tslint": "^5.20.0",
 		"typescript": "^3.6.4",
 		"vscode-test": "^1.2.2"
