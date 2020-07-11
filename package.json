@@ -21,7 +21,9 @@
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.browse",
 		"onCommand:frida.external.bagbak",
-		"onCommand:frida.external.objection"
+		"onCommand:frida.external.objection",
+		"onCommand:frida.boilerplate.agent",
+		"onCommand:frida.boilerplate.module"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -100,6 +102,16 @@
 				"command": "frida.external.objection",
 				"title": "Objection",
 				"category": "Frida"
+			},
+			{
+				"command": "frida.boilerplate.agent",
+				"title": "Frida Agent TypeScript Example",
+				"category": "Frida Boilerplate"
+			},
+			{
+				"command": "frida.boilerplate.module",
+				"title": "Frida Module TypeScript Example",
+				"category": "Frida Boilerplate"
 			}
 		],
 		"viewsContainers": {

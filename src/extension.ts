@@ -9,6 +9,7 @@ import * as syslog from './commands/syslog';
 import * as file from './commands/file';
 import * as bagbak from './commands/bagbak';
 import * as objection from './commands/objection';
+import * as boilerplate from './commands/boilerplate';
 import { FileSystemProvider } from './providers/filesystem';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -35,6 +36,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.bagbak', bagbak.dump));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
+
+	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));
 }
 
 // this method is called when your extension is deactivated
