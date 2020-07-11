@@ -55,7 +55,7 @@ export function show(node?: TargetItem) {
       const args = [py, 'syslog', '--device', node.device.id.toString(), ...bundleOrPid];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'python3', args).show();
     } else if (type === 'Android') {
-      // todo: adb logcat
+      window.showErrorMessage('Logcat is not implemented yet. Contributions are welcomed');
     } else {
       window.showErrorMessage(`Unknown type of device ${node.device.name}`);
     }

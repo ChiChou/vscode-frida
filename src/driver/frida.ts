@@ -1,13 +1,15 @@
 import { join } from 'path';
-
 import { execFile, spawn } from 'child_process';
 import { Device, App, Process } from '../types';
 
+import * as vscode from 'vscode';
 import * as os from 'os';
 
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
+
+const logger = vscode.window.createOutputChannel("Frida Python Driver");
 
 export function platformize(tool: string, args: string[]): [string, string[]] {
   let bin = tool;
@@ -23,12 +25,11 @@ export function exec(...args: string[]): Promise<any> {
   return new Promise((resolve, reject) => {
     execFile('python3', [py, ...args], {}, (err, stdout, stderr) => {
       if (err) {
-        const begin = stdout.lastIndexOf('Error:');
-        if (begin > -1) {
-          reject(new Error(stdout.substr(begin)));
-        } else {
-          reject(err);
-        }
+        logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
+        logger.appendLine(stdout);
+        logger.appendLine(stderr);
+        logger.appendLine(`Exited with ${err.code}`);
+        reject(new Error(stdout));
       } else {
         resolve(JSON.parse(stdout));
       }

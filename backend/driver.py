@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import sys
+import os
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -94,7 +95,15 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    result = main(args)
+    if 'DEBUG' in os.environ:
+        result = main(args)
+    else:
+        try:
+            result = main(args)
+        except Exception as e:
+            print(e)
+            sys.exit(-1)
+
     import json
     if args.action not in ['syslog', 'download', 'upload']:
         print(json.dumps(result))
