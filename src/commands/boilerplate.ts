@@ -8,8 +8,10 @@ import { Readable } from 'stream';
 
 
 async function gitClone(template: string) {
+  let openAfterClone = false;
   let { rootPath } = vscode.workspace;
   if (!rootPath) {
+    openAfterClone = true;
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectMany: false,
@@ -73,6 +75,11 @@ async function gitClone(template: string) {
             reject();
             return;
           }
+          
+          if (openAfterClone) {
+            vscode.commands.executeCommand('vscode.openFolder', uri, true);
+          }
+          npmInit(uri);
           resolve();
         })
         .on('error', (err) => {
@@ -81,6 +88,16 @@ async function gitClone(template: string) {
         });
     });
   });
+}
+
+function npmInit(cwd: vscode.Uri) {
+  const [shellPath, shellArgs] = platformize('npm', ['install']);
+  vscode.window.createTerminal({
+    name: 'npm install',
+    shellPath,
+    shellArgs,
+    cwd
+  }).show();
 }
 
 export function agent() {
