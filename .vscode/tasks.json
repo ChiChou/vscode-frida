@@ -4,6 +4,7 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "TypeScript",
 			"type": "npm",
 			"script": "watch",
 			"problemMatcher": "$tsc-watch",
@@ -14,6 +15,18 @@
 			"group": {
 				"kind": "build",
 				"isDefault": true
+			}
+		},
+		{
+			"label": "agent",
+			"type": "npm",
+			"script": "build",
+			"isBackground": true,
+			"presentation": {
+				"reveal": "never"
+			},
+			"options": {
+				"cwd": "agent"
 			}
 		}
 	]
