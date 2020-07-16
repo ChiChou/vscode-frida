@@ -6,13 +6,10 @@ import { DeviceType } from '../types';
 import { terminate } from '../driver/frida';
 import { refresh, sleep } from '../utils';
 
-let NEXT_TERM_ID = 1;
-
 const terminals = new Set<vscode.Terminal>();
 
 function repl(args: string[], name: string, tool: string='frida') {
-  const title = `Frida REPL #${NEXT_TERM_ID++}: ${name}`;
-  
+  const title = `Frida - ${name}`;  
   const [shell, rest] = platform() === 'win32' ?
     ['cmd.exe', ['/c', tool, ...args]] : [tool, args];
 
@@ -96,7 +93,9 @@ export async function load() {
   }
 
   const { document } = activeTextEditor;
-  term.sendText(document.isDirty ? document.getText() : `%load ${document.uri.fsPath}`);
+  term.sendText(
+    platform() === 'win32' || document.isDirty ? // bug: %load doesn't seem to handle path right on Windows
+    document.getText() : `%load ${document.uri.fsPath}`);
   await sleep(100);
   term.sendText(EOL);
 }
