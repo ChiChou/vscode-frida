@@ -23,7 +23,9 @@
 		"onCommand:frida.external.bagbak",
 		"onCommand:frida.external.objection",
 		"onCommand:frida.boilerplate.agent",
-		"onCommand:frida.boilerplate.module"
+		"onCommand:frida.boilerplate.module",
+		"onCommand:frida.snippet.execute",
+		"onLanguage:javascript"
 	],
 	"main": "./out/extension.js",
 	"contributes": {
@@ -112,6 +114,12 @@
 				"command": "frida.boilerplate.module",
 				"title": "Frida Module TypeScript Example",
 				"category": "Frida Boilerplate"
+			},
+			{
+				"command": "frida.snippet.execute",
+				"title": "Run",
+				"category": "Frida",
+				"icon": "resources/run.svg"
 			}
 		],
 		"viewsContainers": {
@@ -136,6 +144,13 @@
 			]
 		},
 		"menus": {
+			"editor/title": [
+        {
+          "when": "resourceLangId == javascript",
+          "command": "frida.snippet.execute",
+					"group": "navigation@1"
+        }
+      ],
 			"view/title": [
 				{
 					"command": "frida.apps.refresh",

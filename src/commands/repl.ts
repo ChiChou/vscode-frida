@@ -1,39 +1,45 @@
 import * as vscode from 'vscode';
 
 import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
-import { platform } from 'os';
+import { platform, EOL } from 'os';
 import { DeviceType } from '../types';
 import { terminate } from '../driver/frida';
-import { refresh } from '../utils';
+import { refresh, sleep } from '../utils';
 
 let NEXT_TERM_ID = 1;
 
-function repl(args: string[], tool: string='frida') {
-  const title = `Frida REPL #${NEXT_TERM_ID++}`;
-  if (platform() === 'win32') {
-    vscode.window.createTerminal(title, 'cmd.exe', ['/c', tool, ...args]).show();
-  } else {
-    vscode.window.createTerminal(title, tool, args).show();
-  }
+const terminals = new Set<vscode.Terminal>();
+
+function repl(args: string[], name: string, tool: string='frida') {
+  const title = `Frida REPL #${NEXT_TERM_ID++}: ${name}`;
+  
+  const [shell, rest] = platform() === 'win32' ?
+    ['cmd.exe', ['/c', tool, ...args]] : [tool, args];
+
+  const term = vscode.window.createTerminal(title, shell, rest);
+  term.show();
+  terminals.add(term);
 }
+
+vscode.window.onDidCloseTerminal(t => terminals.delete(t));
 
 export function spawn(node?: AppItem) {
   if (!node) {
-    // todo: select from list
+    vscode.window.showInformationMessage('Please use this command in the context menu of frida sidebar');
     return;
   }
 
-  repl(['-f', node.data.identifier, '--device', node.device.id, '--no-pause']);
+  repl(['-f', node.data.identifier, '--device', node.device.id, '--no-pause'], node.data.name);
   refresh();
 }
 
 export function spawnSuspended(node?: AppItem) {
   if (!node) {
-    // todo: select
+    vscode.window.showInformationMessage('Please use this command in the context menu of frida sidebar');
     return;
   }
 
-  repl(['-f', node.data.identifier, '--device', node.device.id]);
+  repl(['-f', node.data.identifier, '--device', node.device.id], node.data.name);
   refresh();
 }
 
@@ -62,6 +68,35 @@ export function attach(node?: TargetItem) {
     }
 
     const device = node.device.type === DeviceType.Local ? [] : ['--device', node.device.id];
-    repl([node.data.pid.toString(), ...device]);
+    repl([node.data.pid.toString(), ...device], node.data.pid.toString());
   }
+}
+
+export async function load() {
+  const { activeTextEditor, activeTerminal, showErrorMessage } = vscode.window;
+  if (!activeTextEditor) {
+    showErrorMessage('No active document');
+    return;
+  }
+
+  if (terminals.size === 0) {
+    showErrorMessage('No active frida REPL');
+    return;
+  }
+
+  let term: vscode.Terminal | null = null;
+  if (activeTerminal && terminals.has(activeTerminal)) {
+    term = activeTerminal;
+  } else if (terminals.size === 1) {
+    term = terminals.values().next().value as vscode.Terminal;
+    term.show();
+  } else {
+    showErrorMessage('You have multiple REPL instances. Please activate one');
+    return;
+  }
+
+  const { document } = activeTextEditor;
+  term.sendText(document.isDirty ? document.getText() : `%load ${document.uri.fsPath}`);
+  await sleep(100);
+  term.sendText(EOL);
 }
