@@ -81,11 +81,6 @@
 				"category": "Frida"
 			},
 			{
-				"command": "frida.browse",
-				"title": "Browse Files",
-				"category": "Frida"
-			},
-			{
 				"command": "frida.syslog",
 				"title": "View Logs",
 				"icon": {
@@ -208,19 +203,9 @@
 					"group": "frida_process@3"
 				},
 				{
-					"command": "frida.browse",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
-					"group": "frida_logger@2"
-				},
-				{
-					"command": "frida.browse",
-					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device && viewItem != empty",
-					"group": "frida_logger@3"
-				},
-				{
 					"command": "frida.external.bagbak",
 					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
-					"group": "frida_dump@3"
+					"group": "frida_external@3"
 				},
 				{
 					"command": "frida.external.objection",
