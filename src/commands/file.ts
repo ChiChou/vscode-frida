@@ -14,6 +14,6 @@ export function browse(target: AppItem | ProcessItem) {
   }
 
   if (uri && name) {
-    vscode.workspace.updateWorkspaceFolders(0, 0, { uri: vscode.Uri.parse(uri), name });
+    vscode.commands.executeCommand('vscode.openFolder', vscode.Uri.parse(uri), true);
   }
 }
