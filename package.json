@@ -82,7 +82,7 @@
 			},
 			{
 				"command": "frida.syslog",
-				"title": "View Logs",
+				"title": "View iOS syslog",
 				"icon": {
 					"light": "resources/light/statusRun.svg",
 					"dark": "resources/dark/statusRun.svg"
