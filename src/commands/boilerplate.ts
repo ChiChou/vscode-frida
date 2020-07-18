@@ -5,13 +5,12 @@ import * as path from 'path';
 
 import { platformize } from '../driver/frida';
 import { Readable } from 'stream';
+import { TextDecoder } from 'util';
 
 
 async function gitClone(template: string) {
-  let openAfterClone = false;
   let { rootPath } = vscode.workspace;
   if (!rootPath) {
-    openAfterClone = true;
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectMany: false,
@@ -65,7 +64,7 @@ async function gitClone(template: string) {
 
     return new Promise((resolve, reject) => {
       proc
-        .on('exit', (code, signal) => {
+        .on('exit', async (code, signal) => {
           if (code !== 0) {
             if (signal === 'SIGINT') {
               vscode.workspace.fs.delete(uri, { recursive: true });
@@ -76,9 +75,7 @@ async function gitClone(template: string) {
             return;
           }
           
-          if (openAfterClone) {
-            vscode.commands.executeCommand('vscode.openFolder', uri, true);
-          }
+          openFile(uri).catch(_ => {});
           npmInit(uri);
           resolve();
         })
@@ -98,6 +95,15 @@ function npmInit(cwd: vscode.Uri) {
     shellArgs,
     cwd
   }).show();
+}
+
+async function openFile(root: vscode.Uri) {
+  const meta = path.join(root.fsPath, 'package.json');
+  const content = await vscode.workspace.fs.readFile(vscode.Uri.file(meta));
+  const info = JSON.parse(new TextDecoder('utf-8').decode(content));
+  const { main } = info;
+  const mainSourceUri = vscode.Uri.file(path.join(root.fsPath, main));  
+  vscode.commands.executeCommand('vscode.open', mainSourceUri);
 }
 
 export function agent() {
