@@ -6,7 +6,7 @@
 		"type": "git",
 		"url": "https://github.com/ChiChou/vscode-frida"
 	},
-	"displayName": "vscode-frida",
+	"displayName": "frida Workbench",
 	"description": "Unofficial frida workbench for VSCode",
 	"version": "0.0.1",
 	"engines": {
