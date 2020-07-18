@@ -1,5 +1,9 @@
 {
 	"name": "vscode-frida",
+	"publisher": "codecolorist",
+	"repository": {
+		"url": "https://github.com/ChiChou/vscode-frida"
+	},
 	"displayName": "vscode-frida",
 	"description": "Unofficial frida workbench for VSCode",
 	"version": "0.0.1",
