@@ -1,0 +1,1 @@
+global.process = { pid: Process.id, version: Frida.version, arch: Process.arch };

@@ -1,7 +1,9 @@
 {
 	"name": "vscode-frida",
+	"icon": "icon.png",
 	"publisher": "codecolorist",
 	"repository": {
+		"type": "git",
 		"url": "https://github.com/ChiChou/vscode-frida"
 	},
 	"displayName": "vscode-frida",
@@ -106,12 +108,12 @@
 			},
 			{
 				"command": "frida.boilerplate.agent",
-				"title": "Clone Agent TypeScript Example",
+				"title": "Clone TypeScript Agent Example",
 				"category": "Frida Boilerplate"
 			},
 			{
 				"command": "frida.boilerplate.module",
-				"title": "Clone Module TypeScript Example",
+				"title": "Clone TypeScript Module Example",
 				"category": "Frida Boilerplate"
 			},
 			{
@@ -144,12 +146,12 @@
 		},
 		"menus": {
 			"editor/title": [
-        {
-          "when": "resourceLangId == javascript",
-          "command": "frida.snippet.execute",
+				{
+					"when": "resourceLangId == javascript",
+					"command": "frida.snippet.execute",
 					"group": "navigation@1"
-        }
-      ],
+				}
+			],
 			"view/title": [
 				{
 					"command": "frida.apps.refresh",
@@ -235,6 +237,7 @@
 	},
 	"dependencies": {
 		"axios": "^0.19.1",
+		"lookpath": "^1.1.0",
 		"ws": "^7.2.1"
 	}
 }
