@@ -4,6 +4,8 @@
 
 **Unofficial** frida workbench for VSCode
 
+[Get it on Marketplace](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
+
 ## features
 
 ![demo](resources/doc/demo.gif)
