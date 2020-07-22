@@ -4,6 +4,11 @@
 
 [Get it on Marketplace](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
 
+## Prerequisites
+
+* Python
+* `pip install -U frida-tools`
+
 ## features
 
 ![demo](resources/doc/demo.gif)
