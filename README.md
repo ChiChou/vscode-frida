@@ -10,10 +10,6 @@
 
 ### Graphical Target Selector
 
-Choose the target in a visualized way
-
-![App List](resources/doc/list.png)
-
 ### Clone Boilerplate
 
 [@oleavr](https://github.com/oleavr) has made two boilerplates so you can code in TypeScript!
@@ -23,9 +19,15 @@ Choose the target in a visualized way
 
 ![Clong Boilerplate from GitHub](resources/doc/clone.png)
 
-### iOS syslog
+### Debug Log
 
-![syslog](resources/doc/syslog.gif)
+Now supports both iOS syslog and Android logcat!
+
+![Debug Log](resources/doc/syslog.gif)
+
+### Download and Apply frida-gum Typing Info
+
+![Typing](resources/doc/typing.gif)
 
 ### Bagbak and Objection intergration
 
@@ -43,6 +45,7 @@ Choose the target in a visualized way
 ### v0.0.2 - 22 Jul, 2020
 
 * support logcat for Android
+* download `frida-gum.d.ts` from github
 
 ### v0.0.1 - 19 Jul, 2020
 
