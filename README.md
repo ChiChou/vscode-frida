@@ -1,7 +1,5 @@
 # vscode-frida
 
-![icon](icon.png)
-
 **Unofficial** frida workbench for VSCode
 
 [Get it on Marketplace](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
@@ -37,9 +35,15 @@ Choose the target in a visualized way
 ## Todo
 
 * Handle device connection and disconnection. Support remote TCP
-* More Android features (e.g. syslog)
+* More Android features
 * More mobile security terminal tools intergration
 
 ## Release Note:
 
-* v.0.0.1 first release
+### v0.0.2 - 22 Jul, 2020
+
+* support logcat for Android
+
+### v0.0.1 - 19 Jul, 2020
+
+* first release
