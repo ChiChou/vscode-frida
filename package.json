@@ -121,6 +121,11 @@
 				"title": "Run",
 				"category": "Frida",
 				"icon": "resources/run.svg"
+			},
+			{
+				"command": "frida.typing.init",
+				"title": "Get typing hint for frida",
+				"category": "Frida"
 			}
 		],
 		"viewsContainers": {

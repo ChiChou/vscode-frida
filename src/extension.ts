@@ -10,6 +10,7 @@ import * as file from './commands/file';
 import * as repl from './commands/repl';
 import * as bagbak from './commands/bagbak';
 import * as syslog from './commands/syslog';
+import * as typing from './commands/typing';
 import * as objection from './commands/objection';
 import * as boilerplate from './commands/boilerplate';
 
@@ -41,6 +42,8 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));
+
+	context.subscriptions.push(vscode.commands.registerCommand('frida.typing.init', typing.init));
 }
 
 // this method is called when your extension is deactivated
