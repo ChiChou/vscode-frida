@@ -1,9 +1,10 @@
 # Change Log
 
-All notable changes to the "frida" extension will be documented in this file.
+### v0.0.2 - 22 Jul, 2020
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+* support logcat for Android
+* pull `frida-gum.d.ts` from github
 
-## [Unreleased]
+### v0.0.1 - 19 Jul, 2020
 
-- Initial release
+* first release
