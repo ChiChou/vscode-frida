@@ -12,6 +12,7 @@ import * as bagbak from './commands/bagbak';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
 import * as objection from './commands/objection';
+import * as flex from './commands/flexdecrypt';
 import * as boilerplate from './commands/boilerplate';
 
 export function activate(context: vscode.ExtensionContext) {
@@ -39,6 +40,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.bagbak', bagbak.dump));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', flex.decrypt));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));

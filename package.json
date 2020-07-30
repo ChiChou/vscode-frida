@@ -28,6 +28,7 @@
 		"onCommand:frida.browse",
 		"onCommand:frida.external.bagbak",
 		"onCommand:frida.external.objection",
+		"onCommand:frida.external.flexdecrypt",
 		"onCommand:frida.boilerplate.agent",
 		"onCommand:frida.boilerplate.module",
 		"onCommand:frida.snippet.execute",
@@ -79,7 +80,7 @@
 			},
 			{
 				"command": "frida.kill",
-				"title": "Kill Process",
+				"title": "End Process",
 				"category": "Frida"
 			},
 			{
@@ -104,6 +105,11 @@
 			{
 				"command": "frida.external.objection",
 				"title": "Objection",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.external.flexdecrypt",
+				"title": "FlexDecrypt",
 				"category": "Frida"
 			},
 			{
@@ -182,42 +188,42 @@
 				},
 				{
 					"command": "frida.spawn",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "inline"
 				},
 				{
 					"command": "frida.spawn.suspended",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
-					"group": "frida_process@1"
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "1_frida_process@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "frida_logger@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaPs && viewItem =~ /^process|/ && viewItem != device && viewItem != empty"
+					"when": "view == fridaPs && viewItem =~ /^process\\|/"
 				},
 				{
 					"command": "frida.kill",
-					"when": "view == fridaApps && viewItem == 'app|running'",
-					"group": "frida_process@2"
-				},
-				{
-					"command": "frida.kill",
-					"when": "view == fridaPs && viewItem == 'process|running'",
-					"group": "frida_process@3"
+					"when": "viewItem =~ /\\|running$/",
+					"group": "1_frida_process@2"
 				},
 				{
 					"command": "frida.external.bagbak",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device && viewItem != empty",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "frida_external@3"
 				},
 				{
 					"command": "frida.external.objection",
-					"when": "view == fridaApps && viewItem =~ /^app|/ && viewItem != device",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "frida_external@4"
+				},
+				{
+					"command": "frida.external.flexdecrypt",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "frida_external@5"
 				}
 			]
 		}
