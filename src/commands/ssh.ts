@@ -1,6 +1,6 @@
 import { window, Task, TaskDefinition, ShellExecution, tasks } from 'vscode';
 import { DeviceItem, TargetItem } from "../providers/devices";
-import { devtype } from '../driver/frida';
+import { devtype, platformize } from '../driver/frida';
 import { freePort } from '../utils';
 
 let iproxy: Task | null;
@@ -63,11 +63,14 @@ export async function copyid(node: TargetItem) {
     type: 'shell',
   };
 
+  const [bin, arg] = platformize('ssh-copy-id',
+    [`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no']);
+
   const task = new Task(
     defination,
-    'ssh',
+    'Copy SSH pubkey',
     'frida extension',
-    new ShellExecution('ssh-copy-id', [`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'])
+    new ShellExecution(bin, arg)
   );
   tasks.executeTask(task);
 }
@@ -82,17 +85,19 @@ export async function shell(node: TargetItem) {
   const name = `SSH: ${node.data.name}`;
   if (deviceType === 'iOS') {
     const port = await runIProxy();
-    window.createTerminal({
-      name,
-      shellArgs: [`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'],
-      shellPath: 'ssh'
-    }).show();
-  } else if (deviceType === 'Android') {
-    const shellArgs = ['-s', node.data.id, 'shell'];
+    const [shellPath, shellArgs] = platformize('ssh',
+      [`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no']);
     window.createTerminal({
       name,
       shellArgs,
-      shellPath: 'adb'
+      shellPath
+    }).show();
+  } else if (deviceType === 'Android') {
+    const [shellPath, shellArgs] = platformize('adb', ['-s', node.data.id, 'shell']);
+    window.createTerminal({
+      name,
+      shellArgs,
+      shellPath
     }).show();
   } else {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);
