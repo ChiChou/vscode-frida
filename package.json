@@ -30,6 +30,7 @@
 		"onCommand:frida.external.objection",
 		"onCommand:frida.external.flexdecrypt",
 		"onCommand:frida.external.shell",
+		"onCommand:frida.external.copyid",
 		"onCommand:frida.boilerplate.agent",
 		"onCommand:frida.boilerplate.module",
 		"onCommand:frida.snippet.execute",
@@ -116,7 +117,12 @@
 			{
 				"command": "frida.external.shell",
 				"title": "Shell",
-				"category": "Frida"
+				"category": "SSH over USB"
+			},
+			{
+				"command": "frida.external.copyid",
+				"title": "ssh-copy-id",
+				"category": "SSH over USB"
 			},
 			{
 				"command": "frida.boilerplate.agent",
@@ -230,10 +236,16 @@
 					"command": "frida.external.flexdecrypt",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "frida_external@5"
-				}, {
+				},
+				{
 					"command": "frida.external.shell",
 					"when": "viewItem == 'device|usb'",
 					"group": "frida_external@6"
+				},
+				{
+					"command": "frida.external.copyid",
+					"when": "viewItem == 'device|usb'",
+					"group": "frida_external@7"
 				}
 			]
 		}

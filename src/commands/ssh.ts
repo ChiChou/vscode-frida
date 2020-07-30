@@ -44,7 +44,35 @@ async function runIProxy(): Promise<number> {
   return port;
 }
 
-export default async function shell(node: TargetItem) {
+export async function copyid(node: TargetItem) {
+  if (!(node instanceof DeviceItem)) {
+    window.showErrorMessage('This command is only avaliable on context menu');
+    return;
+  }
+
+  // todo: decorator
+  const deviceType = await devtype(node.data.id);
+  if (deviceType !== 'iOS') {
+    window.showErrorMessage(`Device type "${deviceType}" is not supported`);
+    return;
+  }
+
+  const port = await runIProxy();
+  const defination: TaskDefinition = {
+    label: 'ssh-copy-id',
+    type: 'shell',
+  };
+
+  const task = new Task(
+    defination,
+    'ssh',
+    'frida extension',
+    new ShellExecution('ssh-copy-id', [`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'])
+  );
+  tasks.executeTask(task);
+}
+
+export async function shell(node: TargetItem) {
   if (!(node instanceof DeviceItem)) {
     window.showErrorMessage('This command is only avaliable on context menu');
     return;
