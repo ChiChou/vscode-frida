@@ -6,6 +6,8 @@ import { ProviderType } from './types';
 import { DevicesProvider } from './providers/devices';
 import { FileSystemProvider } from './providers/filesystem';
 
+import remoteshell from './commands/remoteshell';
+
 import * as file from './commands/file';
 import * as repl from './commands/repl';
 import * as bagbak from './commands/bagbak';
@@ -41,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.bagbak', bagbak.dump));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', flex.decrypt));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', remoteshell));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));

@@ -74,7 +74,11 @@ export class DeviceItem extends TargetItem {
     return Promise.resolve([]);
   }
 
-  contextValue = 'device';
+  get contextValue() {
+    // todo: Android / iOS
+    return `device|${this.data.type}`;
+  }
+
 }
 
 export class NotFound extends TargetItem {
@@ -118,7 +122,6 @@ export class AppItem extends TargetItem {
   children(): Thenable<TargetItem[]> {
     return Promise.resolve([]);
   }
-
 
   get iconPath() {
     if (this.data.largeIcon) {
