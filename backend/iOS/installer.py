@@ -35,12 +35,19 @@ def apps():
         channel.write({
             'Command': 'Browse',
             'ClientOptions': {
-                'ApplicationType': 'User'
+                # comment this out to list all apps
+                # 'ApplicationType': 'User'
             }
         })
-        response = channel.read()
-        return response['CurrentList']
 
+        while True:
+            response = channel.read()
+            if response['Status'] == 'BrowsingApplications':
+                for app in response['CurrentList']:
+                    yield app
+
+            elif response['Status'] == 'Complete':
+                break
 
 def main(bundle):
     try:
