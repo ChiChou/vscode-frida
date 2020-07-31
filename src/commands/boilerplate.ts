@@ -32,14 +32,17 @@ async function gitClone(template: string) {
   const uri = vscode.Uri.file(dest);
 
   // check for existence
+  let exists = false;
   try {
-    const st = await vscode.workspace.fs.stat(uri);
-    if (st) {
-      vscode.window.showWarningMessage(`Destination ${uri.fsPath} already exists`);
-      return;
-    }
+    exists = Boolean(await vscode.workspace.fs.stat(uri));
   } catch (_) {
 
+  }
+
+  if (exists) {
+    const choice = await vscode.window.showWarningMessage(`Destination ${uri.fsPath} already exists`, 'Open File', 'Dismiss');
+    if (choice === 'Open File') { openFile(uri); }
+    return;
   }
 
   const bin = executable('git');
@@ -76,8 +79,8 @@ async function gitClone(template: string) {
             reject();
             return;
           }
-          
-          openFile(uri).catch(_ => {});
+
+          openFile(uri).catch(_ => { });
           npmInstall(dest);
           resolve();
         })
@@ -103,7 +106,7 @@ async function openFile(root: vscode.Uri) {
   const content = await vscode.workspace.fs.readFile(vscode.Uri.file(meta));
   const info = JSON.parse(new TextDecoder('utf-8').decode(content));
   const { main } = info;
-  const mainSourceUri = vscode.Uri.file(path.join(root.fsPath, main));  
+  const mainSourceUri = vscode.Uri.file(path.join(root.fsPath, main));
   vscode.commands.executeCommand('vscode.open', mainSourceUri);
 }
 
