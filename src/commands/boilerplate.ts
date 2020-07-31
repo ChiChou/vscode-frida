@@ -6,6 +6,7 @@ import * as path from 'path';
 import { platformize } from '../driver/frida';
 import { Readable } from 'stream';
 import { TextDecoder } from 'util';
+import { executable } from '../utils';
 
 
 async function gitClone(template: string) {
@@ -14,7 +15,7 @@ async function gitClone(template: string) {
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectMany: false,
-      openLabel: 'Destination'
+      openLabel: 'Clone Here'
     });
 
     if (fileUri && fileUri.length === 1) {
@@ -28,7 +29,6 @@ async function gitClone(template: string) {
   const name = `frida-${template}-example`;
   const url = `https://github.com/oleavr/${name}.git`;
   const dest = path.join(rootPath, name);
-  const [bin, args] = platformize('git', ['clone', url, '--progress', dest]);
   const uri = vscode.Uri.file(dest);
 
   // check for existence
@@ -42,6 +42,8 @@ async function gitClone(template: string) {
 
   }
 
+  const bin = executable('git');
+  const args = ['clone', url, '--progress', dest];
   const proc = cp.execFile(bin, args, { cwd: vscode.workspace.rootPath });
   vscode.window.withProgress({
     location: vscode.ProgressLocation.Notification,
@@ -76,7 +78,7 @@ async function gitClone(template: string) {
           }
           
           openFile(uri).catch(_ => {});
-          npmInit(uri);
+          npmInstall(dest);
           resolve();
         })
         .on('error', (err) => {
@@ -87,14 +89,13 @@ async function gitClone(template: string) {
   });
 }
 
-function npmInit(cwd: vscode.Uri) {
-  const [shellPath, shellArgs] = platformize('npm', ['install']);
-  vscode.window.createTerminal({
-    name: 'npm install',
-    shellPath,
-    shellArgs,
-    cwd
-  }).show();
+function npmInstall(cwd: string) {
+  const [bin, args] = platformize('npm', ['install']);
+  const task = new vscode.Task({ type: 'shell' }, bin, 'npm install',
+    new vscode.ShellExecution(bin, args, {
+      cwd
+    }));
+  vscode.tasks.executeTask(task);
 }
 
 async function openFile(root: vscode.Uri) {

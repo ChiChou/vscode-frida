@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as net from 'net';
 import { join } from 'path';
+import { platform } from 'os';
 
 export function resource(...paths: string[]): vscode.Uri {
   const file = join(__dirname, '..', 'resources', ...paths);
@@ -14,6 +15,10 @@ export function sleep(ms: number) {
 export function refresh() {
   vscode.commands.executeCommand('frida.ps.refresh');
   vscode.commands.executeCommand('frida.apps.refresh');
+}
+
+export function executable(cmd: string) {
+  return cmd + (platform() === 'win32' ? '.exe' : '');
 }
 
 export function freePort(): Promise<number> {
