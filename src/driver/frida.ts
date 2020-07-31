@@ -53,6 +53,10 @@ export function devtype(id: string) {
   return exec('type', id) as Promise<string>;
 }
 
+export function port(id: string) {
+  return exec('port', id) as Promise<number>;
+}
+
 export async function launch(device: string, bundle: string): Promise<Number> {
   const params = ['-f', bundle, '--device', device, bundle, '--no-pause', '-q', '-e', 'Process.id'];
   const [bin, args] = platformize('frida', params);

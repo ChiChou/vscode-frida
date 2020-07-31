@@ -62,6 +62,17 @@ def ps(device: frida.core.Device) -> list:
     return [wrap(p) for p in device.enumerate_processes()]
 
 
+def find_port(device: frida.core.Device) -> int:
+    pid = device.spawn('/bin/sh')
+    session = device.attach(pid)
+    session.enable_jit()
+    with (Path(__file__).parent.parent / 'agent' / 'socket.js').open('r', encoding='utf8') as fp:
+        source = fp.read()
+    script = session.create_script(source)
+    script.load()
+    return script.exports.find()
+
+
 def device_type(device: frida.core.Device) -> str:
     mapping = {
         'SpringBoard': 'iOS',
