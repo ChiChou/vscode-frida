@@ -6,14 +6,20 @@
 
 ## Prerequisites
 
-* Python
-* `pip install -U frida-tools`
+* Python3
+* `pip3 install -U frida-tools`
+* [iproxy](https://libimobiledevice.org/#get-started) * (For Windows build, see https://github.com/libimobiledevice-win32/imobiledevice-net/releases)
+* SSH client (`ssh` command) *
 
-## features
+[*] Optional. Only some of the functionalities rely on it
+
+## Features
 
 ![demo](resources/doc/demo.gif)
 
-### Graphical Target Selector
+### Target Selector
+
+User friendly UI
 
 ### Clone Boilerplate
 
@@ -34,10 +40,25 @@ Now supports both iOS syslog and Android logcat!
 
 ![Typing](resources/doc/typing.gif)
 
-### Bagbak and Objection intergration
+### Objection
 
-* [Bagbak](https://github.com/ChiChou/bagbak) is a tool for fetching decrypted apps from jailbroken iDevice
 * [Objection](https://github.com/sensepost/objection) Runtime Mobile Exploration
+
+### Javascript REPL shortcut
+
+Open and activate an REPL at the bottom. Use the "frida" button at the top of any active `js` / `typescript` document, it will send the code to the active REPL.
+
+### FlexDecrypt
+
+![FlexDecrypt](resources/doc/flexdecrypt.png)
+
+[FlexDecrypt](https://github.com/JohnCoates/flexdecrypt) seems to be the best app decryptor so far. It almost act like a static decryptor, without running the actual app. So you don't have to worry about jailbreak detection or abnormal crash. The only problem is that is not so user-friendly, so I intergrated it and even replaced my own tool
+
+For Android devices, **Open Shell** is simply a wrapper for `adb shell`. iOS requires libimobiledevice. This command will automatically launch `iproxy` at the background and then give you a shell.
+
+There's also a shortcut for copying SSH public key to jailbroken iDevice.
+
+All the SSH related commands takes port 22 as the default port. If you are on `chekra1n` jailbreak, please install OpenSSH on your device.
 
 ## Todo
 
@@ -47,11 +68,4 @@ Now supports both iOS syslog and Android logcat!
 
 ## Release Note:
 
-### v0.0.2 - 22 Jul, 2020
-
-* support logcat for Android
-* download `frida-gum.d.ts` from github
-
-### v0.0.1 - 19 Jul, 2020
-
-* first release
+Please refer to [CHANGELOG](CHANGELOG.md)
