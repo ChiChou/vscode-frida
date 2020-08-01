@@ -1,13 +1,12 @@
 import { Task, TaskDefinition, ShellExecution, tasks } from 'vscode';
-import { freePort, executable } from './utils';
+import { idle, executable } from './utils';
 
 let iproxy: Task | null;
 let iproxyPort: number;
 
-
-export async function run(uuid: string): Promise<number> {
+export async function ssh(uuid: string): Promise<number> {
   if (iproxy) { return iproxyPort; }
-  const port = await freePort();
+  const port = await idle();
   const defination: TaskDefinition = {
     label: 'iproxy',
     type: 'shell',

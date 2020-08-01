@@ -21,7 +21,7 @@ export function executable(cmd: string) {
   return cmd + (platform() === 'win32' ? '.exe' : '');
 }
 
-export function freePort(): Promise<number> {
+export function idle(): Promise<number> {
   return new Promise((resolve, reject) => {
     const server = net.createServer()
       .on('error', reject)

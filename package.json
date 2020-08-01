@@ -116,12 +116,12 @@
 			},
 			{
 				"command": "frida.external.shell",
-				"title": "Shell",
+				"title": "Open Shell",
 				"category": "SSH over USB"
 			},
 			{
 				"command": "frida.external.copyid",
-				"title": "ssh-copy-id",
+				"title": "Install SSH Public Key",
 				"category": "SSH over USB"
 			},
 			{

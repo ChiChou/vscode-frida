@@ -1,41 +1,30 @@
-import { window, Task, TaskDefinition, ShellExecution, tasks } from 'vscode';
+import { window, Task, ShellExecution, tasks } from 'vscode';
 import { DeviceItem, TargetItem } from "../providers/devices";
-import { devtype, platformize } from '../driver/frida';
-import { run as runIProxy } from '../iproxy';
-import { platform } from 'os';
+import { devtype } from '../driver/frida';
+import { ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
+import { join } from 'path';
 
 export async function copyid(node: TargetItem) {
-  if (platform() === 'win32') {
-    window.showErrorMessage('This command is not avaliable on Windows');
-    return;
-  }
-
   if (!(node instanceof DeviceItem)) {
     window.showErrorMessage('This command is only avaliable on context menu');
     return;
   }
 
   // todo: decorator
-  const deviceType = await devtype(node.data.id);
+const deviceType = await devtype(node.data.id);
   if (deviceType !== 'iOS') {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);
     return;
   }
 
-  const port = await runIProxy(node.data.id);
-  const defination: TaskDefinition = {
-    label: 'ssh-copy-id',
-    type: 'shell',
-  };
-
-  const args =[`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'];
-
+  const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
+  const args = [py, 'ssh-copy-id', node.data.id];
   const task = new Task(
-    defination,
+    { type: 'shell' },
     'Copy SSH pubkey',
     'frida extension',
-    new ShellExecution('ssh-copy-id', args)
+    new ShellExecution(executable('python3'), args)
   );
   tasks.executeTask(task);
 }
@@ -49,9 +38,9 @@ export async function shell(node: TargetItem) {
   const deviceType = await devtype(node.data.id);
   const name = `SSH: ${node.data.name}`;
   if (deviceType === 'iOS') {
-    const port = await runIProxy(node.data.id);
+    const port = await proxySSH(node.data.id);
     const shellPath = executable('ssh');
-    const shellArgs = [`-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'];
+    const shellArgs = ['-q', `-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'];
     window.createTerminal({
       name,
       shellArgs,
