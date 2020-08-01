@@ -240,11 +240,6 @@
 					"group": "1_frida_process@2"
 				},
 				{
-					"command": "frida.external.bagbak",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "3_frida_external@1"
-				},
-				{
 					"command": "frida.external.objection",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "3_frida_external@2"

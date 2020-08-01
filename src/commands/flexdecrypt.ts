@@ -8,7 +8,7 @@ import { promisify } from 'util';
 import { join, resolve } from 'path';
 import { tmpdir, homedir } from 'os';
 import { promises as fsp } from 'fs';
-import { window, commands, Uri, workspace } from 'vscode';
+import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH } from '../iproxy';
 import { platformize, devtype } from '../driver/frida';
@@ -129,27 +129,25 @@ class LLDB extends RemoteTool {
 class Decryptor extends RemoteTool {
   dependencies = ['zip', 'flexdecrypt'];
 
-  async go(dest: string): Promise<void> {
+  async go(dest: string, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
+    progress.report({ message: 'Starting iproxy' });
     await this.connect();
-
+    progress.report({ message: `Fetching the path of ${this.app}` });
     const bundle = await this.bundlePath();
+    progress.report({ message: `Creating bundle archive` });
     const cwd = (await this.exec('mktemp', '-d')).stdout.trim();
     const archive = `${cwd}/archive.zip`;
     await this.execInTerminal(...this.cmdSSH('zip', '-r', archive, bundle));
+    progress.report({ message: `Downloading bundle archive` });
     const local = await this.download(`${cwd}/archive.zip`);
+    progress.report({ message: 'Clean up device' });
     await this.execInTerminal(...this.cmdSSH('rm', archive));
 
+    progress.report({ message: 'Decrypting MachO executables' });
     {
       const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'decrypt.py');
       const [bin, args] = platformize('python3', [py, local, bundle, `${this.port}`, '-o', dest]);
       await this.execInTerminal(bin, args);
-    }
-
-    const choice = await window.showInformationMessage(
-      'FlexDecrypt successfully finished', 'Open File', 'Dismiss');
-
-    if (choice === 'Open File') {
-      commands.executeCommand('vscode.open', Uri.file(dest));
     }
   }
 
@@ -216,10 +214,23 @@ export async function decrypt(node: TargetItem): Promise<void> {
     .update('decryptOutput', resolve(join(destination.fsPath, '..')));
 
   const dec = new Decryptor(node.device.id, node.data.identifier);
-  try {
-    await dec.go(destination.fsPath);
-  } catch (e) {
-    window.showErrorMessage(e);
+  await window.withProgress({
+    location: ProgressLocation.Notification,
+    title: 'FlexDecrypt running',
+    cancellable: false
+  }, async (progress, token) => {
+    try {
+      await dec.go(destination.fsPath, progress);
+    } catch (e) {
+      window.showErrorMessage(e);
+      return;
+    }
+  });
+
+  const choice = await window.showInformationMessage(
+    'FlexDecrypt successfully finished', `Open .ipa`, 'Dismiss');
+  if (choice === 'Open .ipa') {
+    commands.executeCommand('vscode.open', Uri.file(destination.fsPath));
   }
 }
 
