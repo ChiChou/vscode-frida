@@ -29,6 +29,7 @@
 		"onCommand:frida.external.bagbak",
 		"onCommand:frida.external.objection",
 		"onCommand:frida.external.flexdecrypt",
+		"onCommand:frida.external.installflex",
 		"onCommand:frida.external.shell",
 		"onCommand:frida.external.copyid",
 		"onCommand:frida.boilerplate.agent",
@@ -122,6 +123,11 @@
 			{
 				"command": "frida.external.flexdecrypt",
 				"title": "FlexDecrypt",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.external.installflex",
+				"title": "Install FlexDecrypt",
 				"category": "Frida"
 			},
 			{
@@ -221,11 +227,12 @@
 				{
 					"command": "frida.syslog",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "frida_logger@1"
+					"group": "2_frida_logger@1"
 				},
 				{
 					"command": "frida.syslog",
-					"when": "view == fridaPs && viewItem =~ /^process\\|/"
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"group": "2_frida_logger@1"
 				},
 				{
 					"command": "frida.kill",
@@ -235,27 +242,32 @@
 				{
 					"command": "frida.external.bagbak",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "frida_external@3"
+					"group": "3_frida_external@1"
 				},
 				{
 					"command": "frida.external.objection",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "frida_external@4"
+					"group": "3_frida_external@2"
 				},
 				{
 					"command": "frida.external.flexdecrypt",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "frida_external@5"
+					"group": "3_frida_external@3"
 				},
 				{
 					"command": "frida.external.shell",
 					"when": "viewItem == 'device|usb'",
-					"group": "frida_external@6"
+					"group": "3_frida_external@4"
+				},
+				{
+					"command": "frida.external.installflex",
+					"when": "viewItem == 'device|usb'",
+					"group": "4_frida_external@1"
 				},
 				{
 					"command": "frida.external.copyid",
 					"when": "viewItem == 'device|usb'",
-					"group": "frida_external@7"
+					"group": "4_frida_external@2"
 				}
 			]
 		}

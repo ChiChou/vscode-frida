@@ -9,9 +9,9 @@ import { join, resolve } from 'path';
 import { tmpdir, homedir } from 'os';
 import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace } from 'vscode';
-import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
+import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH } from '../iproxy';
-import { platformize } from '../driver/frida';
+import { platformize, devtype } from '../driver/frida';
 import { executable } from '../utils';
 
 
@@ -146,14 +146,10 @@ class Decryptor extends RemoteTool {
     }
 
     const choice = await window.showInformationMessage(
-      'FlexDecrypt successfully finished', 'Open File', 'Open Folder in Terminal', 'Dismiss');
+      'FlexDecrypt successfully finished', 'Open File', 'Dismiss');
 
     if (choice === 'Open File') {
       commands.executeCommand('vscode.open', Uri.file(dest));
-    } else if (choice === 'Open Folder in Terminal') {
-      window.createTerminal({
-        cwd: join(dest, '..')
-      });
     }
   }
 
@@ -168,6 +164,36 @@ class Decryptor extends RemoteTool {
       throw new Error(`Error: App not found or unable to connect to lockdown service. \nReason:\n${e}`);
     }
   }
+}
+
+export async function install(node: TargetItem): Promise<void> {
+  if (!(node instanceof DeviceItem)) {
+    // todo: select from device
+    window.showErrorMessage('This command should be used in context menu');
+    return;
+  }
+
+  const type = await devtype(node.data.id);
+  if (type !== 'iOS') {
+    window.showErrorMessage(`Unsupported device type: ${type}`);
+    return;
+  }
+
+  const port = await proxySSH(node.data.id);
+  const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'get-flex.py');
+  const [shellPath, shellArgs] = platformize('python3', [py, port.toString()]);
+  const t = window.createTerminal({
+    name: 'FlexDecrypt installer',
+    shellPath,
+    shellArgs,
+  });
+  t.show();
+  const disposable = window.onDidCloseTerminal(term => {
+    if (term === t) {
+      window.showInformationMessage(`FlexDecrypt installed on ${node.data.name}`, 'Dismiss');
+      disposable.dispose();
+    }
+  });
 }
 
 export async function decrypt(node: TargetItem): Promise<void> {
