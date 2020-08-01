@@ -3,6 +3,9 @@
 import subprocess
 import urllib.request
 import json
+import shutil
+import tempfile
+from pathlib import Path
 
 
 class Downloader(object):
@@ -29,14 +32,31 @@ class Downloader(object):
         with urllib.request.urlopen('https://api.github.com/repos/frida/frida/releases/latest') as response:
             info = json.loads(response.read())
 
-        url = next(asset['browser_download_url'] for asset in info['assets'] if asset['name'].endswith(suffix))
-        print(url)
+        for asset in info['assets']:
+            name = asset['name']
+            if name.endswith(suffix):
+                url = asset['browser_download_url']
+                break
+        else:
+            raise RuntimeError('Unable to find frida-server for %s' % arch)
+
+        print('download frida-server')
+        tmp = Path(tempfile.gettempdir()) / name
+        with urllib.request.urlopen(url) as response, tmp.open('wb') as fp:
+            shutil.copyfileobj(response, fp)
+
+        self.adb('push', tmp, '/data/local/tmp/frida-server')
+
+    def start(self):
+        self.adb('shell', '/data/local/tmp/frida-server')
+
 
 if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--uuid', help='uuid of the device', required=False)
+    parser.add_argument(
+        '-i', '--uuid', help='uuid of the device', required=False)
     args = parser.parse_args()
 
     d = Downloader(args.uuid)
