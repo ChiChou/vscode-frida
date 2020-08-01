@@ -1,9 +1,13 @@
 import { window, Task, ShellExecution, tasks } from 'vscode';
-import { DeviceItem, TargetItem } from "../providers/devices";
+import { join } from 'path';
+import { execFile } from 'child_process';
+import { promisify } from 'util';
+
+import { DeviceItem, TargetItem } from '../providers/devices';
 import { devtype } from '../driver/frida';
 import { ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
-import { join } from 'path';
+
 
 export async function copyid(node: TargetItem) {
   if (!(node instanceof DeviceItem)) {
@@ -12,7 +16,7 @@ export async function copyid(node: TargetItem) {
   }
 
   // todo: decorator
-const deviceType = await devtype(node.data.id);
+  const deviceType = await devtype(node.data.id);
   if (deviceType !== 'iOS') {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);
     return;
@@ -20,13 +24,10 @@ const deviceType = await devtype(node.data.id);
 
   const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
   const args = [py, 'ssh-copy-id', node.data.id];
-  const task = new Task(
-    { type: 'shell' },
-    'Copy SSH pubkey',
-    'frida extension',
-    new ShellExecution(executable('python3'), args)
-  );
-  tasks.executeTask(task);
+  const exec = promisify(execFile);
+  await exec(executable('python3'), args);
+
+  window.showInformationMessage(`Succesfully installed SSH public key on "${node.data.name}"`);
 }
 
 export async function shell(node: TargetItem) {
