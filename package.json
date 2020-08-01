@@ -38,6 +38,16 @@
 	],
 	"main": "./out/extension.js",
 	"contributes": {
+		"configuration": {
+      "title": "Frida",
+      "properties": {
+        "frida.decryptOutput": {
+          "type": ["string", "null"],
+          "default": null,
+          "description": "Preferred directory to save ipa"
+        }
+      }
+    },
 		"commands": [
 			{
 				"command": "frida.ps.refresh",

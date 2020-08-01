@@ -7,6 +7,9 @@ from pathlib import Path
 from tempfile import NamedTemporaryFile
 
 
+from base import BaseTool
+
+
 FAT_MAGIC = 0xcafebabe
 FAT_CIGAM = 0xbebafeca
 MH_MAGIC = 0xfeedface
@@ -14,17 +17,14 @@ MH_CIGAM = 0xcefaedfe
 MH_MAGIC_64 = 0xfeedfacf
 MH_CIGAM_64 = 0xcffaedfe
 
-IGNORE = ['-oStrictHostKeyChecking=no', '-oUserKnownHostsFile=/dev/null', '-q']
 
-
-class Repack(object):
+class Repack(BaseTool):
     def __init__(self, src: Path, dst: Path, base: Path, port: int, host='localhost', user='root'):
+        super().__init__(port, host, user)
+
         self.src = src
         self.dst = dst
         self.base = base
-        self.host = host
-        self.user = user
-        self.port = port
 
         self.zin: zipfile.ZipFile = None
         self.zout: zipfile.ZipFile = None
@@ -36,23 +36,15 @@ class Repack(object):
                 self.zin, self.zout = zin, zout
                 self.handle_entry(info)
 
-    def ssh(self, *args):
-        return ['ssh'] + IGNORE + ['-p%d' % self.port, '%s@%s' % (self.user, self.host)] + list(args)
-
-    def scp(self, remote, local, direction='down'):
-        pair = ['%s@%s:%s' % (self.user, self.host, remote), local]
-        if direction == 'up':
-            pair = pair[::-1]
-        return ['scp'] + IGNORE + ['-P%d' % self.port] + pair
-
     def handle_macho(self, info: zipfile.ZipInfo, new_info: zipfile.ZipInfo):
         abspath = '/' + info.filename
         with NamedTemporaryFile() as tmpf:
             tmp = tmpf.name
 
-        remote_tmp = subprocess.check_output(self.ssh('mktemp')).decode()
+        remote_tmp = subprocess.check_output(self.ssh('mktemp')).decode().strip()
+        escaped = '"' + abspath.replace('"', '\\"') + '"'
         subprocess.call(
-            self.ssh('/usr/bin/flexdecrypt', abspath, '--output', remote_tmp))
+            self.ssh('/usr/bin/flexdecrypt', escaped, '--output', remote_tmp))
         subprocess.call(self.scp(remote_tmp, tmp))
         subprocess.call(self.ssh('rm', remote_tmp))
         with open(tmp, 'rb') as fp:
@@ -61,7 +53,8 @@ class Repack(object):
 
     def handle_entry(self, info: zipfile.ZipInfo):
         abspath = '/' + info.filename
-        new_file = Path('Payload') / Path(abspath).relative_to(self.base.parent)
+        new_file = Path('Payload') / \
+            Path(abspath).relative_to(self.base.parent)
         file_mod = info.external_attr >> 16
         new_info = deepcopy(info)
         new_info.filename = Path.as_posix(new_file)
@@ -85,11 +78,11 @@ class Repack(object):
         self.zout.writestr(new_info, self.zin.read(info))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('archive')
-    parser.add_argument('app')  # /Applications/MobileTimer.app
+    parser.add_argument('app')
     parser.add_argument('port', type=int)
 
     parser.add_argument('-o', '--output', dest='output', action='store')
