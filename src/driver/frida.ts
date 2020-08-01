@@ -1,15 +1,13 @@
 import { join } from 'path';
 import { execFile, spawn } from 'child_process';
 import { Device, App, Process } from '../types';
+import { logger } from '../logger';
 
-import * as vscode from 'vscode';
 import * as os from 'os';
 
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
-
-const logger = vscode.window.createOutputChannel("Frida Python Driver");
 
 export function platformize(tool: string, args: string[]): [string, string[]] {
   let bin = tool;
