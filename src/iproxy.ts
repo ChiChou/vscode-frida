@@ -1,43 +1,27 @@
-import { Task, TaskDefinition, ShellExecution, tasks } from 'vscode';
+import { spawn, ChildProcess } from 'child_process';
 import { idle, executable } from './utils';
+import { logger }from './logger';
+import { createInterface } from 'readline';
 
-let iproxy: Task | null;
-let iproxyPort: number;
+let thePort: number;
+let singleton: ChildProcess | null = null;
 
 export async function ssh(uuid: string): Promise<number> {
-  if (iproxy) { return iproxyPort; }
+  if (singleton) { return thePort; }
+
   const port = await idle();
-  const defination: TaskDefinition = {
-    label: 'iproxy',
-    type: 'shell',
-  };
+  singleton = spawn(executable('iproxy'), [port.toString(), '22', uuid]);
 
-  const bin = executable('iproxy');
-  const task = new Task(defination, bin, 'frida extension',
-    new ShellExecution('iproxy', [port.toString(), '22', uuid]));
-  task.isBackground = true;
-  tasks.executeTask(task);
+  if (singleton.stderr) {
+    const rl = createInterface({ input: singleton.stderr });
+    rl.on('line', (line: string) => logger.appendLine(`[iproxy] ${line}`));
+  }
 
-  await new Promise(resolve => {
-    const handler = tasks.onDidStartTaskProcess(e => {
-      if (e.execution.task === task) {
-        resolve();
-        handler.dispose();
-      }
-    });
+  singleton.on('close', () => {
+    logger.appendLine('iproxy is unexpectly terminated');
+    thePort = -1;
+    singleton = null;
   });
 
-  iproxy = task;
-  iproxyPort = port;
-
-  // no, this ain't the task port you want
-  const disposable = tasks.onDidEndTask(e => {
-    if (e.execution.task === iproxy) {
-      iproxy = null;
-      iproxyPort = -1;
-      disposable.dispose();
-    }
-  });
-
-  return port;
+  return (thePort = port);
 }
