@@ -11,6 +11,7 @@ def main(args):
     from backend import core, rpc, syslog
     from backend.file import upload, download
     from backend.fs import FileSystem
+    from backend.ios.copyid import install
 
     if args.action == 'devices':
         return core.devices()
@@ -27,6 +28,9 @@ def main(args):
 
     if args.action == 'type':
         return core.device_type(device)
+    
+    if args.action == 'ssh-copy-id':
+        return install(device)
 
     if args.action == 'port':
         return core.find_port(device)
@@ -84,6 +88,7 @@ if __name__ == '__main__':
     subparsers.add_parser('ps', parents=[requires_device])
     subparsers.add_parser('port', parents=[requires_device])
     subparsers.add_parser('type', parents=[requires_device])
+    subparsers.add_parser('ssh-copy-id', parents=[requires_device])
 
     rpc_parser = subparsers.add_parser('rpc', parents=[requires_app])
     rpc_parser.add_argument('method')
