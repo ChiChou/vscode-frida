@@ -8,23 +8,23 @@ import { AppItem } from "../providers/devices";
 
 export async function dump(target: AppItem) {
   if (!target) {
-    // todo: select from list
+    vscode.window.showErrorMessage('This command is only avaliable on context menu.');
     return;
   }
 
   if (typeof await lookpath('bagbak') === 'undefined') {
     const choice = await vscode.window.showWarningMessage('bagbak is not installed. Would you like to install it now?', 'Yes', 'No');
     if (choice === 'Yes') {
-      const task = new vscode.Task(
-        { type: 'shell' },
-        vscode.TaskScope.Workspace,
-        'install',
-        'npm',
-        new vscode.ShellExecution('npm', ['install', '-g', 'bagbak']));
-      await vscode.tasks.executeTask(task);
-      await new Promise((resolve) => {
-        const disposable = vscode.tasks.onDidEndTask(t => {
-          if (t.execution.task === task) {
+      const [shellPath, shellArgs] = platformize('npm', ['install', '-g', 'bagbak']);
+      const term = vscode.window.createTerminal({
+        name: 'npm install bagbak',
+        shellPath,
+        shellArgs,
+      });
+
+      await new Promise(resolve => {
+        const disposable = vscode.window.onDidCloseTerminal(t => {
+          if (t === term) {
             resolve();
             disposable.dispose();
           }
