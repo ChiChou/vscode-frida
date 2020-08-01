@@ -8,7 +8,7 @@
 	},
 	"displayName": "frida Workbench",
 	"description": "Unofficial frida workbench for VSCode",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"engines": {
 		"vscode": "^1.41.0"
 	},
@@ -40,15 +40,18 @@
 	"main": "./out/extension.js",
 	"contributes": {
 		"configuration": {
-      "title": "Frida",
-      "properties": {
-        "frida.decryptOutput": {
-          "type": ["string", "null"],
-          "default": null,
-          "description": "Preferred directory to save ipa"
-        }
-      }
-    },
+			"title": "Frida",
+			"properties": {
+				"frida.decryptOutput": {
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"description": "Preferred directory to save ipa"
+				}
+			}
+		},
 		"commands": [
 			{
 				"command": "frida.ps.refresh",
