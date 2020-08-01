@@ -93,12 +93,14 @@ async function gitClone(template: string) {
 }
 
 function npmInstall(cwd: string) {
-  const [bin, args] = platformize('npm', ['install']);
-  const task = new vscode.Task({ type: 'shell' }, bin, 'npm install',
-    new vscode.ShellExecution(bin, args, {
-      cwd
-    }));
-  vscode.tasks.executeTask(task);
+  const [shellPath, shellArgs] = platformize('npm', ['install']);
+  const name = `npm install on ${cwd}`;
+  vscode.window.createTerminal({
+    cwd,
+    name,
+    shellPath,
+    shellArgs
+  }).show();
 }
 
 async function openFile(root: vscode.Uri) {
