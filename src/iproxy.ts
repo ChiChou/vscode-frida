@@ -25,3 +25,11 @@ export async function ssh(uuid: string): Promise<number> {
 
   return (thePort = port);
 }
+
+export function cleanup() {
+  if (singleton) {
+    singleton.kill();
+    singleton = null;
+    thePort = -1;
+  }
+}
