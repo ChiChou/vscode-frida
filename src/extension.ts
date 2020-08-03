@@ -16,7 +16,7 @@ import * as typing from './commands/typing';
 import * as objection from './commands/objection';
 import * as flex from './commands/flexdecrypt';
 import * as boilerplate from './commands/boilerplate';
-import { cleanup } from './iproxy';
+import * as iproxy from './iproxy';
 
 export function activate(context: vscode.ExtensionContext) {
 	const fs = new FileSystemProvider();
@@ -44,6 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.bagbak', bagbak.dump));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', flex.decrypt));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug)); // todo: move to another module
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installflex', flex.install));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));
@@ -56,5 +57,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-	cleanup();
+	iproxy.cleanup();
+	flex.cleanup();
 }

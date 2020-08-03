@@ -29,6 +29,7 @@
 		"onCommand:frida.external.bagbak",
 		"onCommand:frida.external.objection",
 		"onCommand:frida.external.flexdecrypt",
+		"onCommand:frida.external.lldb",
 		"onCommand:frida.external.installflex",
 		"onCommand:frida.external.shell",
 		"onCommand:frida.external.copyid",
@@ -121,6 +122,11 @@
 			{
 				"command": "frida.external.objection",
 				"title": "Objection",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.external.lldb",
+				"title": "Debug with lldb",
 				"category": "Frida"
 			},
 			{
@@ -253,9 +259,19 @@
 					"group": "3_frida_external@3"
 				},
 				{
+					"command": "frida.external.lldb",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "3_frida_external@4"
+				},
+				{
+					"command": "frida.external.lldb",
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"group": "3_frida_external@5"
+				},
+				{
 					"command": "frida.external.shell",
 					"when": "viewItem == 'device|usb'",
-					"group": "3_frida_external@4"
+					"group": "3_frida_external@6"
 				},
 				{
 					"command": "frida.external.installflex",

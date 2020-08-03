@@ -3,11 +3,10 @@ import { createInterface } from 'readline';
 import { spawn, ChildProcess } from 'child_process';
 import { logger } from './logger';
 import { idle, executable } from './utils';
-import { SIGALRM } from 'constants';
 
 let singleton: IProxy | null = null;
 
-class IProxy extends EventEmitter {
+export class IProxy extends EventEmitter {
   p?: ChildProcess;
   local = 0;
   ready = false;

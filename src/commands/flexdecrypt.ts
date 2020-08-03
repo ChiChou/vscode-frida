@@ -10,7 +10,7 @@ import { tmpdir, homedir } from 'os';
 import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
-import { ssh as proxySSH } from '../iproxy';
+import { ssh as proxySSH, IProxy } from '../iproxy';
 import { platformize, devtype, port, location } from '../driver/frida';
 import { executable } from '../utils';
 
@@ -25,7 +25,7 @@ class RemoteTool {
   port?: number;
   dependencies: string[] = [];
 
-  constructor(public id: string, public app: string) { }
+  constructor(public id: string) { }
 
   async connect() {
     this.port = await proxySSH(this.id);
@@ -107,57 +107,99 @@ class RemoteTool {
 
 const LLDB_PATH = '/usr/bin/debugserver';
 
+function dbg() {
+  return function (target: LLDB, propertyKey: string, descriptor: PropertyDescriptor) {
+    const original = descriptor.value;
+    descriptor.value = async function(this: LLDB, ...args: any[]) {
+      await this.connect();
+      await this.bridge();
+      const server = await original.call(this, ...args) as cp.ChildProcess;
+
+      // todo: wait until "Listening to port"
+      // server.stdout?.on('data', (chunk) => console.log('stdout', chunk));
+      // server.stderr?.on('data', (chunk) => console.log('stderr', chunk));
+
+      await new Promise((resolve, reject) => {
+        server.on('exit', (code) => {
+          if (code !== 0) {
+            reject(new Error(`debugserver exited with ${code}`));
+          }
+          this.teardown();
+        });
+        setTimeout(resolve, 1000);
+      });
+
+      this.debugServer = server;
+      await this.execInTerminal('lldb', ['--one-line', `process connect connect://127.1:${this.serverPort}`, '--one-line', 'bt']);
+    };
+  };
+}
+
 class LLDB extends RemoteTool {
   dependencies = [LLDB_PATH, 'ldid'];
-  iproxy?: cp.ChildProcess;
+  iproxy?: IProxy;
   serverPort?: number;
+  remotePort?: number;
   debugProxy?: cp.ChildProcess;
+  debugServer?: cp.ChildProcess;
 
   async bridge(): Promise<void> {
-    this.serverPort = await port(this.id);
-    this.debugProxy = cp.spawn(executable('iproxy'), []);
+    this.remotePort = await port(this.id);
+    this.iproxy = new IProxy(this.remotePort, this.id);
+    this.serverPort = await this.iproxy.start();
   }
 
-  async spawn(bundle: string): Promise<void> {
-    const path = await location(this.id, this.app);
-    this.ssh(LLDB_PATH, '-x', 'backboard', `127.1:${this.serverPort}`, path);
+  @dbg()
+  async spawn(bundle: string): Promise<cp.ChildProcess> {
+    const path = await location(this.id, bundle);
+    const [bin, arg] = this.ssh(LLDB_PATH, '-x', 'backboard', `127.1:${this.remotePort}`, path);
+    return cp.spawn(bin, arg);
   }
 
-  async attach(target: number | string): Promise<void> {
-    this.ssh(LLDB_PATH, `127.1:${this.serverPort}`, '-a', target.toString());
-  }
-
-  async go(): Promise<void> {
-    await this.bridge();
-    this.execInTerminal('lldb', ['--one-line', `process connect connect://127.1:${this.serverPort}`]);
+  @dbg()
+  async attach(target: number | string): Promise<cp.ChildProcess> {
+    const [bin, arg] = this.ssh(LLDB_PATH, `127.1:${this.remotePort}`, '-a', target.toString());
+    return cp.spawn(bin, arg);
   }
 
   async install() {
     // todo: use frida to resign binary
     const TMP_XML = '/tmp/ent.xml';
-    const py = join(__dirname, '..', '..', 'backend', 'driver.py');
-    await this.execInTerminal(...this.scp('ent.xml', TMP_XML, 'up'));
+    const xml = join(__dirname, '..', '..', 'resources', 'ent.xml');
+    await this.execInTerminal(...this.scp(xml, TMP_XML, 'up'));
     await this.exec('cp', '/Developer/usr/bin/debugserver', LLDB_PATH);
-    await this.exec('ldid', '-S/tmp/ent.xml', LLDB_PATH);
+    await this.exec('ldid', `-S${TMP_XML}`, LLDB_PATH);
+    await this.exec('rm', TMP_XML);
   }
 
   async teardown() {
-    
+    if (this.iproxy) {
+      this.iproxy.stop();
+      this.iproxy = undefined;
+    }
+
+    if (this.debugServer) {
+      this.debugServer.kill();
+      this.remotePort = undefined;
+      this.debugProxy = undefined;
+    }
   }
 }
+
+type Bar = Progress<{ message?: string; increment?: number }>;
 
 class Decryptor extends RemoteTool {
   dependencies = ['zip', 'flexdecrypt'];
 
-  async go(dest: string, progress: Progress<{ message?: string; increment?: number }>): Promise<void> {
+  async go(bundle: string, dest: string, progress: Bar): Promise<void> {
     progress.report({ message: 'Starting iproxy' });
     await this.connect();
-    progress.report({ message: `Fetching the path of ${this.app}` });
-    const bundle = await location(this.id, this.app);
+    progress.report({ message: `Fetching the path of ${bundle}` });
+    const path = await location(this.id, bundle);
     progress.report({ message: `Creating bundle archive` });
     const cwd = (await this.exec('mktemp', '-d')).stdout.trim();
     const archive = `${cwd}/archive.zip`;
-    await this.execInTerminal(...this.ssh('zip', '-r', archive, bundle));
+    await this.execInTerminal(...this.ssh('zip', '-r', archive, path));
     progress.report({ message: `Downloading bundle archive` });
     const local = await this.download(`${cwd}/archive.zip`);
     progress.report({ message: 'Clean up device' });
@@ -166,7 +208,7 @@ class Decryptor extends RemoteTool {
     progress.report({ message: 'Decrypting MachO executables' });
     {
       const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'decrypt.py');
-      const [bin, args] = platformize('python3', [py, local, bundle, `${this.port}`, '-o', dest]);
+      const [bin, args] = platformize('python3', [py, local, path, `${this.port}`, '-o', dest]);
       await this.execInTerminal(bin, args);
     }
   }
@@ -221,12 +263,12 @@ export async function decrypt(node: TargetItem): Promise<void> {
   workspace.getConfiguration('frida')
     .update('decryptOutput', resolve(join(destination.fsPath, '..')));
 
-  const dec = new Decryptor(node.device.id, node.data.identifier);
+  const dec = new Decryptor(node.device.id);
   await window.withProgress({
     location: ProgressLocation.Notification,
     title: 'FlexDecrypt running',
     cancellable: false
-  }, (progress) => dec.go(destination.fsPath, progress));
+  }, (progress) => dec.go(node.data.identifier, destination.fsPath, progress));
 
   const choice = await window.showInformationMessage(
     'FlexDecrypt successfully finished', `Open .ipa`, 'Dismiss');
@@ -235,18 +277,32 @@ export async function decrypt(node: TargetItem): Promise<void> {
   }
 }
 
+const lldbInstances = new Set<LLDB>();
+
 export async function debug(node: TargetItem): Promise<void> {
-  // const bundle = await location(this.id, this.app);
   if (node instanceof AppItem) {
+    const lldb = new LLDB(node.device.id);
+    lldbInstances.add(lldb);
     if (node.data.pid) {
-      // attach
+      lldb.attach(node.data.pid);
     } else {
-      // springboard spawn
+      lldb.spawn(node.data.identifier);
     }
+    lldb.teardown();
   } else if (node instanceof ProcessItem) {
-    // node.data.pid
+    if (node.device.id === 'local') {
+      throw new Error('Not implemented');
+    }
+    const lldb = new LLDB(node.device.id);
+    lldbInstances.add(lldb);
+    lldb.attach(node.data.pid);
   } else {
     window.showErrorMessage('This command should be used in context menu');
   }
+}
 
+export function cleanup() {
+  for (const lldb of lldbInstances) {
+    lldb.teardown();
+  }
 }
