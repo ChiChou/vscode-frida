@@ -10,16 +10,20 @@ import { executable } from '../utils';
 
 
 async function gitClone(template: string) {
-  let { rootPath } = vscode.workspace;
-  if (!rootPath) {
+  let root: vscode.Uri;
+
+  {
+    const { workspaceFolders } = vscode.workspace;
+    if (workspaceFolders?.length) { root = workspaceFolders[0].uri; }
+  
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectMany: false,
       openLabel: 'Clone Here'
     });
-
-    if (fileUri && fileUri.length === 1) {
-      rootPath = fileUri[0].fsPath;
+  
+    if (fileUri?.length) {
+      root = fileUri[0];
     } else {
       vscode.window.showInformationMessage('You just cancelled the operation.');
       return;
@@ -28,25 +32,24 @@ async function gitClone(template: string) {
 
   const name = `frida-${template}-example`;
   const url = `https://github.com/oleavr/${name}.git`;
-  const dest = path.join(rootPath, name);
-  const uri = vscode.Uri.file(dest);
+  const dest = vscode.Uri.joinPath(root, name);
 
   // check for existence
   let exists = false;
   try {
-    exists = Boolean(await vscode.workspace.fs.stat(uri));
+    exists = Boolean(await vscode.workspace.fs.stat(dest));
   } catch (_) {
 
   }
 
   if (exists) {
-    const choice = await vscode.window.showWarningMessage(`Destination ${uri.fsPath} already exists`, 'Open File', 'Dismiss');
-    if (choice === 'Open File') { openFile(uri); }
+    const choice = await vscode.window.showWarningMessage(`Destination ${dest} already exists`, 'Open File', 'Dismiss');
+    if (choice === 'Open File') { openFile(dest); }
     return;
   }
 
   const bin = executable('git');
-  const args = ['clone', url, '--progress', dest];
+  const args = ['clone', url, '--progress', dest.fsPath];
   const proc = cp.execFile(bin, args, { cwd: vscode.workspace.rootPath });
   vscode.window.withProgress({
     location: vscode.ProgressLocation.Notification,
@@ -72,7 +75,7 @@ async function gitClone(template: string) {
         .on('exit', async (code, signal) => {
           if (code !== 0) {
             if (signal === 'SIGINT') {
-              vscode.workspace.fs.delete(uri, { recursive: true });
+              vscode.workspace.fs.delete(dest, { recursive: true });
             } else {
               vscode.window.showErrorMessage(`Failed to clone example. Git exited with code ${code}`);
             }
@@ -80,8 +83,8 @@ async function gitClone(template: string) {
             return;
           }
 
-          openFile(uri).catch(_ => { });
-          npmInstall(dest);
+          openFile(dest).catch(_ => { });
+          npmInstall(dest.fsPath);
           resolve();
         })
         .on('error', (err) => {
@@ -104,12 +107,12 @@ function npmInstall(cwd: string) {
 }
 
 async function openFile(root: vscode.Uri) {
-  const meta = path.join(root.fsPath, 'package.json');
-  const content = await vscode.workspace.fs.readFile(vscode.Uri.file(meta));
+  const meta = vscode.Uri.joinPath(root, 'package.json');
+  const content = await vscode.workspace.fs.readFile(meta);
   const info = JSON.parse(new TextDecoder('utf-8').decode(content));
   const { main } = info;
-  const mainSourceUri = vscode.Uri.file(path.join(root.fsPath, main));
-  vscode.commands.executeCommand('vscode.open', mainSourceUri);
+  const mainSource = vscode.Uri.joinPath(root, main);
+  vscode.commands.executeCommand('vscode.open', mainSource);
 }
 
 export function agent() {
