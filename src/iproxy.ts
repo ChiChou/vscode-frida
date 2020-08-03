@@ -1,35 +1,64 @@
-import { spawn, ChildProcess } from 'child_process';
-import { idle, executable } from './utils';
-import { logger }from './logger';
+import { EventEmitter } from 'events';
 import { createInterface } from 'readline';
+import { spawn, ChildProcess } from 'child_process';
+import { logger } from './logger';
+import { idle, executable } from './utils';
+import { SIGALRM } from 'constants';
 
-let thePort: number;
-let singleton: ChildProcess | null = null;
+let singleton: IProxy | null = null;
 
-export async function ssh(uuid: string): Promise<number> {
-  if (singleton) { return thePort; }
+class IProxy extends EventEmitter {
+  p?: ChildProcess;
+  local = 0;
+  ready = false;
 
-  const port = await idle();
-  singleton = spawn(executable('iproxy'), [port.toString(), '22', uuid]);
+  constructor(public remote: number, public uuid: string) { super(); }
 
-  if (singleton.stderr) {
-    const rl = createInterface({ input: singleton.stderr });
-    rl.on('line', (line: string) => logger.appendLine(`[iproxy] ${line}`));
+  async start() {
+    this.local = await idle();
+    this.p = spawn(executable('iproxy'), [
+      this.local.toString(), this.remote.toString(), this.uuid]);
+
+    if (this.p.stderr) {
+      const rl = createInterface({ input: this.p.stderr });
+      rl.on('line', (line: string) => logger.appendLine(`[iproxy ${this.remote}] ${line}`));
+    }
+
+    this.p.on('close', () => {
+      logger.appendLine('iproxy is unexpectly terminated');
+      this.emit('close');
+    });
+
+    this.ready = true;
+    this.emit('ready');
+    
+    return this.local;
   }
 
-  singleton.on('close', () => {
-    logger.appendLine('iproxy is unexpectly terminated');
-    thePort = -1;
-    singleton = null;
-  });
+  stop() {
+    if (this.p) { this.p.kill(); }
+    this.ready = false;
+  }
+}
 
-  return (thePort = port);
+export async function ssh(uuid: string): Promise<number> {
+  if (singleton) {
+    if (singleton.ready) { return singleton.local; }
+    return new Promise((resolve, reject) => {
+      singleton!
+        .on('ready', () => resolve(singleton!.local))
+        .on('close', () => reject(new Error('iproxy abnormally terminated')));
+    });
+  }
+
+  singleton = new IProxy(22, uuid);
+  singleton.on('close', () => { singleton = null; });
+  return singleton.start();
 }
 
 export function cleanup() {
   if (singleton) {
-    singleton.kill();
+    singleton.stop();
     singleton = null;
-    thePort = -1;
   }
 }

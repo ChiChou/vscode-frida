@@ -49,20 +49,3 @@ def apps():
             elif response['Status'] == 'Complete':
                 break
 
-def main(bundle):
-    try:
-        root = next(app['Path'] for app in apps() if app['CFBundleIdentifier'] == bundle)
-        print(root)
-    except StopIteration:
-        import sys
-        sys.stderr.write('%s not found' % bundle)
-        sys.exit(255)
-
-
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser()
-    parser.add_argument('bundle')
-    opt = parser.parse_args()
-
-    main(opt.bundle)

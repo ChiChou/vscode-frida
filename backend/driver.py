@@ -12,6 +12,7 @@ def main(args):
     from backend.file import upload, download
     from backend.fs import FileSystem
     from backend.ios.copyid import install
+    from backend.ios.installer import apps
 
     if args.action == 'devices':
         return core.devices()
@@ -28,12 +29,15 @@ def main(args):
 
     if args.action == 'type':
         return core.device_type(device)
-    
+
     if args.action == 'ssh-copy-id':
         return install(device)
 
     if args.action == 'port':
         return core.find_port(device)
+
+    if args.action == 'location':
+        return next(app['Path'] for app in apps() if app['CFBundleIdentifier'] == args.bundle)
 
     target = args.pid or args.name
     agent = rpc.ProcessAgent(device, target) if target else \
@@ -89,6 +93,8 @@ if __name__ == '__main__':
     subparsers.add_parser('port', parents=[requires_device])
     subparsers.add_parser('type', parents=[requires_device])
     subparsers.add_parser('ssh-copy-id', parents=[requires_device])
+    location_parser = subparsers.add_parser('location', parents=[requires_device])
+    location_parser.add_argument('bundle')
 
     rpc_parser = subparsers.add_parser('rpc', parents=[requires_app])
     rpc_parser.add_argument('method')
@@ -99,7 +105,8 @@ if __name__ == '__main__':
     subparsers.add_parser('upload', parents=[requires_app, requires_path])
 
     fs_parser = subparsers.add_parser('fs', parents=[requires_app])
-    fs_parser.add_argument('method', choices=['cp', 'mkdir', 'rm', 'ls', 'mv', 'stat'])
+    fs_parser.add_argument(
+        'method', choices=['cp', 'mkdir', 'rm', 'ls', 'mv', 'stat'])
     fs_parser.add_argument('args', metavar='N', nargs='*', default=[])
 
     args = parser.parse_args()

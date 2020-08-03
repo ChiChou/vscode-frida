@@ -55,6 +55,10 @@ export function port(id: string) {
   return exec('port', id) as Promise<number>;
 }
 
+export function location(id: string, bundle: string) {
+  return exec('location', id, bundle);
+}
+
 export async function launch(device: string, bundle: string): Promise<Number> {
   const params = ['-f', bundle, '--device', device, bundle, '--no-pause', '-q', '-e', 'Process.id'];
   const [bin, args] = platformize('frida', params);
