@@ -234,6 +234,16 @@
 					"group": "1_frida_process@1"
 				},
 				{
+					"command": "frida.external.lldb",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "1_frida_process@2"
+				},
+				{
+					"command": "frida.external.lldb",
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"group": "1_frida_process@2"
+				},
+				{
 					"command": "frida.syslog",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "2_frida_logger@1"
@@ -257,16 +267,6 @@
 					"command": "frida.external.flexdecrypt",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "3_frida_external@3"
-				},
-				{
-					"command": "frida.external.lldb",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "3_frida_external@4"
-				},
-				{
-					"command": "frida.external.lldb",
-					"when": "view == fridaPs && viewItem =~ /^process\\|/",
-					"group": "3_frida_external@5"
 				},
 				{
 					"command": "frida.external.shell",

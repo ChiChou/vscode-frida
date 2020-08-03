@@ -130,7 +130,14 @@ function dbg() {
       });
 
       this.debugServer = server;
-      await this.execInTerminal('lldb', ['--one-line', `process connect connect://127.1:${this.serverPort}`, '--one-line', 'bt']);
+      await this.execInTerminal('lldb', [
+        '--one-line',
+        `process connect connect://127.1:${this.serverPort}`,
+        '--one-line',
+        'bt',
+        '--one-line',
+        'reg read'
+      ]);
     };
   };
 }
