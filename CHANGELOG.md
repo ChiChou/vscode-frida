@@ -1,8 +1,12 @@
 # Change Log
 
+### v0.0.4 - 3 Aug, 2020
+
+* Add experimental lldb shortcut
+
 ### v0.0.3 - 2 Aug, 2020
 
-New
+Added
 
 * Shell for both iOS (requires libimobiledevice) and Androd (requires adb)
 * Install public SSH key to iOS (like `ssh-copy-id`, but also supports Windows)
