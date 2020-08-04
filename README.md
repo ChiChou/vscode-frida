@@ -52,7 +52,11 @@ Open and activate an REPL at the bottom. Use the "frida" button at the top of an
 
 ![FlexDecrypt](resources/doc/flexdecrypt.png)
 
-[FlexDecrypt](https://github.com/JohnCoates/flexdecrypt) seems to be the best app decryptor so far. It almost act like a static decryptor, without running the actual app. So you don't have to worry about jailbreak detection or abnormal crash. The only problem is that is not so user-friendly, so I intergrated it and even replaced my own tool
+[FlexDecrypt](https://github.com/JohnCoates/flexdecrypt) seems to be the best app decryptor so far. It almost act like a static decryptor, without running the actual app. So you don't have to worry about jailbreak detection or abnormal crash. The only problem is that is not so user-friendly, so I intergrated it and even replaced my own tool.
+
+This shortcut requires `zip` and `flexdecrypt` to be installed on iDevice. You need to run **Install FlexDecrypt** command before the first use.
+
+### Shell
 
 For Android devices, **Open Shell** is simply a wrapper for `adb shell`. iOS requires libimobiledevice. This command will automatically launch `iproxy` at the background and then give you a shell.
 
