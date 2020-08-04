@@ -19,7 +19,7 @@ const exec = promisify(cp.execFile);
 
 const validated = new Map<string, Set<string>>();
 
-const SHARED_ARGS = ['-o', 'StrictHostKeyChecking=no'];
+const SHARED_ARGS = ['-q', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
 
 class RemoteTool {
   port?: number;

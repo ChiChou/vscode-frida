@@ -1,4 +1,4 @@
-IGNORE = ['-oStrictHostKeyChecking=no', '-oUserKnownHostsFile=/dev/null', '-q']
+IGNORE = ['-oStrictHostKeyChecking=no', '-oUserKnownHostsFile=/dev/null', '-q', '-oUserKnownHostsFile=/dev/null']
 
 
 class BaseTool(object):

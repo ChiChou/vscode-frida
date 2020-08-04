@@ -41,7 +41,7 @@ export async function shell(node: TargetItem) {
   if (deviceType === 'iOS') {
     const port = await proxySSH(node.data.id);
     const shellPath = executable('ssh');
-    const shellArgs = ['-q', `-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no'];
+    const shellArgs = ['-q', `-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
     window.createTerminal({
       name,
       shellArgs,
