@@ -37,7 +37,7 @@ def main(args):
         return core.find_port(device)
 
     if args.action == 'location':
-        return next(app['Path'] for app in apps() if app['CFBundleIdentifier'] == args.bundle)
+        return next(app['Path'] for app in apps(device) if app['CFBundleIdentifier'] == args.bundle)
 
     target = args.pid or args.name
     agent = rpc.ProcessAgent(device, target) if target else \

@@ -4,8 +4,8 @@ import plistlib
 
 
 class InstallationProxy(object):
-    def __init__(self):
-        self.dev = frida.get_usb_device()
+    def __init__(self, device: frida.core.Device):
+        self.dev = device
         self.pipe = None
 
     def __enter__(self):
@@ -30,8 +30,8 @@ class InstallationProxy(object):
         self.pipe.close()
 
 
-def apps():
-    with InstallationProxy() as channel:
+def apps(device: frida.core.Device):
+    with InstallationProxy(device) as channel:
         channel.write({
             'Command': 'Browse',
             'ClientOptions': {
