@@ -2,6 +2,7 @@
 
 if ! sysctl machdep.cpu.brand_string | grep -q "Apple processor"; then
   echo "This script is for Apple device only"
+  echo "Usage: ssh ios 'sh -s' < $0"
   exit -1
 fi
 
