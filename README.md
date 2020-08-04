@@ -58,7 +58,7 @@ For Android devices, **Open Shell** is simply a wrapper for `adb shell`. iOS req
 
 There's also a shortcut for copying SSH public key to jailbroken iDevice.
 
-All the SSH related commands takes port 22 as the default port. If you are on `chekra1n` jailbreak, please install OpenSSH on your device.
+All the SSH related commands take port 22 as the default port. If you are on `chekra1n` jailbreak, please install OpenSSH on your device.
 
 ## Todo
 
