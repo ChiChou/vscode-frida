@@ -1,4 +1,4 @@
-IGNORE = ['-oStrictHostKeyChecking=no', '-oUserKnownHostsFile=/dev/null', '-q', '-oUserKnownHostsFile=/dev/null']
+IGNORE = ['-oStrictHostKeyChecking=no', '-oUserKnownHostsFile=/dev/null', '-oUserKnownHostsFile=/dev/null']
 
 
 class BaseTool(object):
@@ -8,7 +8,7 @@ class BaseTool(object):
         self.user = user
 
     def ssh(self, *args):
-        return ['ssh'] + IGNORE + ['-p%d' % self.port, '%s@%s' % (self.user, self.host)] + list(args)
+        return ['ssh'] + IGNORE + ['-q', '-p%d' % self.port, '%s@%s' % (self.user, self.host)] + list(args)
 
     def scp(self, src: str, dst: str, direction='down'):
         prefix = '%s@%s:' % (self.user, self.host)

@@ -19,7 +19,7 @@ const exec = promisify(cp.execFile);
 
 const validated = new Map<string, Set<string>>();
 
-const SHARED_ARGS = ['-q', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
+const SHARED_ARGS = ['-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
 
 class RemoteTool {
   port?: number;
@@ -38,7 +38,7 @@ class RemoteTool {
   }
 
   ssh(...cmd: string[]): [string, string[]] {
-    return [executable('ssh'), [...SHARED_ARGS, `-p${this.port}`, 'root@localhost', ...cmd]];
+    return [executable('ssh'), [...SHARED_ARGS, '-q', `-p${this.port}`, 'root@localhost', ...cmd]];
   }
 
   scp(src: string, dst: string, dir: 'up' | 'down' = 'down'): [string, string[]] {
