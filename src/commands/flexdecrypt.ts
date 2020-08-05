@@ -268,7 +268,7 @@ export async function decrypt(node: TargetItem): Promise<void> {
 
   // save preferred path
   workspace.getConfiguration('frida')
-    .update('decryptOutput', resolve(join(destination.fsPath, '..')));
+    .update('decryptOutput', resolve(join(destination.fsPath, '..')), true);
 
   const dec = new Decryptor(node.device.id);
   await window.withProgress({
