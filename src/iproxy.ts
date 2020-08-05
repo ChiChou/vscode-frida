@@ -2,57 +2,74 @@ import { EventEmitter } from 'events';
 import { createInterface } from 'readline';
 import { spawn, ChildProcess } from 'child_process';
 import { logger } from './logger';
-import { idle, executable } from './utils';
+import { idle, executable, sleep } from './utils';
+import { join } from 'path';
+import { createConnection } from 'net';
 
 let singleton: IProxy | null = null;
 
 export class IProxy extends EventEmitter {
   p?: ChildProcess;
   local = 0;
-  ready = false;
 
-  constructor(public remote: number, public uuid: string) { super(); }
+  constructor(public remote: number | string, public udid: string) { super(); }
 
-  async start() {
+  async start(): Promise<number> {
     this.local = await idle();
-    this.p = spawn(executable('iproxy'), [
-      this.local.toString(), this.remote.toString(), this.uuid]);
 
-    if (this.p.stderr) {
-      const rl = createInterface({ input: this.p.stderr });
+    const py: string = join(__dirname, '..', 'backend', 'ios', 'iproxy.py');
+    const pyArgs = [py, this.udid, this.remote.toString(), this.local.toString()];
+    const p = spawn(executable('python3'), pyArgs)
+      .on('close', () => {
+        logger.appendLine('iproxy is unexpectly terminated');
+        this.emit('close');
+      })
+      .on('error', err => this.emit('error', err));
+
+    if (p.stderr) {
+      const rl = createInterface({ input: p.stderr });
       rl.on('line', (line: string) => logger.appendLine(`[iproxy ${this.remote}] ${line}`));
     }
 
-    this.p.on('close', () => {
-      logger.appendLine('iproxy is unexpectly terminated');
-      this.emit('close');
-    });
+    const MAX = 5;
+    for (let i = 0; i < MAX; i++) {
+      await sleep(100);
 
-    this.ready = true;
-    this.emit('ready');
-    
+      try {
+        // ping
+        const ok = await new Promise((resolve, reject) => {
+          const socket = createConnection({ port: this.local }, () => {
+            resolve();
+            socket.end();
+          }).on('error', (err) => {
+            reject(err);
+          });
+        });
+
+        break;
+      } catch(e) {
+        if (i === MAX - 1) {
+          throw e;
+        }
+      }
+    }
+
     return this.local;
   }
 
   stop() {
     if (this.p) { this.p.kill(); }
-    this.ready = false;
   }
 }
 
 export async function ssh(uuid: string): Promise<number> {
-  if (singleton) {
-    if (singleton.ready) { return singleton.local; }
-    return new Promise((resolve, reject) => {
-      singleton!
-        .on('ready', () => resolve(singleton!.local))
-        .on('close', () => reject(new Error('iproxy abnormally terminated')));
-    });
-  }
+  if (singleton) { return singleton.local; }
 
-  singleton = new IProxy(22, uuid);
-  singleton.on('close', () => { singleton = null; });
-  return singleton.start();
+  const iproxy = new IProxy('ssh', uuid);
+  await iproxy.start();
+  iproxy.on('close', () => { singleton = null; });
+  singleton = iproxy;
+  return singleton.local;
 }
 
 export function cleanup() {

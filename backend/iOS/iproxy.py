@@ -1,14 +1,16 @@
 import asyncio
 import concurrent.futures
 import frida
+import sys
 
 
 pool = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 
-def make_handler(dev: frida.core.Device, port:int, buffer_size=4096):
-    async def handler(reader, writer):        
+def make_handler(dev: frida.core.Device, port: int, buffer_size=4096):
+    async def handler(reader, writer):
         channel = dev.open_channel('tcp:%d' % port)
+
         async def read_pipe():
             while True:
                 loop = asyncio.get_event_loop()
@@ -22,12 +24,23 @@ def make_handler(dev: frida.core.Device, port:int, buffer_size=4096):
             try:
                 while not reader.at_eof():
                     channel.write(await reader.read(buffer_size))
+            except e:
+                print('e', e)
             finally:
                 channel.close()
 
         await asyncio.gather(read_pipe(), write_pipe())
-    
+
     return handler
+
+
+def find_free_port():
+    import socket
+    sock = socket.socket()
+    sock.bind(('', 0))
+    ip, port = sock.getsockname()
+    sock.close()
+    return port
 
 
 async def main(opt):
@@ -48,10 +61,32 @@ async def main(opt):
     else:
         port = int(opt.port)
 
+
+    import shutil
+    import subprocess
+    if shutil.which('iproxy'):
+        output = subprocess.check_output(['iproxy', '--help'])
+        local_port = opt.local or find_free_port()
+        args = ['iproxy']
+        if b'LOCAL_PORT:DEVICE_PORT' in output: # new
+            args += [f'{local_port}:{port}']
+            if opt.device != 'usb':
+                args += ['-u', opt.device]
+        else:
+            args += [str(local_port), str(port)]
+            if opt.device != 'usb':
+                args += [opt.device]
+
+        print(args)
+        subprocess.call(args)
+        return
+
+    # fallback to python (bad performace)
     handler = make_handler(dev, port)
-    server = await asyncio.start_server(handler, '127.0.0.1', port=opt.local)
-    _, port = server.sockets[0].getsockname()
-    print(port)
+    server = await asyncio.start_server(handler, '127.0.0.1', port=opt.local, start_serving=False)
+    print('waiting for connection', file=sys.stderr, flush=True)
+    # _, local_port = server.sockets[0].getsockname()
+    # print(local_port, flush=True)
 
     async with server:
         await server.serve_forever()
