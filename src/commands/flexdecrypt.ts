@@ -5,7 +5,7 @@
 
 import * as cp from 'child_process';
 import { promisify } from 'util';
-import { join, resolve } from 'path';
+import { join, basename } from 'path';
 import { tmpdir, homedir } from 'os';
 import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
@@ -13,6 +13,8 @@ import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devic
 import { ssh as proxySSH, IProxy } from '../iproxy';
 import { platformize, devtype, port, location } from '../driver/frida';
 import { executable } from '../utils';
+import { platform } from 'os';
+import { lookpath } from 'lookpath';
 
 
 const exec = promisify(cp.execFile);
@@ -110,7 +112,7 @@ const LLDB_PATH = '/usr/bin/debugserver';
 function dbg() {
   return function (target: LLDB, propertyKey: string, descriptor: PropertyDescriptor) {
     const original = descriptor.value;
-    descriptor.value = async function(this: LLDB, ...args: any[]) {
+    descriptor.value = async function (this: LLDB, ...args: any[]) {
       await this.connect();
       await this.bridge();
       const server = await original.call(this, ...args) as cp.ChildProcess;
@@ -266,9 +268,11 @@ export async function decrypt(node: TargetItem): Promise<void> {
 
   if (!destination) { return; }
 
+  const folder = Uri.joinPath(destination, '..').fsPath;
+  const name = `${basename(destination.fsPath)}.ipa`;
+
   // save preferred path
-  workspace.getConfiguration('frida')
-    .update('decryptOutput', resolve(join(destination.fsPath, '..')), true);
+  workspace.getConfiguration('frida').update('decryptOutput', folder, true);
 
   const dec = new Decryptor(node.device.id);
   await window.withProgress({
@@ -278,9 +282,32 @@ export async function decrypt(node: TargetItem): Promise<void> {
   }, (progress) => dec.go(node.data.identifier, destination.fsPath, progress));
 
   const choice = await window.showInformationMessage(
-    'FlexDecrypt successfully finished', `Open .ipa`, 'Dismiss');
-  if (choice === 'Open .ipa') {
-    commands.executeCommand('vscode.open', Uri.file(destination.fsPath));
+    'FlexDecrypt successfully finished', 'Open Folder', `Open ${name}`, 'Dismiss');
+  if (choice === `Open ${name}`) {
+    commands.executeCommand('vscode.open', destination);
+  } else if (choice === 'Open Folder') {
+    // todo: refactor me
+    const o = platform();
+    let found = false;
+    const detached = (bin: string, ...args: string[]) =>
+      cp.spawn(bin, args, { detached: true, stdio: 'ignore' }).unref();
+    if (o === 'win32') {
+      detached('explorer.exe', '/select', destination.fsPath);
+      found = true;
+    } else if (o === 'linux') {
+      for (const tool of ['xdg-open', 'gnome-open']) {
+        detached(tool, folder);
+        found = true;
+        break;
+      }
+    } else if (o === 'darwin') {
+      detached('open', '-a', 'Finder', folder);
+      found = true;
+    } 
+
+    if (!found) {
+      window.showWarningMessage('Your platform does not support this command');
+    }
   }
 }
 
