@@ -1,5 +1,10 @@
 # Change Log
 
+### v0.0.6
+
+Bugfix: `iproxy` fallback
+New: show ipa in folder
+
 ### v0.0.4 - 3 Aug, 2020
 
 * Add experimental lldb shortcut
