@@ -52,7 +52,7 @@ class Repack(BaseTool):
         Path(tmp).unlink()
 
     def handle_entry(self, info: zipfile.ZipInfo):
-        abspath = '/' + info.filename
+        abspath = '/' + info.filename.encode('cp437').decode('utf8')
         new_file = Path('Payload') / \
             Path(abspath).relative_to(self.base.parent)
         file_mod = info.external_attr >> 16
@@ -60,7 +60,8 @@ class Repack(BaseTool):
         new_info.filename = Path.as_posix(new_file)
 
         if stat.S_ISDIR(file_mod):
-            self.zout.writestr(new_info, b'')
+            # do nothing
+            # self.zout.writestr(new_info, b'')
             return
 
         elif stat.S_ISREG(file_mod) and (file_mod & stat.S_IXUSR):
