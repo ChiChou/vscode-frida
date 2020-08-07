@@ -1,12 +1,14 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
-import { platformize, launch } from '../driver/frida';
+import { launch } from '../driver/frida';
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
 import { DeviceType } from '../types';
+import { executable } from '../utils';
 
 export async function explore(target: TargetItem) {
   if (!target) {
-    // todo: select from list
+    vscode.window.showErrorMessage('This command is only expected to be used in the context menu');
     return;
   }
 
@@ -33,14 +35,15 @@ export async function explore(target: TargetItem) {
     let gadget = pid.toString();
     if (target instanceof AppItem && !pid) {
       try {
-        gadget = await launch(target.device.id, target.data.identifier).toString();
+        gadget = (await launch(target.device.id, target.data.identifier)).toString();
       } catch (e) {
         vscode.window.showWarningMessage(`Warning: failed to launch App ${target.data.identifier}`);
         gadget = target.data.name;
       }
     }
 
-    const [bin, args] = platformize('objection', ['-g', gadget, ...device, 'explore']);
-    vscode.window.createTerminal(title, bin, args).show();
+    const py: string = path.join(__dirname, '..', '..', 'backend', 'pause.py');
+    const args = [py, 'objection', '-g', gadget, ...device, 'explore'];
+    vscode.window.createTerminal(title, executable('python3'), args).show();
   }
 }
