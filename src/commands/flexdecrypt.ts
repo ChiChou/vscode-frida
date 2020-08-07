@@ -14,7 +14,7 @@ import { ssh as proxySSH, IProxy } from '../iproxy';
 import { platformize, devtype, port, location } from '../driver/frida';
 import { executable } from '../utils';
 import { platform } from 'os';
-import { lookpath } from 'lookpath';
+import { logger } from '../logger';
 
 
 const exec = promisify(cp.execFile);
@@ -67,6 +67,8 @@ class RemoteTool {
         await this.exec('which', tool);
       } catch (_) {
         remoteMissing.push(tool);
+        logger.appendLine(`[flexdecrypt] ERROR: failed to check the existence for ${tool}, reason:`);
+        logger.appendLine(`${_}`);
       }
     }
 
