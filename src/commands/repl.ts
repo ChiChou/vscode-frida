@@ -1,19 +1,20 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
 import { platform, EOL } from 'os';
 import { DeviceType } from '../types';
 import { terminate } from '../driver/frida';
-import { refresh, sleep } from '../utils';
+import { refresh, sleep, executable } from '../utils';
 
 const terminals = new Set<vscode.Terminal>();
 
-function repl(args: string[], name: string, tool: string='frida') {
-  const title = `Frida - ${name}`;  
-  const [shell, rest] = platform() === 'win32' ?
-    ['cmd.exe', ['/c', tool, ...args]] : [tool, args];
-
-  const term = vscode.window.createTerminal(title, shell, rest);
+function repl(args: string[], name: string, tool: string = 'frida') {
+  const title = `Frida - ${name}`;
+  const shellBin = executable('python3');
+  const py = path.join(__dirname, '..', '..', 'backend', 'pause.py');
+  const shellArgs = [py, tool, ...args];
+  const term = vscode.window.createTerminal(title, shellBin, shellArgs);
   term.show();
   terminals.add(term);
 }
@@ -95,7 +96,7 @@ export async function load() {
   const { document } = activeTextEditor;
   term.sendText(
     platform() === 'win32' || document.isDirty ? // bug: %load doesn't seem to handle path right on Windows
-    document.getText() : `%load ${document.uri.fsPath}`);
+      document.getText() : `%load ${document.uri.fsPath}`);
   await sleep(100);
   term.sendText(EOL);
 }
