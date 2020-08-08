@@ -1,8 +1,3 @@
-
-// todo: check commands
-// async function checkEnviron() {
-// }
-
 import * as cp from 'child_process';
 import { promisify } from 'util';
 import { join, basename } from 'path';
