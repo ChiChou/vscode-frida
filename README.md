@@ -10,6 +10,7 @@
 * `pip3 install -U frida-tools`
 * [iproxy](https://libimobiledevice.org/#get-started) * (For Windows build, see https://github.com/libimobiledevice-win32/imobiledevice-net/releases)
 * SSH client (`ssh` command) *
+* iTunes on Windows
 
 [*] Optional. Only some of the functionalities rely on it
 
