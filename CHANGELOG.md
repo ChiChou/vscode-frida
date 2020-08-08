@@ -1,6 +1,12 @@
 # Change Log
 
-### v0.0.6
+### v0.0.8 - 8 Aug, 2020
+
+* Bugfix: Attaching objection to a running application
+* Do not close terminal immediatly when exit code is not 0
+* More error logs
+
+### v0.0.6 - 4 Aug, 2020
 
 Bugfix: `iproxy` fallback
 New: show ipa in folder
