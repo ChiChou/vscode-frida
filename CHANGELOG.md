@@ -22,7 +22,7 @@ Added
 * Shell for both iOS (requires libimobiledevice) and Androd (requires adb)
 * Install public SSH key to iOS (like `ssh-copy-id`, but also supports Windows)
 * FlexDecrypt support. Requires `flexdecrypt` and `zip` on iOS, `ssh` and `iproxy` on desktop
-* FlexDecrypt GitHub installer
+* FlexDecrypt installer
 
 Deprecation
 
