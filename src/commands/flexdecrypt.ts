@@ -219,7 +219,8 @@ class Decryptor extends RemoteTool {
     progress.report({ message: 'Decrypting MachO executables' });
     {
       const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'decrypt.py');
-      const [bin, args] = platformize('python3', [py, local, path, `${this.port}`, '-o', dest]);
+      const bin = executable('python3');
+      const args = [py, local, path, `${this.port}`, '-o', dest];
       await this.execInTerminal(bin, args);
     }
   }
