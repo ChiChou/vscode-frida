@@ -294,7 +294,7 @@ export async function decrypt(node: TargetItem): Promise<void> {
     const detached = (bin: string, ...args: string[]) =>
       cp.spawn(bin, args, { detached: true, stdio: 'ignore' }).unref();
     if (o === 'win32') {
-      detached('explorer.exe', '/select', destination.fsPath);
+      detached('explorer.exe', '/select,', destination.fsPath);
       found = true;
     } else if (o === 'linux') {
       for (const tool of ['xdg-open', 'gnome-open']) {
