@@ -26,7 +26,6 @@
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.browse",
-		"onCommand:frida.external.bagbak",
 		"onCommand:frida.external.objection",
 		"onCommand:frida.external.flexdecrypt",
 		"onCommand:frida.external.lldb",
@@ -112,11 +111,6 @@
 			{
 				"command": "frida.syslog.vacuum",
 				"title": "Close All Console",
-				"category": "Frida"
-			},
-			{
-				"command": "frida.external.bagbak",
-				"title": "Dump iOS App",
 				"category": "Frida"
 			},
 			{

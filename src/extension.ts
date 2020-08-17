@@ -10,7 +10,6 @@ import { FileSystemProvider } from './providers/filesystem';
 import * as ssh from './commands/ssh';
 import * as file from './commands/file';
 import * as repl from './commands/repl';
-import * as bagbak from './commands/bagbak';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
 import * as objection from './commands/objection';
@@ -41,7 +40,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.browse', file.browse));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.bagbak', bagbak.dump));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', flex.decrypt));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug)); // todo: move to another module
