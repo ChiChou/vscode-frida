@@ -1,33 +1,75 @@
-import { window, Task, ShellExecution, tasks } from 'vscode';
+import { homedir } from 'os';
 import { join } from 'path';
-import { execFile } from 'child_process';
-import { promisify } from 'util';
-
+import { promises as fsp } from 'fs';
+import { window } from 'vscode';
 import { DeviceItem, TargetItem } from '../providers/devices';
-import { devtype } from '../driver/frida';
+import { devtype, copyid as fridaCopyId } from '../driver/frida';
 import { ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
 
 
-export async function copyid(node: TargetItem) {
+async function keygen(path: string): Promise<boolean> {
+  const choice = await window.showErrorMessage(
+    'SSH key pair not found. Generate now?', 'Yes', 'Cancel');
+  
+  if (choice === 'Yes') {
+    const term = window.createTerminal({
+      name: 'ssh-keygen',
+      shellPath: 'ssh-keygen',
+      shellArgs: ['-f', path],
+    });
+    term.show();
+    await new Promise((resolve, reject) => {
+      const disposable = window.onDidCloseTerminal(t => {
+        if (t === term) {
+          if (t.exitStatus?.code === 0) {
+            resolve();
+          } else {
+            reject(new Error('Failed to generate SSH key pair'));
+          }
+          disposable.dispose();
+        }
+      });
+    });
+
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export async function doCopyId(id: string) {
+  const privateKey = join(homedir(), '.ssh', 'id_rsa');
+
+  try {
+    await fsp.access(privateKey);
+  } catch(err) {
+    if (!await keygen(privateKey)) {
+      return false;
+    }
+  }
+
+  return fridaCopyId(id);
+}
+
+export async function sshcopyid(node: TargetItem) {
   if (!(node instanceof DeviceItem)) {
     window.showErrorMessage('This command is only avaliable on context menu');
     return;
   }
 
-  // todo: decorator
   const deviceType = await devtype(node.data.id);
   if (deviceType !== 'iOS') {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);
     return;
   }
 
-  const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
-  const args = [py, 'ssh-copy-id', node.data.id];
-  const exec = promisify(execFile);
-  await exec(executable('python3'), args);
-
-  window.showInformationMessage(`Succesfully installed SSH public key on "${node.data.name}"`);
+  const result = await doCopyId(node.data.id);
+  if (result) {
+    window.showInformationMessage(`Succesfully installed SSH public key on "${node.data.name}"`);
+  } else {
+    window.showErrorMessage(`Failed to deploy SSH key to ${node.data.name}`);
+  }
 }
 
 export async function shell(node: TargetItem) {

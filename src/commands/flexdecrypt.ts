@@ -6,10 +6,11 @@ import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH, IProxy } from '../iproxy';
-import { platformize, devtype, port, location } from '../driver/frida';
+import { platformize, devtype, port, location, copyid } from '../driver/frida';
 import { executable } from '../utils';
 import { platform } from 'os';
 import { logger } from '../logger';
+import { doCopyId } from './ssh';
 
 
 const exec = promisify(cp.execFile);
@@ -53,6 +54,17 @@ class RemoteTool {
     }
 
     if (registry.has(this.id)) { return true; }
+
+    try {
+      await this.exec('id');
+    } catch(_) {
+      logger.appendLine(`Shell is not avaliable on ${this.id}`);
+      logger.appendLine(`reason: ${_}`);
+
+      if (!await doCopyId(this.id)) {
+        throw new Error('Failed to establish SSH tunnel to device. Unable to deploy SSH public key');
+      }
+    }
 
     const required = this.dependencies;
     // check for missing commands

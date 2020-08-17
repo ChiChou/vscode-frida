@@ -47,7 +47,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug)); // todo: move to another module
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installflex', flex.install));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.sshcopyid));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));

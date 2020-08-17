@@ -26,3 +26,5 @@ def install(device: frida.core.Device):
     session.detach()
     device.kill(pid)
 
+    return True
+

@@ -14,6 +14,8 @@
 
 [*] Optional. Only some of the functionalities rely on it
 
+FlexDecrypt depends on SSH. You need to generate a public key before using it.
+
 ## Features
 
 ![demo](resources/doc/demo.gif)
