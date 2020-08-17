@@ -29,6 +29,7 @@
 		"onCommand:frida.external.objection",
 		"onCommand:frida.external.flexdecrypt",
 		"onCommand:frida.external.lldb",
+		"onCommand:frida.external.setuplldb",
 		"onCommand:frida.external.installflex",
 		"onCommand:frida.external.shell",
 		"onCommand:frida.external.copyid",
@@ -121,17 +122,22 @@
 			{
 				"command": "frida.external.lldb",
 				"title": "Debug with lldb",
-				"category": "Frida"
+				"category": "iOS"
 			},
 			{
 				"command": "frida.external.flexdecrypt",
 				"title": "FlexDecrypt",
-				"category": "Frida"
+				"category": "iOS"
 			},
 			{
 				"command": "frida.external.installflex",
 				"title": "Install FlexDecrypt",
-				"category": "Frida"
+				"category": "iOS"
+			},
+			{
+				"command": "frida.external.setuplldb",
+				"title": "Grant Full Entitlements on LLDB Server",
+				"category": "iOS"
 			},
 			{
 				"command": "frida.external.shell",
@@ -273,9 +279,14 @@
 					"group": "4_frida_external@1"
 				},
 				{
-					"command": "frida.external.copyid",
+					"command": "frida.external.setuplldb",
 					"when": "viewItem == 'device|usb'",
 					"group": "4_frida_external@2"
+				},
+				{
+					"command": "frida.external.copyid",
+					"when": "viewItem == 'device|usb'",
+					"group": "4_frida_external@3"
 				}
 			]
 		}

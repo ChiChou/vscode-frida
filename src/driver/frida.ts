@@ -63,6 +63,10 @@ export function copyid(id: string) {
   return exec('ssh-copy-id', id);
 }
 
+export function setupDebugServer(id: string) {
+  return exec('sign-debugserver', id);
+}
+
 export async function launch(device: string, bundle: string): Promise<Number> {
   const params = ['-f', bundle, '--device', device, bundle, '--no-pause', '-q', '-e', 'Process.id'];
   const [bin, args] = platformize('frida', params);

@@ -1,12 +1,36 @@
-import { readFileSync, createWriteStream } from 'fs';
+import { unlinkSync, writeFileSync, readFileSync, createWriteStream } from 'fs';
 
+const system = new NativeFunction(
+  Module.findExportByName(null, 'system')!, 'int', ['pointer']);
+
+function sh(cmd: string): number {
+  return system(Memory.allocUtf8String(cmd)) as number;
+}
+
+export async function signDebugserver(ent: string) {
+  const dest = '/usr/bin/debugserver';
+  const tmp = '/tmp/ent.xml';
+
+  if (sh(`cp /Developer${dest} ${dest}`) !== 0) {
+    throw new Error('Failed to copy original debugserver. Did you mount Developer Disk Image?');
+  }
+  await write(tmp, ent);
+  if (sh(`ldid -S${tmp} ${dest}`) !== 0) {
+    throw new Error('Failed to sign debugserver with new signature. Is ldid avaliable on your device?');
+  }
+  unlinkSync(tmp);
+}
+
+function write(file: string, content: string) {
+  return new Promise((resolve, reject) => {
+    const stream = createWriteStream(file);
+    stream.on('finish', resolve).on('error', reject);
+    stream.write(content);
+    stream.end();
+  });
+}
 
 export async function copyid(id: string) {
-  const system = new NativeFunction(Module.findExportByName(null, 'system')!, 'int', ['pointer']);
-  function sh(cmd: string): number {
-    return system(Memory.allocUtf8String(cmd)) as number;
-  }
-
   for (const user of ['root', 'mobile']) {
     // look at me I am so injected
     const parent = `/var/${user}/.ssh/`;
@@ -24,13 +48,8 @@ export async function copyid(id: string) {
 
     if (content.indexOf(id) > -1) { continue; }
 
-    await new Promise((resolve, reject) => {
-      content.push(id);
-      const joint = content.join('\n') + '\n';
-      const stream = createWriteStream(file);
-      stream.on('finish', resolve).on('error', reject);
-      stream.write(joint);
-      stream.end();
-    });
+    content.push(id);
+    const joint = content.join('\n') + '\n';
+    return write(file, joint);
   }
 }

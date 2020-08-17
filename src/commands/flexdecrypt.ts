@@ -6,7 +6,7 @@ import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH, IProxy } from '../iproxy';
-import { platformize, devtype, port, location, copyid } from '../driver/frida';
+import { platformize, devtype, port, location, copyid, setupDebugServer } from '../driver/frida';
 import { executable } from '../utils';
 import { platform } from 'os';
 import { logger } from '../logger';
@@ -126,10 +126,6 @@ function dbg() {
       await this.bridge();
       const server = await original.call(this, ...args) as cp.ChildProcess;
 
-      // todo: wait until "Listening to port"
-      // server.stdout?.on('data', (chunk) => console.log('stdout', chunk));
-      // server.stderr?.on('data', (chunk) => console.log('stderr', chunk));
-
       await new Promise((resolve, reject) => {
         server.on('exit', (code) => {
           if (code !== 0) {
@@ -180,17 +176,7 @@ class LLDB extends RemoteTool {
     return cp.spawn(bin, arg);
   }
 
-  async install() {
-    // todo: use frida to resign binary
-    const TMP_XML = '/tmp/ent.xml';
-    const xml = join(__dirname, '..', '..', 'resources', 'ent.xml');
-    await this.execInTerminal(...this.scp(xml, TMP_XML, 'up'));
-    await this.exec('cp', '/Developer/usr/bin/debugserver', LLDB_PATH);
-    await this.exec('ldid', `-S${TMP_XML}`, LLDB_PATH);
-    await this.exec('rm', TMP_XML);
-  }
-
-  async teardown() {
+  teardown() {
     if (this.iproxy) {
       this.iproxy.stop();
       this.iproxy = undefined;
@@ -323,23 +309,40 @@ export async function decrypt(node: TargetItem): Promise<void> {
 
 const lldbInstances = new Set<LLDB>();
 
+export async function setupLLDBServer(node: TargetItem): Promise<void> {
+  if (node instanceof DeviceItem) {
+    if (await devtype(node.data.id) === 'iOS') {
+      if (await setupDebugServer(node.data.id)) {
+        window.showInformationMessage('Successfully resigned debugserver');
+      }
+    } else {
+      window.showErrorMessage('This command is for iOS only');
+    }
+  } else {
+    // todo: select from list
+    window.showErrorMessage('Use the context menu instead');
+  }
+}
+
 export async function debug(node: TargetItem): Promise<void> {
   if (node instanceof AppItem) {
     const lldb = new LLDB(node.device.id);
     lldbInstances.add(lldb);
     if (node.data.pid) {
-      lldb.attach(node.data.pid);
+      await lldb.attach(node.data.pid);
     } else {
-      lldb.spawn(node.data.identifier);
+      await lldb.spawn(node.data.identifier);
     }
-    lldb.teardown();
+    lldbInstances.delete(lldb);
   } else if (node instanceof ProcessItem) {
     if (node.device.id === 'local') {
       throw new Error('Not implemented');
     }
     const lldb = new LLDB(node.device.id);
     lldbInstances.add(lldb);
+    lldb.connect();
     lldb.attach(node.data.pid);
+    lldbInstances.delete(lldb);
   } else {
     window.showErrorMessage('This command should be used in context menu');
   }
