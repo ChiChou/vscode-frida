@@ -136,7 +136,7 @@
 			},
 			{
 				"command": "frida.external.setuplldb",
-				"title": "Grant Full Entitlements on LLDB Server",
+				"title": "Setup LLDB debugserver",
 				"category": "iOS"
 			},
 			{
