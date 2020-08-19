@@ -25,7 +25,6 @@
 		"onCommand:frida.app.refresh",
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
-		"onCommand:frida.browse",
 		"onCommand:frida.external.objection",
 		"onCommand:frida.external.flexdecrypt",
 		"onCommand:frida.external.lldb",
@@ -193,6 +192,75 @@
 			]
 		},
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "frida.boilerplate.agent"
+				},
+				{
+					"command": "frida.boilerplate.module"
+				},
+				{
+					"command": "frida.ps.refresh"
+				},
+				{
+					"command": "frida.apps.refresh"
+				},
+				{
+					"command": "frida.typing.init"
+				},
+				{
+					"command": "frida.external.objection",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.flexdecrypt",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.lldb",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.setuplldb",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.installflex",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.shell",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.copyid",
+					"when": "false"
+				},
+				{
+					"command": "frida.syslog",
+					"when": "false"
+				},
+				{
+					"command": "frida.attach",
+					"when": "false"
+				},
+				{
+					"command": "frida.kill",
+					"when": "false"
+				},
+				{
+					"command": "frida.spawn",
+					"when": "false"
+				},
+				{
+					"command": "frida.spawn.suspended",
+					"when": "false"
+				},
+				{
+					"command": "frida.snippet.execute",
+					"when": "editorLangId == javascript && terminalFocus"
+				}
+			],
 			"editor/title": [
 				{
 					"when": "resourceLangId == javascript",
