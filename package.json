@@ -81,6 +81,14 @@
 				"category": "Frida"
 			},
 			{
+				"command": "frida.bundle.copy",
+				"title": "Copy Bundle ID"
+			},
+			{
+				"command": "frida.name.copy",
+				"title": "Copy Process Name"
+			},
+			{
 				"command": "frida.spawn",
 				"title": "Spawn",
 				"icon": {
@@ -257,6 +265,10 @@
 					"when": "false"
 				},
 				{
+					"command": "frida.bundle.copy",
+					"when": "false"
+				},
+				{
 					"command": "frida.snippet.execute",
 					"when": "editorLangId == javascript && terminalFocus"
 				}
@@ -297,64 +309,74 @@
 					"group": "inline"
 				},
 				{
-					"command": "frida.spawn.suspended",
+					"command": "frida.bundle.copy",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "1_frida_process@1"
+					"group": "1_frida_info@1"
 				},
 				{
-					"command": "frida.external.lldb",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "1_frida_process@2"
-				},
-				{
-					"command": "frida.external.lldb",
+					"command": "frida.name.copy",
 					"when": "view == fridaPs && viewItem =~ /^process\\|/",
-					"group": "1_frida_process@2"
-				},
-				{
-					"command": "frida.syslog",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "2_frida_logger@1"
-				},
-				{
-					"command": "frida.syslog",
-					"when": "view == fridaPs && viewItem =~ /^process\\|/",
-					"group": "2_frida_logger@1"
+					"group": "1_frida_info@1"
 				},
 				{
 					"command": "frida.kill",
 					"when": "viewItem =~ /\\|running$/",
-					"group": "1_frida_process@2"
+					"group": "2_frida_process@2"
+				},
+				{
+					"command": "frida.spawn.suspended",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "2_frida_process@1"
+				},
+				{
+					"command": "frida.external.lldb",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "2_frida_process@2"
+				},
+				{
+					"command": "frida.external.lldb",
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"group": "2_frida_process@2"
+				},
+				{
+					"command": "frida.syslog",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "3_frida_logger@1"
+				},
+				{
+					"command": "frida.syslog",
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"group": "3_frida_logger@1"
 				},
 				{
 					"command": "frida.external.objection",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "3_frida_external@2"
+					"group": "4_frida_external@2"
 				},
 				{
 					"command": "frida.external.flexdecrypt",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "3_frida_external@3"
+					"group": "4_frida_external@3"
 				},
 				{
 					"command": "frida.external.shell",
 					"when": "viewItem == 'device|usb'",
-					"group": "3_frida_external@6"
+					"group": "1_frida_dev_external@1"
 				},
 				{
 					"command": "frida.external.installflex",
 					"when": "viewItem == 'device|usb'",
-					"group": "4_frida_external@1"
+					"group": "2_frida_dev_setup@1"
 				},
 				{
 					"command": "frida.external.setuplldb",
 					"when": "viewItem == 'device|usb'",
-					"group": "4_frida_external@2"
+					"group": "2_frida_dev_setup@2"
 				},
 				{
 					"command": "frida.external.copyid",
 					"when": "viewItem == 'device|usb'",
-					"group": "4_frida_external@3"
+					"group": "2_frida_dev_setup@3"
 				}
 			]
 		}

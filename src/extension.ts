@@ -6,16 +6,16 @@ import { ProviderType } from './types';
 import { DevicesProvider } from './providers/devices';
 import { FileSystemProvider } from './providers/filesystem';
 
-
+import * as iproxy from './iproxy';
 import * as ssh from './commands/ssh';
 import * as file from './commands/file';
 import * as repl from './commands/repl';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
-import * as objection from './commands/objection';
 import * as flex from './commands/flexdecrypt';
+import * as objection from './commands/objection';
+import * as clipboard from './commands/clipboard';
 import * as boilerplate from './commands/boilerplate';
-import * as iproxy from './iproxy';
 
 export function activate(context: vscode.ExtensionContext) {
 	const fs = new FileSystemProvider();
@@ -41,6 +41,9 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.browse', file.browse));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.bundle.copy', clipboard.copy));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.name.copy', clipboard.copy));
+
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installflex', flex.install));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', flex.decrypt));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', flex.setupLLDBServer));
