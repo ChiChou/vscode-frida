@@ -65,7 +65,6 @@ def ps(device: frida.core.Device) -> list:
 def find_port(device: frida.core.Device) -> int:
     pid = device.spawn('/bin/sh')
     session = device.attach(pid)
-    session.enable_jit()
     with (Path(__file__).parent.parent / 'agent' / 'socket.js').open('r', encoding='utf8') as fp:
         source = fp.read()
     script = session.create_script(source)
