@@ -21,7 +21,7 @@ class FlexInstaller(BaseTool):
 
     def deploy(self, local: Path):
         remote = '/tmp/flexdecrypt.deb'
-        subprocess.call(self.scp(local, remote, direction='up'))
+        subprocess.call(self.scp(str(local), remote, direction='up'))
         subprocess.call(self.ssh('dpkg', '-i', remote))
         subprocess.call(self.ssh('rm', remote))
         subprocess.call(self.ssh('apt-get', 'install', '-y', 'zip'))
