@@ -325,9 +325,28 @@ export async function setupLLDBServer(node: TargetItem): Promise<void> {
 }
 
 export async function debug(node: TargetItem): Promise<void> {
+  if (!(node instanceof AppItem) && !(node instanceof ProcessItem)) {
+    window.showErrorMessage('This command should be used in context menu');
+    return;
+  }
+
+  if (node.device.id === 'local') {
+    window.showErrorMessage('debug local process is not implemented yet');
+    return;
+  }
+
+  const lldb = new LLDB(node.device.id);
+  try {
+    await lldb.connect();
+  } catch(e) {
+    if (await window.showErrorMessage(`${e}`, 'Deploy debugserver', 'Cancel') === 'Deploy debugserver') {
+      setupDebugServer(node.device.id);
+      return;
+    }
+  }
+
+  lldbInstances.add(lldb);
   if (node instanceof AppItem) {
-    const lldb = new LLDB(node.device.id);
-    lldbInstances.add(lldb);
     if (node.data.pid) {
       await lldb.attach(node.data.pid);
     } else {
@@ -335,17 +354,9 @@ export async function debug(node: TargetItem): Promise<void> {
     }
     lldbInstances.delete(lldb);
   } else if (node instanceof ProcessItem) {
-    if (node.device.id === 'local') {
-      throw new Error('Not implemented');
-    }
-    const lldb = new LLDB(node.device.id);
-    lldbInstances.add(lldb);
-    lldb.connect();
-    lldb.attach(node.data.pid);
-    lldbInstances.delete(lldb);
-  } else {
-    window.showErrorMessage('This command should be used in context menu');
+    await lldb.attach(node.data.pid);
   }
+  lldbInstances.delete(lldb);
 }
 
 export function cleanup() {
