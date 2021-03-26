@@ -39,4 +39,4 @@ def shell():
     session.detach()
     dev.kill(pid)
 
-shell()
+# shell()
