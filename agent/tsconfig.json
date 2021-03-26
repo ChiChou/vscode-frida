@@ -2,7 +2,7 @@
   "compilerOptions": {
     "experimentalDecorators": true,
     "target": "esnext",
-    "lib": ["esnext"],
+    "lib": ["es2020"],
     "allowJs": true,
     "noEmit": true,
     "strict": true,
