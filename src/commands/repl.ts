@@ -94,9 +94,7 @@ export async function load() {
   }
 
   const { document } = activeTextEditor;
-  term.sendText(
-    platform() === 'win32' || document.isDirty ? // bug: %load doesn't seem to handle path right on Windows
-      document.getText() : `%load ${document.uri.fsPath}`);
+  term.sendText(document.getText());
   await sleep(100);
   term.sendText(EOL);
 }
