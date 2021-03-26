@@ -37,7 +37,7 @@ export class IProxy extends EventEmitter {
 
       try {
         // ping
-        const ok = await new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
           const socket = createConnection({ port: this.local }, () => {
             resolve();
             socket.end();
