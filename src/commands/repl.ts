@@ -69,32 +69,3 @@ export function attach(node?: TargetItem) {
     repl([node.data.pid.toString(), ...device], node.data.pid.toString());
   }
 }
-
-export async function load() {
-  const { activeTextEditor, activeTerminal, showErrorMessage } = vscode.window;
-  if (!activeTextEditor) {
-    showErrorMessage('No active document');
-    return;
-  }
-
-  if (terminals.size === 0) {
-    showErrorMessage('No active frida REPL');
-    return;
-  }
-
-  let term: vscode.Terminal | null = null;
-  if (activeTerminal && terminals.has(activeTerminal)) {
-    term = activeTerminal;
-  } else if (terminals.size === 1) {
-    term = terminals.values().next().value as vscode.Terminal;
-    term.show();
-  } else {
-    showErrorMessage('You have multiple REPL instances. Please activate one');
-    return;
-  }
-
-  const { document } = activeTextEditor;
-  term.sendText(document.getText());
-  await sleep(100);
-  term.sendText(EOL);
-}

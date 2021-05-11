@@ -34,7 +34,6 @@
 		"onCommand:frida.external.copyid",
 		"onCommand:frida.boilerplate.agent",
 		"onCommand:frida.boilerplate.module",
-		"onCommand:frida.snippet.execute",
 		"onLanguage:javascript"
 	],
 	"main": "./out/extension.js",
@@ -167,12 +166,6 @@
 				"category": "Frida Boilerplate"
 			},
 			{
-				"command": "frida.snippet.execute",
-				"title": "Run",
-				"category": "Frida",
-				"icon": "resources/run.svg"
-			},
-			{
 				"command": "frida.typing.init",
 				"title": "Get typing hint for frida",
 				"category": "Frida"
@@ -268,17 +261,6 @@
 					"command": "frida.bundle.copy",
 					"when": "false"
 				},
-				{
-					"command": "frida.snippet.execute",
-					"when": "editorLangId == javascript && terminalFocus"
-				}
-			],
-			"editor/title": [
-				{
-					"when": "resourceLangId == javascript",
-					"command": "frida.snippet.execute",
-					"group": "navigation@1"
-				}
 			],
 			"view/title": [
 				{

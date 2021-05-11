@@ -33,7 +33,6 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn.suspended', repl.spawnSuspended));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', repl.attach));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.kill', repl.kill));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.snippet.execute', repl.load));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog', syslog.show));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));
