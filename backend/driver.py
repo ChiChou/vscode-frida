@@ -11,9 +11,9 @@ def main(args):
     from backend import core, rpc, syslog
     from backend.file import upload, download
     from backend.fs import FileSystem
-    from backend.ios.copyid import install
-    from backend.ios.debugserver import setup
-    from backend.ios.installer import apps
+    from backend.fruit.copyid import install
+    from backend.fruit.debugserver import setup
+    from backend.fruit.installer import apps
 
     if args.action == 'devices':
         return core.devices()
