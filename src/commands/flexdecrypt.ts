@@ -7,7 +7,7 @@ import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vs
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH, IProxy } from '../iproxy';
 import { platformize, devtype, port, location, copyid, setupDebugServer } from '../driver/frida';
-import { executable } from '../utils';
+import { executable, python3Path } from '../utils';
 import { platform } from 'os';
 import { logger } from '../logger';
 import { doCopyId } from './ssh';
@@ -212,7 +212,7 @@ class Decryptor extends RemoteTool {
     progress.report({ message: 'Decrypting MachO executables' });
     {
       const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'decrypt.py');
-      const bin = executable('python3');
+      const bin = python3Path();
       const args = [py, local, path, `${this.port}`, '-o', dest];
       await this.execInTerminal(bin, args);
     }
@@ -234,7 +234,7 @@ export async function install(node: TargetItem): Promise<void> {
 
   const port = await proxySSH(node.data.id);
   const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'get-flex.py');
-  const [shellPath, shellArgs] = platformize('python3', [py, port.toString()]);
+  const [shellPath, shellArgs] = platformize(python3Path(), [py, port.toString()]);
   const t = window.createTerminal({
     name: 'FlexDecrypt installer',
     shellPath,

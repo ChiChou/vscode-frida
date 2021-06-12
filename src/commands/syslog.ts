@@ -2,7 +2,7 @@ import * as cp from 'child_process';
 
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
 import { devtype } from '../driver/frida';
-import { refresh } from '../utils';
+import { python3Path, refresh } from '../utils';
 
 import { window, OutputChannel } from 'vscode';
 import { join } from 'path';
@@ -53,7 +53,7 @@ export function show(node?: TargetItem) {
     if (type === 'iOS' || type === 'Linux' || type === 'macOS') {
       const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
       const args = [py, 'syslog', '--device', node.device.id, ...bundleOrPid];
-      cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'python3', args).show();
+      cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3Path(), args).show();
     } else if (type === 'Android') {
       const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
