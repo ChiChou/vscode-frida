@@ -5,7 +5,7 @@
 ## Prerequisites
 
 * Python3
-* `pip3 install -U frida-tools` (If your have more than one python3 in your path, you should config the python path with this pip3 in settings.)
+* `pip3 install -U frida-tools` (If you have more than one python3 in your path, you should config the python path with this pip3 in settings.)
 * [iproxy](https://libimobiledevice.org/#get-started) * (For Windows build, see https://github.com/libimobiledevice-win32/imobiledevice-net/releases)
 * SSH client (`ssh` command) *
 * iTunes on Windows
