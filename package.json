@@ -260,7 +260,7 @@
 				{
 					"command": "frida.bundle.copy",
 					"when": "false"
-				},
+				}
 			],
 			"view/title": [
 				{
