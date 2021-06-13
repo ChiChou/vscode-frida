@@ -4,7 +4,7 @@ import * as path from 'path';
 import { launch } from '../driver/frida';
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
 import { DeviceType } from '../types';
-import { executable } from '../utils';
+import { executable, python3Path } from '../utils';
 
 export async function explore(target: TargetItem) {
   if (!target) {
@@ -44,6 +44,6 @@ export async function explore(target: TargetItem) {
 
     const py: string = path.join(__dirname, '..', '..', 'backend', 'pause.py');
     const args = [py, 'objection', '-g', gadget, ...device, 'explore'];
-    vscode.window.createTerminal(title, executable('python3'), args).show();
+    vscode.window.createTerminal(title, python3Path(), args).show();
   }
 }

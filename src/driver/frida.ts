@@ -6,6 +6,7 @@ import { logger } from '../logger';
 import * as os from 'os';
 
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
+import { python3Path } from '../utils';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
 
@@ -21,7 +22,7 @@ export function platformize(tool: string, args: string[]): [string, string[]] {
 
 export function exec(...args: string[]): Promise<any> {
   return new Promise((resolve, reject) => {
-    execFile('python3', [py, ...args], {}, (err, stdout, stderr) => {
+    execFile(python3Path(), [py, ...args], {}, (err, stdout, stderr) => {
       if (err) {
         logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
         logger.appendLine(stdout);
@@ -104,7 +105,7 @@ export namespace fs {
     const args = [py, 'download', uri, '--device', device, '--pid', pid.toString()];
 
     return new Promise((resolve, reject) => {
-      const p = spawn('python3', args);
+      const p = spawn(python3Path(), args);
       const parts: Buffer[] = [];
       p.stdout.on('data', data => parts.push(data));
       p.on('close', (code, signal) => {
@@ -122,7 +123,7 @@ export namespace fs {
     // todo: options
     const args = [py, 'upload', uri, '--device', device, '--pid', pid.toString()];
     return new Promise((resolve, reject) => {
-      const p = spawn('python3', args);
+      const p = spawn(python3Path(), args);
       p.on('close', (code: number, signal: NodeJS.Signals) => {
         if (code === 0) {
           resolve();

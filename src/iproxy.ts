@@ -2,7 +2,7 @@ import { EventEmitter } from 'events';
 import { createInterface } from 'readline';
 import { spawn, ChildProcess } from 'child_process';
 import { logger } from './logger';
-import { idle, executable, sleep } from './utils';
+import { idle, executable, sleep, python3Path } from './utils';
 import { join } from 'path';
 import { createConnection } from 'net';
 
@@ -19,7 +19,7 @@ export class IProxy extends EventEmitter {
 
     const py: string = join(__dirname, '..', 'backend', 'ios', 'iproxy.py');
     const pyArgs = [py, this.udid, this.remote.toString(), this.local.toString()];
-    const p = spawn(executable('python3'), pyArgs)
+    const p = spawn(python3Path(), pyArgs)
       .on('close', () => {
         logger.appendLine('iproxy is unexpectly terminated');
         this.emit('close');
