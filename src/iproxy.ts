@@ -17,7 +17,7 @@ export class IProxy extends EventEmitter {
   async start(): Promise<number> {
     this.local = await idle();
 
-    const py: string = join(__dirname, '..', 'backend', 'ios', 'iproxy.py');
+    const py: string = join(__dirname, '..', 'backend', 'fruit', 'iproxy.py');
     const pyArgs = [py, this.udid, this.remote.toString(), this.local.toString()];
     const p = spawn(python3Path(), pyArgs)
       .on('close', () => {
