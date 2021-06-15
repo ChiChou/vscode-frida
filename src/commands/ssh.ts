@@ -19,7 +19,7 @@ async function keygen(path: string): Promise<boolean> {
       shellArgs: ['-f', path],
     });
     term.show();
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       const disposable = window.onDidCloseTerminal(t => {
         if (t === term) {
           if (t.exitStatus?.code === 0) {
