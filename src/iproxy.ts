@@ -47,7 +47,7 @@ export class IProxy extends EventEmitter {
         });
 
         break;
-      } catch(e) {
+      } catch (e) {
         if (i === MAX - 1) {
           throw e;
         }

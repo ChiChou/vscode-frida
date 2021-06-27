@@ -57,7 +57,7 @@ class RemoteTool {
 
     try {
       await this.exec('id');
-    } catch(_) {
+    } catch (_) {
       logger.appendLine(`Shell is not avaliable on ${this.id}`);
       logger.appendLine(`reason: ${_}`);
 
@@ -299,7 +299,7 @@ export async function decrypt(node: TargetItem): Promise<void> {
     } else if (o === 'darwin') {
       detached('open', '-a', 'Finder', folder);
       found = true;
-    } 
+    }
 
     if (!found) {
       window.showWarningMessage('Your platform does not support this command');
@@ -338,7 +338,7 @@ export async function debug(node: TargetItem): Promise<void> {
   const lldb = new LLDB(node.device.id);
   try {
     await lldb.connect();
-  } catch(e) {
+  } catch (e) {
     if (await window.showErrorMessage(`${e}`, 'Deploy debugserver', 'Cancel') === 'Deploy debugserver') {
       setupDebugServer(node.device.id);
       return;
