@@ -48,14 +48,6 @@
 					],
 					"default": null,
 					"description": "Preferred directory to save ipa"
-				},
-				"frida.python3Path": {
-					"type": [
-						"string",
-						"null"
-					],
-					"default": "python",
-					"description": "the python3 path that you've installed frida-tool"
 				}
 			}
 		},
@@ -391,5 +383,6 @@
 	},
 	"dependencies": {
 		"lookpath": "^1.1.0"
-	}
+	},
+	"extensionDependencies": ["ms-python.python"]
 }

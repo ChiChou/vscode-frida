@@ -34,8 +34,9 @@ export function idle(): Promise<number> {
 }
 
 export function python3Path(): string {
-  // `python3` is't always exist , so we use `python` for default
-  let python3Path: string = vscode.workspace.getConfiguration('frida').get('python3Path') || 'python';
+  // use settings from Python extension
+  let python3Path = vscode.workspace.getConfiguration('python').get('pythonPath', 'python')
+
   if (platform() === 'win32' && !python3Path.endsWith('.exe')) {
     python3Path += '.exe'
   }
