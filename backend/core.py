@@ -43,8 +43,11 @@ def apps(device: frida.core.Device) -> list:
 
     def wrap(app):
         obj = {prop: getattr(app, prop) for prop in props}
-        obj['largeIcon'] = png.to_uri(app.get_large_icon())
-        obj['smallIcon'] = png.to_uri(app.get_small_icon())
+        try:
+            obj['largeIcon'] = png.to_uri(app.get_large_icon())
+            obj['smallIcon'] = png.to_uri(app.get_small_icon())
+        except AttributeError:
+            pass
         return obj
 
     return [wrap(app) for app in device.enumerate_applications()]
@@ -55,8 +58,11 @@ def ps(device: frida.core.Device) -> list:
 
     def wrap(p):
         obj = {prop: getattr(p, prop) for prop in props}
-        obj['largeIcon'] = png.to_uri(p.get_large_icon())
-        obj['smallIcon'] = png.to_uri(p.get_small_icon())
+        try:
+            obj['largeIcon'] = png.to_uri(p.get_large_icon())
+            obj['smallIcon'] = png.to_uri(p.get_small_icon())
+        except AttributeError:
+            pass
         return obj
 
     return [wrap(p) for p in device.enumerate_processes()]

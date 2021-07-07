@@ -30,6 +30,10 @@ def to_uri(icon):
     if not icon:
         return None
 
-    assert icon.rowstride == icon.width * 4
-    buf = encode(icon.pixels, icon.width, icon.height)
+    if type(icon) is dict:
+        buf = encode(icon['image'], icon['width'], icon['height'])
+    else:
+        assert icon.rowstride == icon.width * 4
+        buf = encode(icon.pixels, icon.width, icon.height)
+
     return 'data:image/png;base64,' + base64.b64encode(buf).decode('ascii')
