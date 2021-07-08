@@ -1,6 +1,6 @@
 from pathlib import Path
 import time
-import base64
+import tempfile
 
 try:
     import frida
@@ -53,43 +53,39 @@ def tmpicon(uid: str, params: dict):
     return None
 
 
-def apps(device: frida.core.Device) -> list:
-    props = ['identifier', 'name', 'pid']
-
-    def wrap(app):
-        obj = {prop: getattr(app, prop) for prop in props}
+def info_wrap(props, fmt):
+    def wrap(target):
+        obj = {prop: getattr(target, prop) for prop in props}
         
         # is new API?
-        params = getattr(app, 'parameters')
+        params = getattr(target, 'parameters')
         try:
-            obj['largeIcon'] = png.to_uri(app.get_large_icon())
-            obj['smallIcon'] = png.to_uri(app.get_small_icon())
+            obj['largeIcon'] = png.to_uri(target.get_large_icon())
+            obj['smallIcon'] = png.to_uri(target.get_small_icon())
         except AttributeError:
             if params is None:
                 raise RuntimeError('frida (%s) not compatable' % frida.__version__)
-            name = '%s-%s' % (device.id, app.pid or app.identifier)
-            obj['largeIcon'] = tmpicon(name, params)
+            obj['largeIcon'] = tmpicon(fmt(target), params)
         return obj
 
+    return wrap
+
+
+def apps(device: frida.core.Device) -> list:
+    props = ['identifier', 'name', 'pid']
+
+    def fmt(app):
+        return '%s-%s' % (device.id, app.pid or app.identifier)
+    wrap = info_wrap(props, fmt)
     return [wrap(app) for app in device.enumerate_applications(scope='full')]
 
 
 def ps(device: frida.core.Device) -> list:
     props = ['name', 'pid']
 
-    def wrap(p):
-        obj = {prop: getattr(p, prop) for prop in props}
-        try:
-            obj['largeIcon'] = png.to_uri(p.get_large_icon())
-            obj['smallIcon'] = png.to_uri(p.get_small_icon())
-        except AttributeError:
-            icons = getattr(p, 'parameters').get('icons', [])
-            for icon in icons:
-                if icon.get('format') == 'png':
-                    uri = 'data:image/png;base64,' + base64.b64encode(icon['image']).decode()
-                    obj['largeIcon'] = uri
-                    break
-        return obj
+    def fmt(p):
+        return '%s-%s' % (device.id, p.name or p.pid)
+    wrap = info_wrap(props, fmt)
 
     return [wrap(p) for p in device.enumerate_processes(scope='full')]
 
