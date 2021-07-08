@@ -39,21 +39,36 @@ def get_device(device_id: str) -> frida.core.Device:
         return frida.get_device(device_id, timeout=1)
 
 
+def tmpicon(uid: str, params: dict):
+    parent = Path(tempfile.gettempdir()) / '.vscode-frida'
+    parent.mkdir(parents=True, exist_ok=True)
+
+    icons = params.get('icons', [])
+    tmp = parent / ('icon-%s.png' % uid)
+    for icon in icons:
+        if icon.get('format') == 'png':
+            with tmp.open('wb') as fp:
+                fp.write(icon['image'])
+            return tmp.as_uri()
+    return None
+
+
 def apps(device: frida.core.Device) -> list:
     props = ['identifier', 'name', 'pid']
 
     def wrap(app):
         obj = {prop: getattr(app, prop) for prop in props}
+        
+        # is new API?
+        params = getattr(app, 'parameters')
         try:
             obj['largeIcon'] = png.to_uri(app.get_large_icon())
             obj['smallIcon'] = png.to_uri(app.get_small_icon())
         except AttributeError:
-            icons = getattr(app, 'parameters').get('icons', [])
-            for icon in icons:
-                if icon.get('format') == 'png':
-                    uri = 'data:image/png;base64,' + base64.b64encode(icon['image']).decode()
-                    obj['largeIcon'] = uri
-                    break
+            if params is None:
+                raise RuntimeError('frida (%s) not compatable' % frida.__version__)
+            name = '%s-%s' % (device.id, app.pid or app.identifier)
+            obj['largeIcon'] = tmpicon(name, params)
         return obj
 
     return [wrap(app) for app in device.enumerate_applications(scope='full')]
