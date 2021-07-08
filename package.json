@@ -157,12 +157,12 @@
 			},
 			{
 				"command": "frida.boilerplate.agent",
-				"title": "Clone TypeScript Agent Example",
+				"title": "Create Frida Agent",
 				"category": "Frida Boilerplate"
 			},
 			{
 				"command": "frida.boilerplate.module",
-				"title": "Clone TypeScript Module Example",
+				"title": "Create Frida CModule",
 				"category": "Frida Boilerplate"
 			},
 			{

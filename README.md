@@ -22,15 +22,6 @@ FlexDecrypt depends on SSH. You need to generate a public key before using it.
 
 User friendly UI
 
-### Clone Boilerplate
-
-[@oleavr](https://github.com/oleavr) has made two boilerplates so you can code in TypeScript!
-
-* Frida Boilerplate: Clone TypeScript Agent Example
-* Frida Boilerplate: Clone TypeScript Module Example
-
-![Clong Boilerplate from GitHub](resources/doc/clone.png)
-
 ### Debug Log
 
 Now supports both iOS syslog and Android logcat!
