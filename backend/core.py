@@ -1,5 +1,6 @@
 from pathlib import Path
 import time
+import base64
 
 try:
     import frida
@@ -47,10 +48,15 @@ def apps(device: frida.core.Device) -> list:
             obj['largeIcon'] = png.to_uri(app.get_large_icon())
             obj['smallIcon'] = png.to_uri(app.get_small_icon())
         except AttributeError:
-            pass
+            icons = getattr(app, 'parameters').get('icons', [])
+            for icon in icons:
+                if icon.get('format') == 'png':
+                    uri = 'data:image/png;base64,' + base64.b64encode(icon['image']).decode()
+                    obj['largeIcon'] = uri
+                    break
         return obj
 
-    return [wrap(app) for app in device.enumerate_applications()]
+    return [wrap(app) for app in device.enumerate_applications(scope='full')]
 
 
 def ps(device: frida.core.Device) -> list:
@@ -62,10 +68,15 @@ def ps(device: frida.core.Device) -> list:
             obj['largeIcon'] = png.to_uri(p.get_large_icon())
             obj['smallIcon'] = png.to_uri(p.get_small_icon())
         except AttributeError:
-            pass
+            icons = getattr(p, 'parameters').get('icons', [])
+            for icon in icons:
+                if icon.get('format') == 'png':
+                    uri = 'data:image/png;base64,' + base64.b64encode(icon['image']).decode()
+                    obj['largeIcon'] = uri
+                    break
         return obj
 
-    return [wrap(p) for p in device.enumerate_processes()]
+    return [wrap(p) for p in device.enumerate_processes(scope='full')]
 
 
 def find_port(device: frida.core.Device) -> int:
