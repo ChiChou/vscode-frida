@@ -34,11 +34,9 @@ export function idle(): Promise<number> {
 }
 
 export function python3Path(): string {
-  // use settings from Python extension
-  let python3Path = vscode.workspace.getConfiguration('python').get('pythonPath', 'python')
-
-  if (platform() === 'win32' && !python3Path.endsWith('.exe')) {
-    python3Path += '.exe'
-  }
-  return python3Path;
+  let interpreter = 'python3';
+  const pyext = vscode.extensions.getExtension('ms-python.python');
+  if (pyext) interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0];
+  if (platform() === 'win32' && !interpreter.endsWith('.exe')) interpreter += '.exe';
+  return interpreter;
 }
