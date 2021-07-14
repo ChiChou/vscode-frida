@@ -21,6 +21,10 @@ jobs:
         node-version: 14.x
     - run: npm install
     - run: npm install -g vsce
+    - run: npm install
+      working-​directory: agent
+    - run: npm run build
+      working-directory: agent
     - name: Publish
       run: npm run deploy
       env:
