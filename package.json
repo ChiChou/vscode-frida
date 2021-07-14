@@ -364,7 +364,7 @@
 		}
 	},
 	"scripts": {
-		"vscode:prepublish": "pushd agent; npm run build; popd; npm run compile",
+		"vscode:prepublish": "cd agent; npm run build; cd ..; npm run compile",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
 		"pretest": "npm run compile",
