@@ -21,9 +21,9 @@ jobs:
         node-version: 14.x
     - run: npm install
     - run: npm install -g vsce
-    - name: Build agent
-      working-​directory: ./agent
+    - name: Build Agent
       run: |
+        cd agent
         npm install
         npm run build
     - name: Publish
