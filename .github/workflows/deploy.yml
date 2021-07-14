@@ -22,10 +22,10 @@ jobs:
     - run: npm install
     - run: npm install -g vsce
     - name: Build agent
+      working-​directory: ./agent
       run: |
         npm install
         npm run build
-      working-​directory: ./agent
     - name: Publish
       run: npm run deploy
       env:
