@@ -9,3 +9,5 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 resources/doc/**
+agent/node_modules
+**/*.pyc
