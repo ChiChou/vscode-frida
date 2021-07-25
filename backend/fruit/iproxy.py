@@ -24,8 +24,9 @@ def make_handler(dev: frida.core.Device, port: int, buffer_size=4096):
             try:
                 while not reader.at_eof():
                     channel.write(await reader.read(buffer_size))
-            except e:
-                print('e', e)
+            except Exception as e:
+                sys.stderr.write('error:')
+                sys.stderr.write(str(e))
             finally:
                 channel.close()
 
