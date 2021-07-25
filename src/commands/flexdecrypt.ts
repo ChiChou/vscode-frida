@@ -211,7 +211,7 @@ class Decryptor extends RemoteTool {
 
     progress.report({ message: 'Decrypting MachO executables' });
     {
-      const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'decrypt.py');
+      const py: string = join(__dirname, '..', '..', 'backend', 'fruit', 'decrypt.py');
       const bin = python3Path();
       const args = [py, local, path, `${this.port}`, '-o', dest];
       await this.execInTerminal(bin, args);
@@ -233,7 +233,7 @@ export async function install(node: TargetItem): Promise<void> {
   }
 
   const port = await proxySSH(node.data.id);
-  const py: string = join(__dirname, '..', '..', 'backend', 'ios', 'get-flex.py');
+  const py: string = join(__dirname, '..', '..', 'backend', 'fruit', 'get-flex.py');
   const [shellPath, shellArgs] = platformize(python3Path(), [py, port.toString()]);
   const t = window.createTerminal({
     name: 'FlexDecrypt installer',
