@@ -1,11 +1,11 @@
 import subprocess
 import sys
-import traceback
 
 
 if len(sys.argv) > 1:
   try:
     subprocess.check_call(sys.argv[1:])
-  except subprocess.SubprocessError as e:
+  except (subprocess.SubprocessError, FileNotFoundError) as e:
     print(e)
+  finally:
     input('Press Enter to continue...')
