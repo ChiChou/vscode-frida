@@ -37,7 +37,7 @@ export async function init() {
     title: `Downloading typing info for frida-gum`,
     cancellable: false,
   }, (progress, token) => {
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       const req = httpGet(URL, resp => {
         const rawLen = resp.headers['content-length'];
         const len = rawLen ? parseInt(rawLen, 10) : NaN;
