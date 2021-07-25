@@ -70,9 +70,9 @@ export function setupDebugServer(id: string) {
 
 export async function launch(device: string, bundle: string): Promise<Number> {
   const params = ['-f', bundle, '--device', device, bundle, '--no-pause', '-q', '-e', 'Process.id'];
-  const [bin, args] = platformize('frida', params);
+  const args = ['-m', 'frida_tools.repl', ...params];
   return new Promise((resolve, reject) => {
-    execFile(bin, args, {}, (err, stdout) => {
+    execFile(python3Path(), args, {}, (err, stdout) => {
       if (err) {
         reject(err);
       } else {
@@ -87,10 +87,9 @@ export async function launch(device: string, bundle: string): Promise<Number> {
 }
 
 export function terminate(device: string, target: string) {
-  const [bin, args] = platformize('frida-kill', ['--device', device, target]);
-
+  const args = ['-m', 'frida_tools.kill', '--device', device, target];
   return new Promise((resolve, reject) => {
-    execFile(bin, args, {}, (err, stdout) => {
+    execFile(python3Path(), args, {}, (err, stdout) => {
       if (err) {
         reject(err);
       } else {

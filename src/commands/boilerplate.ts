@@ -26,8 +26,7 @@ async function create(template: string) {
     }
   }
 
-  const py: string = path.join(__dirname, '..', '..', 'backend', 'pause.py');
-  const args = [py, 'frida-create', template];
+  const args = ['-m', 'frida_tools.creator', template];
   const term = vscode.window.createTerminal({
     cwd: dest,
     name: 'Create Project',

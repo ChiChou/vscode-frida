@@ -17,6 +17,7 @@ async function keygen(path: string): Promise<boolean> {
       name: 'ssh-keygen',
       shellPath: 'ssh-keygen',
       shellArgs: ['-f', path],
+      hideFromUser: true,
     });
     term.show();
     await new Promise<void>((resolve, reject) => {
@@ -87,7 +88,8 @@ export async function shell(node: TargetItem) {
     window.createTerminal({
       name,
       shellArgs,
-      shellPath
+      shellPath,
+      hideFromUser: true,
     }).show();
   } else if (deviceType === 'Android') {
     const shellPath = executable('adb');
@@ -95,7 +97,8 @@ export async function shell(node: TargetItem) {
     window.createTerminal({
       name,
       shellArgs,
-      shellPath
+      shellPath,
+      hideFromUser: true,
     }).show();
   } else {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);

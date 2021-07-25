@@ -12,7 +12,7 @@ export async function explore(target: TargetItem) {
     return;
   }
 
-  const title = `Objection - ${target.label}`;
+  const name = `Objection - ${target.label}`;
 
   if (target instanceof AppItem || target instanceof ProcessItem) {
     let device: string[];
@@ -37,13 +37,18 @@ export async function explore(target: TargetItem) {
       try {
         gadget = (await launch(target.device.id, target.data.identifier)).toString();
       } catch (e) {
-        vscode.window.showWarningMessage(`Warning: failed to launch App ${target.data.identifier}`);
+        vscode.window.showWarningMessage(`Warning: failed to launch App ${target.data.identifier}\n${e}`);
         gadget = target.data.name;
       }
     }
 
-    const py: string = path.join(__dirname, '..', '..', 'backend', 'pause.py');
-    const args = [py, 'objection', '-g', gadget, ...device, 'explore'];
-    vscode.window.createTerminal(title, python3Path(), args).show();
+    const shellArgs = ['-m', 'objection.console.cli', '-g', gadget, ...device, 'explore'];
+    const shellPath = python3Path();
+    vscode.window.createTerminal({
+      name,
+      shellArgs,
+      shellPath,
+      hideFromUser: true,
+    }).show();
   }
 }

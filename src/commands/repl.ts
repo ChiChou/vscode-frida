@@ -2,19 +2,23 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
-import { platform, EOL } from 'os';
 import { DeviceType } from '../types';
 import { terminate } from '../driver/frida';
-import { refresh, sleep, executable, python3Path } from '../utils';
+import { refresh, python3Path } from '../utils';
 
 const terminals = new Set<vscode.Terminal>();
 
-function repl(args: string[], name: string, tool: string = 'frida') {
-  const title = `Frida - ${name}`;
-  const shellBin = python3Path();
+function repl(args: string[], id: string, tool: string = 'frida') {
+  const name = `Frida - ${id}`;
+  const shellPath = python3Path();
   const py = path.join(__dirname, '..', '..', 'backend', 'pause.py');
   const shellArgs = [py, tool, ...args];
-  const term = vscode.window.createTerminal(title, shellBin, shellArgs);
+  const term = vscode.window.createTerminal({
+    name,
+    shellPath,
+    shellArgs,
+    hideFromUser: true
+  });
   term.show();
   terminals.add(term);
 }
