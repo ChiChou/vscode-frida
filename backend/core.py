@@ -77,7 +77,11 @@ def apps(device: frida.core.Device) -> list:
     def fmt(app):
         return '%s-%s' % (device.id, app.pid or app.identifier)
     wrap = info_wrap(props, fmt)
-    return [wrap(app) for app in device.enumerate_applications(scope='full')]
+    try:
+        apps = device.enumerate_applications(scope='full')
+    except TypeError:
+        raise RuntimeError('Your frida python package is out of date. Please upgrade it')
+    return [wrap(app) for app in apps]
 
 
 def ps(device: frida.core.Device) -> list:
@@ -87,7 +91,11 @@ def ps(device: frida.core.Device) -> list:
         return '%s-%s' % (device.id, p.name or p.pid)
     wrap = info_wrap(props, fmt)
 
-    return [wrap(p) for p in device.enumerate_processes(scope='full')]
+    try:
+        ps = device.enumerate_processes(scope='full')
+    except TypeError:
+        raise RuntimeError('Your frida python package is out of date. Please upgrade it')
+    return [wrap(p) for p in ps]
 
 
 def find_port(device: frida.core.Device) -> int:
