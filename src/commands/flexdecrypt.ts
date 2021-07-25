@@ -243,7 +243,11 @@ export async function install(node: TargetItem): Promise<void> {
   t.show();
   const disposable = window.onDidCloseTerminal(term => {
     if (term === t) {
-      window.showInformationMessage(`FlexDecrypt installed on ${node.data.name}`, 'Dismiss');
+      if (term.exitStatus?.code === 0) {
+        window.showInformationMessage(`FlexDecrypt installed on ${node.data.name}`, 'Dismiss');
+      } else {
+        window.showErrorMessage('Failed to install FlexDecrypt');
+      }
       disposable.dispose();
     }
   });
