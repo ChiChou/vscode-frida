@@ -1,8 +1,7 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
-import { platformize } from '../driver/frida';
-import { python3Path } from '../utils';
+import { executable, python3Path } from '../utils';
+import { run } from '../term';
 
 
 async function create(template: string) {
@@ -27,33 +26,24 @@ async function create(template: string) {
   }
 
   const args = ['-m', 'frida_tools.creator', template];
-  const term = vscode.window.createTerminal({
+
+  await run({
     cwd: dest,
     name: 'Create Project',
     shellPath: python3Path(),
     shellArgs: args
   });
-  term.show();
 
-  const disposable = vscode.window.onDidCloseTerminal(terminal => {
-    if (terminal !== term) { return; }
-    if (!(workspaceFolders?.length)) {
-      vscode.commands.executeCommand('vscode.openFolder', dest);
-    }
-    npmInstall(dest.path);
-    disposable.dispose();
-  });  
-}
+  if (!(workspaceFolders?.length)) {
+    vscode.commands.executeCommand('vscode.openFolder', dest);
+  }
 
-function npmInstall(cwd: string) {
-  const [shellPath, shellArgs] = platformize('npm', ['install']);
-  const name = `npm install on ${cwd}`;
-  vscode.window.createTerminal({
-    cwd,
-    name,
-    shellPath,
-    shellArgs
-  }).show();
+  await run({
+    cwd: dest.path,
+    name: `npm install`,
+    shellPath: executable('npm'),
+    shellArgs: ['install']
+  });
 }
 
 export function agent() {

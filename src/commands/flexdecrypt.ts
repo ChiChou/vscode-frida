@@ -6,11 +6,12 @@ import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH, IProxy } from '../iproxy';
-import { platformize, devtype, port, location, copyid, setupDebugServer } from '../driver/frida';
+import { devtype, port, location, copyid, setupDebugServer } from '../driver/frida';
 import { executable, python3Path } from '../utils';
 import { platform } from 'os';
 import { logger } from '../logger';
 import { doCopyId } from './ssh';
+import { run } from '../term';
 
 
 const exec = promisify(cp.execFile);
@@ -234,23 +235,20 @@ export async function install(node: TargetItem): Promise<void> {
 
   const port = await proxySSH(node.data.id);
   const py: string = join(__dirname, '..', '..', 'backend', 'fruit', 'get-flex.py');
-  const [shellPath, shellArgs] = platformize(python3Path(), [py, port.toString()]);
-  const t = window.createTerminal({
-    name: 'FlexDecrypt installer',
-    shellPath,
-    shellArgs,
-  });
-  t.show();
-  const disposable = window.onDidCloseTerminal(term => {
-    if (term === t) {
-      if (term.exitStatus?.code === 0) {
-        window.showInformationMessage(`FlexDecrypt installed on ${node.data.name}`, 'Dismiss');
-      } else {
-        window.showErrorMessage('Failed to install FlexDecrypt');
-      }
-      disposable.dispose();
-    }
-  });
+  const shellArgs = [py, port.toString()];
+
+  try {
+    await run({
+      name: 'FlexDecrypt installer',
+      shellPath: python3Path(),
+      shellArgs,
+    });
+  } catch(e) {
+    window.showErrorMessage('Failed to install FlexDecrypt');
+    return;
+  }
+
+  window.showInformationMessage(`FlexDecrypt installed on ${node.data.name}`, 'Dismiss');
 }
 
 export async function decrypt(node: TargetItem): Promise<void> {

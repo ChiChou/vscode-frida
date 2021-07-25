@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
 
 import { launch } from '../driver/frida';
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
+import { run } from '../term';
 import { DeviceType } from '../types';
-import { executable, python3Path } from '../utils';
+import { python3Path } from '../utils';
 
 export async function explore(target: TargetItem) {
   if (!target) {
@@ -44,11 +44,10 @@ export async function explore(target: TargetItem) {
 
     const shellArgs = ['-m', 'objection.console.cli', '-g', gadget, ...device, 'explore'];
     const shellPath = python3Path();
-    vscode.window.createTerminal({
+    run({
       name,
       shellArgs,
       shellPath,
-      hideFromUser: true,
-    }).show();
+    });
   }
 }

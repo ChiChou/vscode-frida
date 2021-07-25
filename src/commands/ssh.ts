@@ -13,25 +13,15 @@ async function keygen(path: string): Promise<boolean> {
     'SSH key pair not found. Generate now?', 'Yes', 'Cancel');
   
   if (choice === 'Yes') {
-    const term = window.createTerminal({
-      name: 'ssh-keygen',
-      shellPath: 'ssh-keygen',
-      shellArgs: ['-f', path],
-      hideFromUser: true,
-    });
-    term.show();
-    await new Promise<void>((resolve, reject) => {
-      const disposable = window.onDidCloseTerminal(t => {
-        if (t === term) {
-          if (t.exitStatus?.code === 0) {
-            resolve();
-          } else {
-            reject(new Error('Failed to generate SSH key pair'));
-          }
-          disposable.dispose();
-        }
+    try {
+      await window.createTerminal({
+        name: 'ssh-keygen',
+        shellPath: executable('ssh-keygen'),
+        shellArgs: ['-f', path],
       });
-    });
+    } catch(_) {
+      throw new Error('Failed to generate SSH key pair');
+    }
 
     return true;
   } else {
