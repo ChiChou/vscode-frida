@@ -37,9 +37,10 @@ async function create(template: string) {
   term.show();
 
   const disposable = vscode.window.onDidCloseTerminal(terminal => {
-    if (terminal !== term) return;
-    if (!(workspaceFolders?.length))
+    if (terminal !== term) { return; }
+    if (!(workspaceFolders?.length)) {
       vscode.commands.executeCommand('vscode.openFolder', dest);
+    }
     npmInstall(dest.path);
     disposable.dispose();
   });  

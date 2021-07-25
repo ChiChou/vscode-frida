@@ -36,7 +36,7 @@ export function idle(): Promise<number> {
 export function python3Path(): string {
   let interpreter = 'python3';
   const pyext = vscode.extensions.getExtension('ms-python.python');
-  if (pyext) interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0];
-  if (platform() === 'win32' && !interpreter.endsWith('.exe')) interpreter += '.exe';
+  if (pyext) { interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0]; }
+  if (platform() === 'win32' && !interpreter.endsWith('.exe')) { interpreter += '.exe'; }
   return interpreter;
 }
