@@ -98,7 +98,7 @@ def ps(device: frida.core.Device) -> list:
     except TypeError:
         raise RuntimeError('Your frida python package is out of date. Please upgrade it')
     except frida.TransportError:
-        apps = device.enumerate_processes()
+        ps = device.enumerate_processes()
     return [wrap(p) for p in ps]
 
 
