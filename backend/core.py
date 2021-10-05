@@ -81,6 +81,8 @@ def apps(device: frida.core.Device) -> list:
         apps = device.enumerate_applications(scope='full')
     except TypeError:
         raise RuntimeError('Your frida python package is out of date. Please upgrade it')
+    except frida.TransportError:
+        apps = device.enumerate_applications()
     return [wrap(app) for app in apps]
 
 
@@ -95,6 +97,8 @@ def ps(device: frida.core.Device) -> list:
         ps = device.enumerate_processes(scope='full')
     except TypeError:
         raise RuntimeError('Your frida python package is out of date. Please upgrade it')
+    except frida.TransportError:
+        apps = device.enumerate_processes()
     return [wrap(p) for p in ps]
 
 
