@@ -75,13 +75,13 @@ class RemoteTool {
         await this.exec('which', tool);
       } catch (_) {
         remoteMissing.push(tool);
-        logger.appendLine(`[flexdecrypt] ERROR: failed to check the existence for ${tool}, reason:`);
+        logger.appendLine(`[fouldecrypt] ERROR: failed to check the existence for ${tool}, reason:`);
         logger.appendLine(`${_}`);
       }
     }
 
     if (remoteMissing.length) {
-      throw new Error(`FlexDecrypt requires these command(s) to be installed on device: ${remoteMissing.join(', ')}`);
+      throw new Error(`FoulDecrypt requires these command(s) to be installed on device: ${remoteMissing.join(', ')}`);
     }
 
     registry.add(this.id);
@@ -90,7 +90,7 @@ class RemoteTool {
 
   async execInTerminal(shellPath: string, shellArgs: string[]): Promise<void> {
     const t = window.createTerminal({
-      name: 'FlexDecrypt Utils',
+      name: 'FoulDecrypt Utils',
       shellPath,
       shellArgs
     });
@@ -108,7 +108,7 @@ class RemoteTool {
   }
 
   async download(remote: string): Promise<string> {
-    const cwd = await fsp.mkdtemp(join(tmpdir(), 'flex-'));
+    const cwd = await fsp.mkdtemp(join(tmpdir(), 'foul-'));
     const local = join(cwd, 'archive.zip');
     const [bin, arg] = this.scp(remote, local);
     await this.execInTerminal(bin, arg);
@@ -194,7 +194,7 @@ class LLDB extends RemoteTool {
 type Bar = Progress<{ message?: string; increment?: number }>;
 
 class Decryptor extends RemoteTool {
-  dependencies = ['zip', 'flexdecrypt'];
+  dependencies = ['zip', 'fouldecrypt'];
 
   async go(bundle: string, dest: string, progress: Bar): Promise<void> {
     progress.report({ message: 'Starting iproxy' });
@@ -234,21 +234,21 @@ export async function install(node: TargetItem): Promise<void> {
   }
 
   const port = await proxySSH(node.data.id);
-  const py: string = join(__dirname, '..', '..', 'backend', 'fruit', 'get-flex.py');
+  const py: string = join(__dirname, '..', '..', 'backend', 'fruit', 'get-foul.py');
   const shellArgs = [py, port.toString()];
 
   try {
     await run({
-      name: 'FlexDecrypt installer',
+      name: 'FoulDecrypt installer',
       shellPath: python3Path(),
       shellArgs,
     });
   } catch(e) {
-    window.showErrorMessage('Failed to install FlexDecrypt');
+    window.showErrorMessage('Failed to install FoulDecrypt');
     return;
   }
 
-  window.showInformationMessage(`FlexDecrypt installed on ${node.data.name}`, 'Dismiss');
+  window.showInformationMessage(`FoulDecrypt installed on ${node.data.name}`, 'Dismiss');
 }
 
 export async function decrypt(node: TargetItem): Promise<void> {
@@ -275,12 +275,12 @@ export async function decrypt(node: TargetItem): Promise<void> {
   const dec = new Decryptor(node.device.id);
   await window.withProgress({
     location: ProgressLocation.Notification,
-    title: 'FlexDecrypt running',
+    title: 'FoulDecrypt running',
     cancellable: false
   }, (progress) => dec.go(node.data.identifier, destination.fsPath, progress));
 
   const choice = await window.showInformationMessage(
-    'FlexDecrypt successfully finished', 'Open Folder', `Open ${name}`, 'Dismiss');
+    'FoulDecrypt successfully finished', 'Open Folder', `Open ${name}`, 'Dismiss');
   if (choice === `Open ${name}`) {
     commands.executeCommand('vscode.open', destination);
   } else if (choice === 'Open Folder') {
