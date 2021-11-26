@@ -7,7 +7,7 @@ import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vs
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH, IProxy } from '../iproxy';
 import { devtype, port, location, copyid, setupDebugServer } from '../driver/frida';
-import { executable, python3Path } from '../utils';
+import { executable, python3Path, showInFolder } from '../utils';
 import { platform } from 'os';
 import { logger } from '../logger';
 import { doCopyId } from './ssh';
@@ -284,28 +284,7 @@ export async function decrypt(node: TargetItem): Promise<void> {
   if (choice === `Open ${name}`) {
     commands.executeCommand('vscode.open', destination);
   } else if (choice === 'Open Folder') {
-    // todo: refactor me
-    const o = platform();
-    let found = false;
-    const detached = (bin: string, ...args: string[]) =>
-      cp.spawn(bin, args, { detached: true, stdio: 'ignore' }).unref();
-    if (o === 'win32') {
-      detached('explorer.exe', '/select,', destination.fsPath);
-      found = true;
-    } else if (o === 'linux') {
-      for (const tool of ['xdg-open', 'gnome-open']) {
-        detached(tool, folder);
-        found = true;
-        break;
-      }
-    } else if (o === 'darwin') {
-      detached('open', '-a', 'Finder', folder);
-      found = true;
-    }
-
-    if (!found) {
-      window.showWarningMessage('Your platform does not support this command');
-    }
+    showInFolder(destination);
   }
 }
 

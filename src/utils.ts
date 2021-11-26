@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as net from 'net';
+import * as cp from 'child_process';
 import { join } from 'path';
 import { platform } from 'os';
 
@@ -39,4 +40,30 @@ export function python3Path(): string {
   if (pyext) { interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0]; }
   if (platform() === 'win32' && !interpreter.endsWith('.exe')) { interpreter += '.exe'; }
   return interpreter;
+}
+
+export function showInFolder(destination: vscode.Uri): void {
+  const o = platform();
+  const detached = (bin: string, ...args: string[]) =>
+    cp.spawn(bin, args, { detached: true, stdio: 'ignore' }).unref();
+
+  const folder = vscode.Uri.joinPath(destination, '..').fsPath;
+  if (o === 'win32') {
+    detached('explorer.exe', '/select,', destination.fsPath);
+    return
+  } else if (o === 'linux') {
+    for (const tool of ['xdg-open', 'gnome-open']) {
+      try {
+        detached(tool, folder)
+        return
+      } catch(e) {
+        continue
+      }
+    }
+  } else if (o === 'darwin') {
+    detached('open', '-a', 'Finder', folder);
+    return;
+  }
+
+  vscode.window.showWarningMessage('Your platform does not support this command');
 }
