@@ -6,6 +6,7 @@ import { DeviceItem, TargetItem } from '../providers/devices';
 import { devtype, copyid as fridaCopyId } from '../driver/frida';
 import { ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
+import { run } from '../term';
 
 
 async function keygen(path: string): Promise<boolean> {
@@ -14,7 +15,7 @@ async function keygen(path: string): Promise<boolean> {
   
   if (choice === 'Yes') {
     try {
-      await window.createTerminal({
+      await run({
         name: 'ssh-keygen',
         shellPath: executable('ssh-keygen'),
         shellArgs: ['-f', path],
