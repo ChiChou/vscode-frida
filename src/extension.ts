@@ -12,7 +12,7 @@ import * as file from './commands/file';
 import * as repl from './commands/repl';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
-import * as flex from './commands/flexdecrypt';
+import * as lldb from './commands/lldb';
 import * as foul from './commands/fouldecrypt';
 import * as objection from './commands/objection';
 import * as clipboard from './commands/clipboard';
@@ -40,17 +40,15 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.browse', file.browse));
-
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.bundle.copy', clipboard.copy));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.name.copy', clipboard.copy));
-
+	
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installfoul', foul.install));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.fouldecrypt', foul.decrypt));
 
-	// todo: rename to lldb
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', flex.setupLLDBServer));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', lldb.setup));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', lldb.debug));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));
@@ -65,5 +63,5 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
 	iproxy.cleanup();
-	flex.cleanup();
+	lldb.cleanup();
 }

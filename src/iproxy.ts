@@ -2,9 +2,9 @@ import { EventEmitter } from 'events';
 import { createInterface } from 'readline';
 import { spawn, ChildProcess } from 'child_process';
 import { logger } from './logger';
-import { idle, executable, sleep, python3Path } from './utils';
-import { join } from 'path';
+import { idle, sleep, python3Path } from './utils';
 import { createConnection } from 'net';
+import { fruit } from './driver/backend';
 
 export class IProxy extends EventEmitter {
   p?: ChildProcess;
@@ -16,11 +16,11 @@ export class IProxy extends EventEmitter {
   async start(): Promise<number> {
     this.local = await idle();
 
-    const py: string = join(__dirname, '..', 'backend', 'fruit', 'iproxy.py');
+    const py: string = fruit('iproxy.py');
     const pyArgs = [py, this.udid, this.remote.toString(), this.local.toString()];
     const p = this.p = spawn(python3Path(), pyArgs)
       .on('close', () => {
-        logger.appendLine('iproxy is unexpectly terminated');
+        logger.appendLine('iproxy unexpectly terminated');
         this.emit('close');
       })
       .on('error', err => this.emit('error', err));

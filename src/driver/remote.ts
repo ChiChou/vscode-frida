@@ -18,17 +18,17 @@ const validated = new Map<string, Set<string>>();
 
 export class RemoteTool {
   dependencies: string[] = [];
-  iproxy?: IProxy;
+  sshProxy?: IProxy;
 
   constructor(public id: string) { }
 
   async connect() {
-    this.iproxy = await proxySSH(this.id);
+    this.sshProxy = await proxySSH(this.id);
     await this.checkRequirement();
   }
 
   get port() {
-    return this.iproxy?.local
+    return this.sshProxy?.local
   }
 
   async exec(...cmd: string[]) {
