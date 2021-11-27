@@ -78,7 +78,10 @@ const map = new Map<string, IProxy>();
 
 export async function ssh(uuid: string): Promise<IProxy> {
   const existing = map.get(uuid)
-  if (existing) return existing;
+  if (existing) {
+    existing.retain();
+    return existing;
+  }
 
   const iproxy = new IProxy('ssh', uuid);
   map.set(uuid, iproxy);
