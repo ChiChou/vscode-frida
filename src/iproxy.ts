@@ -6,11 +6,10 @@ import { idle, executable, sleep, python3Path } from './utils';
 import { join } from 'path';
 import { createConnection } from 'net';
 
-let singleton: IProxy | null = null;
-
 export class IProxy extends EventEmitter {
   p?: ChildProcess;
   local = 0;
+  refCount = 0;
 
   constructor(public remote: number | string, public udid: string) { super(); }
 
@@ -19,7 +18,7 @@ export class IProxy extends EventEmitter {
 
     const py: string = join(__dirname, '..', 'backend', 'fruit', 'iproxy.py');
     const pyArgs = [py, this.udid, this.remote.toString(), this.local.toString()];
-    const p = spawn(python3Path(), pyArgs)
+    const p = this.p = spawn(python3Path(), pyArgs)
       .on('close', () => {
         logger.appendLine('iproxy is unexpectly terminated');
         this.emit('close');
@@ -54,27 +53,41 @@ export class IProxy extends EventEmitter {
       }
     }
 
+    this.refCount = 1;
     return this.local;
   }
 
   stop() {
     if (this.p) { this.p.kill(); }
+    this.emit('close');
+  }
+
+  retain() {
+    this.refCount++;
+  }
+
+  release() {
+    this.refCount--;
+    if (this.refCount <= 0) {
+      this.stop();
+    }
   }
 }
 
-export async function ssh(uuid: string): Promise<number> {
-  if (singleton) { return singleton.local; }
+const map = new Map<string, IProxy>();
+
+export async function ssh(uuid: string): Promise<IProxy> {
+  const existing = map.get(uuid)
+  if (existing) return existing;
 
   const iproxy = new IProxy('ssh', uuid);
+  map.set(uuid, iproxy);
   await iproxy.start();
-  iproxy.on('close', () => { singleton = null; });
-  singleton = iproxy;
-  return singleton.local;
+  iproxy.on('close', () => { map.delete(uuid) });
+  return iproxy;
 }
 
 export function cleanup() {
-  if (singleton) {
-    singleton.stop();
-    singleton = null;
-  }
+  map.forEach(entry => entry.stop());
+  map.clear();
 }

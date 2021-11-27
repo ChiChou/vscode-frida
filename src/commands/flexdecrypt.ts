@@ -19,14 +19,18 @@ const validated = new Map<string, Set<string>>();
 const SHARED_ARGS = ['-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
 
 class RemoteTool {
-  port?: number;
   dependencies: string[] = [];
+  iproxy?: IProxy;
 
   constructor(public id: string) { }
 
   async connect() {
-    this.port = await proxySSH(this.id);
+    this.iproxy = await proxySSH(this.id);
     await this.checkRequirement();
+  }
+
+  get port() {
+    return this.iproxy?.local
   }
 
   async exec(...cmd: string[]) {
@@ -229,9 +233,9 @@ export async function install(node: TargetItem): Promise<void> {
     return;
   }
 
-  const port = await proxySSH(node.data.id);
+  const iproxy = await proxySSH(node.data.id);
   const py: string = join(__dirname, '..', '..', 'backend', 'fruit', 'get-foul.py');
-  const shellArgs = [py, port.toString()];
+  const shellArgs = [py, iproxy.local.toString()];
 
   try {
     await run({
@@ -242,8 +246,9 @@ export async function install(node: TargetItem): Promise<void> {
   } catch(e) {
     window.showErrorMessage('Failed to install FoulDecrypt');
     return;
+  } finally {
+    iproxy.release();
   }
-
   window.showInformationMessage(`FoulDecrypt installed on ${node.data.name}`, 'Dismiss');
 }
 
