@@ -45,11 +45,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.bundle.copy', clipboard.copy));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.name.copy', clipboard.copy));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installflex', foul.install));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', foul.decrypt));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installfoul', foul.install));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.fouldecrypt', foul.decrypt));
 
+	// todo: rename to lldb
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', flex.setupLLDBServer));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug)); // todo: move to another module
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));

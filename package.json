@@ -26,10 +26,10 @@
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.external.objection",
-		"onCommand:frida.external.flexdecrypt",
+		"onCommand:frida.external.fouldecrypt",
 		"onCommand:frida.external.lldb",
 		"onCommand:frida.external.setuplldb",
-		"onCommand:frida.external.installflex",
+		"onCommand:frida.external.installfoul",
 		"onCommand:frida.external.shell",
 		"onCommand:frida.external.copyid",
 		"onCommand:frida.external.sshkeygen",
@@ -132,13 +132,13 @@
 				"category": "iOS"
 			},
 			{
-				"command": "frida.external.flexdecrypt",
-				"title": "FlexDecrypt",
+				"command": "frida.external.fouldecrypt",
+				"title": "FoulDecrypt",
 				"category": "iOS"
 			},
 			{
-				"command": "frida.external.installflex",
-				"title": "Install FlexDecrypt",
+				"command": "frida.external.installfoul",
+				"title": "Install FoulDecrypt",
 				"category": "iOS"
 			},
 			{
@@ -220,7 +220,7 @@
 					"when": "false"
 				},
 				{
-					"command": "frida.external.flexdecrypt",
+					"command": "frida.external.fouldecrypt",
 					"when": "false"
 				},
 				{
@@ -232,7 +232,7 @@
 					"when": "false"
 				},
 				{
-					"command": "frida.external.installflex",
+					"command": "frida.external.installfoul",
 					"when": "false"
 				},
 				{
@@ -345,7 +345,7 @@
 					"group": "4_frida_external@2"
 				},
 				{
-					"command": "frida.external.flexdecrypt",
+					"command": "frida.external.fouldecrypt",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "4_frida_external@3"
 				},
@@ -355,7 +355,7 @@
 					"group": "1_frida_dev_external@1"
 				},
 				{
-					"command": "frida.external.installflex",
+					"command": "frida.external.installfoul",
 					"when": "viewItem == 'device|usb'",
 					"group": "2_frida_dev_setup@1"
 				},

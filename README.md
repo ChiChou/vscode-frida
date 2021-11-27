@@ -12,7 +12,7 @@
 
 [*] Optional. Only some of the functionalities rely on it
 
-FlexDecrypt depends on SSH. You need to generate a public key before using it.
+FoulDecrypt depends on SSH. You need to generate a public key before using it.
 
 ## Features
 
@@ -40,13 +40,11 @@ Now supports both iOS syslog and Android logcat!
 
 Open and activate an REPL at the bottom. Use the "frida" button at the top of any active `js` / `typescript` document, it will send the code to the active REPL.
 
-### FlexDecrypt
+### FoulDecrypt
 
-![FlexDecrypt](resources/doc/flexdecrypt.png)
+[FoulDecrypt](https://github.com/NyaMisty/fouldecrypt) by [NyaMisty](https://twitter.com/miscmisty) is based on FlexDecrypt but with bug fixes. Also there is no unnessary swift code base at all, making the package extremely slim. It almost act like a static decryptor, without running the actual app. So you don't have to worry about jailbreak detection or abnormal crash.
 
-[FlexDecrypt](https://github.com/JohnCoates/flexdecrypt) seems to be the best app decryptor so far. It almost act like a static decryptor, without running the actual app. So you don't have to worry about jailbreak detection or abnormal crash. The only problem is that is not so user-friendly, so I intergrated it and even replaced my own tool.
-
-This shortcut requires `zip` and `flexdecrypt` to be installed on iDevice. You need to run **Install FlexDecrypt** command before the first use.
+This shortcut requires `zip` and `fouldecrypt` to be installed on iDevice. You need to run **Install FoulDecrypt** command before the first use.
 
 ### Shell
 
