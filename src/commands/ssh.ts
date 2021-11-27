@@ -72,26 +72,22 @@ export async function shell(node: TargetItem) {
 
   const deviceType = await devtype(node.data.id);
   const name = `SSH: ${node.data.name}`;
+  let shellPath, shellArgs;
   if (deviceType === 'iOS') {
     const port = await proxySSH(node.data.id);
-    const shellPath = executable('ssh');
-    const shellArgs = ['-q', `-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
-    window.createTerminal({
-      name,
-      shellArgs,
-      shellPath,
-      hideFromUser: true,
-    }).show();
+    shellPath = executable('ssh');
+    shellArgs = ['-q', `-p${port}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
   } else if (deviceType === 'Android') {
-    const shellPath = executable('adb');
-    const shellArgs = ['-s', node.data.id, 'shell'];
-    window.createTerminal({
-      name,
-      shellArgs,
-      shellPath,
-      hideFromUser: true,
-    }).show();
+    shellPath = executable('adb');
+    shellArgs = ['-s', node.data.id, 'shell'];
   } else {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);
+    return;
   }
+  window.createTerminal({
+    name,
+    shellArgs,
+    shellPath,
+    hideFromUser: true,
+  }).show();
 }
