@@ -65,10 +65,13 @@ async def main(opt):
 
     import shutil
     import subprocess
-    if shutil.which('iproxy'):
-        output = subprocess.check_output(['iproxy', '--help'])
+    import os
+
+    cli = shutil.which('iproxy')
+    if cli:
+        output = subprocess.check_output([cli, '--help'])
         local_port = opt.local or find_free_port()
-        args = ['iproxy']
+        args = [cli]
         if b'LOCAL_PORT:DEVICE_PORT' in output: # new
             args += [f'{local_port}:{port}']
             if opt.device != 'usb':
@@ -78,9 +81,11 @@ async def main(opt):
             if opt.device != 'usb':
                 args += [opt.device]
 
-        print(args)
-        subprocess.call(args)
-        return
+        if sys.platform == 'win32':
+            subprocess.call(args)
+            return
+        else:
+            os.execv(cli, args)
 
     # fallback to python (bad performace)
     handler = make_handler(dev, port)
