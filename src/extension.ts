@@ -13,6 +13,7 @@ import * as repl from './commands/repl';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
 import * as flex from './commands/flexdecrypt';
+import * as foul from './commands/fouldecrypt';
 import * as objection from './commands/objection';
 import * as clipboard from './commands/clipboard';
 import * as boilerplate from './commands/boilerplate';
@@ -44,10 +45,12 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.bundle.copy', clipboard.copy));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.name.copy', clipboard.copy));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installflex', flex.install));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', flex.decrypt));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installflex', foul.install));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.flexdecrypt', foul.decrypt));
+
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', flex.setupLLDBServer));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug)); // todo: move to another module
+
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.sshkeygen', ssh.keygen));
