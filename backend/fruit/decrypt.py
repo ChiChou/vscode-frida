@@ -44,7 +44,7 @@ class Repack(BaseTool):
         remote_tmp = subprocess.check_output(self.ssh('mktemp')).decode().strip()
         escaped = '"' + abspath.replace('"', '\\"') + '"'
         subprocess.call(
-            self.ssh('/usr/bin/flexdecrypt', escaped, '--output', remote_tmp))
+            self.ssh('/usr/local/bin/fouldecrypt', escaped, remote_tmp))
         subprocess.call(self.scp(remote_tmp, tmp))
         subprocess.call(self.ssh('rm', remote_tmp))
         with open(tmp, 'rb') as fp:
