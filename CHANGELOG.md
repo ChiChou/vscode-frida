@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.3.0.12 - 27 Nov, 2021
+
+* Replace FlexDecrypt with Fouldecrypt
+* Bugfix: Shutdown iproxy when ref count is 0
+* Bugfix: Decryptor failes when App path has spaces
+
 ### v0.0.8 - 8 Aug, 2020
 
 * Bugfix: Attaching objection to a running application
