@@ -28,6 +28,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const psProvider = new DevicesProvider(ProviderType.Processes);
 	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
+
 	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', repl.spawn));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn.suspended', repl.spawnSuspended));
@@ -48,7 +49,8 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', flex.setupLLDBServer));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', flex.debug)); // todo: move to another module
 	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.sshcopyid));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.external.sshkeygen', ssh.keygen));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));

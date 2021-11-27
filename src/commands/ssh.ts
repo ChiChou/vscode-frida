@@ -1,5 +1,3 @@
-import { homedir } from 'os';
-import { join } from 'path';
 import { promises as fsp } from 'fs';
 import { window } from 'vscode';
 import { DeviceItem, TargetItem } from '../providers/devices';
@@ -7,9 +5,20 @@ import { devtype, copyid as fridaCopyId } from '../driver/frida';
 import { ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
 import { run } from '../term';
+import { keyPath } from '../libs/ssh';
 
 
-async function keygen(path: string): Promise<boolean> {
+export async function keygen(): Promise<boolean> {
+  const path = keyPath();
+
+  try {
+    await fsp.access(path);
+    window.showInformationMessage(`Private key (${path}) already exists`);
+    return Promise.resolve(true);
+  } catch(err) {
+
+  }
+
   const choice = await window.showErrorMessage(
     'SSH key pair not found. Generate now?', 'Yes', 'Cancel');
   
@@ -30,25 +39,13 @@ async function keygen(path: string): Promise<boolean> {
   }
 }
 
-export async function doCopyId(id: string) {
-  const privateKey = join(homedir(), '.ssh', 'id_rsa');
-
-  try {
-    await fsp.access(privateKey);
-  } catch(err) {
-    if (!await keygen(privateKey)) {
-      return false;
-    }
-  }
-
-  return fridaCopyId(id);
-}
-
-export async function sshcopyid(node: TargetItem) {
+export async function copyid(node: TargetItem) {
   if (!(node instanceof DeviceItem)) {
     window.showErrorMessage('This command is only avaliable on context menu');
     return;
   }
+
+  await keygen();
 
   const deviceType = await devtype(node.data.id);
   if (deviceType !== 'iOS') {
@@ -56,7 +53,7 @@ export async function sshcopyid(node: TargetItem) {
     return;
   }
 
-  const result = await doCopyId(node.data.id);
+  const result = await fridaCopyId(node.data.id);
   if (result) {
     window.showInformationMessage(`Succesfully installed SSH public key on "${node.data.name}"`);
   } else {

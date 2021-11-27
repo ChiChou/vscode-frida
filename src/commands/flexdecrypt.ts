@@ -6,11 +6,9 @@ import { promises as fsp } from 'fs';
 import { window, commands, Uri, workspace, Progress, ProgressLocation } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { ssh as proxySSH, IProxy } from '../iproxy';
-import { devtype, port, location, copyid, setupDebugServer } from '../driver/frida';
+import { devtype, port, location, setupDebugServer } from '../driver/frida';
 import { executable, python3Path, showInFolder } from '../utils';
-import { platform } from 'os';
 import { logger } from '../logger';
-import { doCopyId } from './ssh';
 import { run } from '../term';
 
 
@@ -62,9 +60,7 @@ class RemoteTool {
       logger.appendLine(`Shell is not avaliable on ${this.id}`);
       logger.appendLine(`reason: ${_}`);
 
-      if (!await doCopyId(this.id)) {
-        throw new Error('Failed to establish SSH tunnel to device. Unable to deploy SSH public key');
-      }
+      window.showErrorMessage('Unable to establish SSH connection to device');
     }
 
     const required = this.dependencies;

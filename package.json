@@ -32,6 +32,7 @@
 		"onCommand:frida.external.installflex",
 		"onCommand:frida.external.shell",
 		"onCommand:frida.external.copyid",
+		"onCommand:frida.external.sshkeygen",
 		"onCommand:frida.boilerplate.agent",
 		"onCommand:frida.boilerplate.module",
 		"onLanguage:javascript"
@@ -156,6 +157,11 @@
 				"category": "SSH over USB"
 			},
 			{
+				"command": "frida.external.sshkeygen",
+				"title": "Generate SSH Keypair",
+				"category": "SSH over USB"
+			},
+			{
 				"command": "frida.boilerplate.agent",
 				"title": "Create Frida Agent",
 				"category": "Frida Boilerplate"
@@ -236,6 +242,9 @@
 				{
 					"command": "frida.external.copyid",
 					"when": "false"
+				},
+				{
+					"command": "frida.external.sshkeygen"
 				},
 				{
 					"command": "frida.syslog",
