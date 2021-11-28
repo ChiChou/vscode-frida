@@ -321,12 +321,12 @@
 				},
 				{
 					"command": "frida.external.lldb",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"when": "!isWindows && view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "2_frida_process@2"
 				},
 				{
 					"command": "frida.external.lldb",
-					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"when": "!isWindows && view == fridaPs && viewItem =~ /^process\\|/",
 					"group": "2_frida_process@2"
 				},
 				{
