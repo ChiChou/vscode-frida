@@ -1,6 +1,10 @@
 # Change Log
 
-### v0.3.0.12 - 27 Nov, 2021
+### v0.3.14 - 25 Jan, 2022
+
+* Fix `iproxy` command
+
+### v0.3.12 - 27 Nov, 2021
 
 * Replace FlexDecrypt with Fouldecrypt
 * Bugfix: Shutdown iproxy when ref count is 0
