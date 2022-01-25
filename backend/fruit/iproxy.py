@@ -77,7 +77,7 @@ async def main(opt):
             if opt.device != 'usb':
                 args += ['-u', opt.device]
         else:
-            args += [str(local_port), str(port)]            
+            args += [str(local_port), str(port)]
             if opt.device != 'usb':
                 if b'--udid UDID' in output:
                     args += ['--udid']
