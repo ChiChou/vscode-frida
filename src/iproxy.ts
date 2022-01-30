@@ -30,7 +30,7 @@ export class IProxy extends EventEmitter {
       rl.on('line', (line: string) => logger.appendLine(`[iproxy ${this.remote}] ${line}`));
     }
 
-    const MAX = 5;
+    const MAX = 50;
     for (let i = 0; i < MAX; i++) {
       await sleep(100);
 
