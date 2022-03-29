@@ -35,6 +35,10 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
 
 export abstract class TargetItem extends vscode.TreeItem {
   abstract children(): Thenable<TargetItem[]>;
+  abstract tooltip?: string;
+  abstract description?: string;
+  abstract iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri; } | vscode.ThemeIcon | undefined;
+  abstract contextValue?: string | undefined;
 }
 
 export class DeviceItem extends TargetItem {
@@ -101,6 +105,8 @@ export class NotFound extends TargetItem {
   };
 
   contextValue = 'empty';
+
+  description = '';
 }
 
 export class AppItem extends TargetItem {
