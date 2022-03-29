@@ -1,5 +1,10 @@
 # Change Log
 
+### v0.3.16 - 29 Mar, 2022
+
+* Ask to install frida-tools when not found
+* Fix issue #26 when multiple python interpreters are present
+
 ### v0.3.14 - 25 Jan, 2022
 
 * Fix `iproxy` command
