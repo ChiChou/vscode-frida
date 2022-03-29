@@ -8,11 +8,11 @@ import { refresh, python3Path } from '../utils';
 
 const terminals = new Set<vscode.Terminal>();
 
-function repl(args: string[], id: string, tool: string = 'frida') {
+function repl(args: string[], id: string) {
   const name = `Frida - ${id}`;
   const shellPath = python3Path();
   const py = path.join(__dirname, '..', '..', 'backend', 'pause.py');
-  const shellArgs = [py, tool, ...args];
+  const shellArgs = [py, shellPath, '-m', 'frida_tools.repl', ...args];
   const term = vscode.window.createTerminal({
     name,
     shellPath,
