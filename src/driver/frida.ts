@@ -5,6 +5,8 @@ import { logger } from '../logger';
 
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
 import { python3Path } from '../utils';
+import { run } from '../term';
+import { window } from 'vscode';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
 
@@ -12,11 +14,21 @@ export function exec(...args: string[]): Promise<any> {
   return new Promise((resolve, reject) => {
     execFile(python3Path(), [py, ...args], {}, (err, stdout, stderr) => {
       if (err) {
+        if (stderr.includes('Unable to import frida')) {
+          window.showErrorMessage('Frida python module not detected. Do you want to install now?', 'Install', 'Calcel')
+            .then(selected => {
+              if (selected === 'Install') {
+                run({
+                  shellPath: python3Path(),
+                  shellArgs: ['-m', 'pip', 'install', 'frida-tools']
+                });
+              }
+          });
+        }
         logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
-        logger.appendLine(stdout);
         logger.appendLine(stderr);
         logger.appendLine(`Exited with ${err.code}`);
-        reject(new Error(stdout));
+        reject(new Error(stderr));
       } else {
         resolve(JSON.parse(stdout));
       }

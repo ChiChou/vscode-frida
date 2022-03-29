@@ -122,7 +122,7 @@ if __name__ == '__main__':
         try:
             result = main(args)
         except Exception as e:
-            print(e)
+            sys.stderr.write(e)
             sys.exit(-1)
 
     import json

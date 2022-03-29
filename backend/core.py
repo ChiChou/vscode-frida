@@ -5,8 +5,8 @@ import tempfile
 try:
     import frida
 except ImportError:
-    print('Unable to import frida. Please ensure you have installed frida-tools via pip')
     import sys
+    sys.stderr.write('Unable to import frida. Please ensure you have installed frida-tools via pip\n')
     sys.exit(-1)
 
 

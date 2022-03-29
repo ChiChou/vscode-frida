@@ -21,6 +21,7 @@
 		"onCommand:frida.attach",
 		"onCommand:frida.spawn",
 		"onCommand:frida.spawn.suspended",
+		"onCommand:frida.device.connect",
 		"onCommand:frida.ps.refresh",
 		"onCommand:frida.app.refresh",
 		"onCommand:frida.syslog",
@@ -68,6 +69,15 @@
 				"icon": {
 					"light": "resources/light/refresh.svg",
 					"dark": "resources/dark/refresh.svg"
+				},
+				"category": "Frida"
+			},
+			{
+				"command": "frida.device.connect",
+				"title": "Connect Remote Device",
+				"icon": {
+					"light": "resources/light/add.svg",
+					"dark": "resources/dark/add.svg"
 				},
 				"category": "Frida"
 			},

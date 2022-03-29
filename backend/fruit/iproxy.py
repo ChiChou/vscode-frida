@@ -92,7 +92,7 @@ async def main(opt):
     # fallback to python (bad performace)
     handler = make_handler(dev, port)
     server = await asyncio.start_server(handler, '127.0.0.1', port=opt.local, start_serving=False)
-    print('waiting for connection', file=sys.stderr, flush=True)
+    sys.stdout.write('waiting for connection\n')
     # _, local_port = server.sockets[0].getsockname()
     # print(local_port, flush=True)
 
