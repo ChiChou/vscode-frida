@@ -50,6 +50,6 @@ export async function copyid(id: string) {
 
     content.push(id);
     const joint = content.join('\n') + '\n';
-    return write(file, joint);
+    return write(file, joint).then(() => {});
   }
 }
