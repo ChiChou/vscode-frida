@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.3.17 - 05 Aug, 2022
+
+* Bring back `execute` command
+
 ### v0.3.16 - 29 Mar, 2022
 
 * Ask to install frida-tools when not found
