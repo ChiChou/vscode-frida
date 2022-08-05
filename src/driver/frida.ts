@@ -6,13 +6,42 @@ import { logger } from '../logger';
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
 import { python3Path } from '../utils';
 import { run } from '../term';
-import { window } from 'vscode';
+import { window, workspace } from 'vscode';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
 
+const remoteHosts = new Set<string>()
+function loadRemoteHosts() {
+  const hosts = workspace.getConfiguration('frida').get<Array<string>>('remoteHosts');
+  if (Array.isArray(hosts)) {
+    hosts.forEach(host => {
+      if (typeof host === 'string') {
+        remoteHosts.add(host);
+      }
+    });
+  }
+}
+
+loadRemoteHosts();
+
+function saveRemoteHosts() {
+  workspace.getConfiguration('frida').update('remoteHosts', Array.from(remoteHosts), true);
+}
+
+export function connect(remote: string) {
+  remoteHosts.add(remote);
+  saveRemoteHosts();
+}
+
+export function disconnect(remote: string) {
+  remoteHosts.delete(remote);
+  saveRemoteHosts();
+}
+
 export function exec(...args: string[]): Promise<any> {
+  const remoteDevices = remoteHosts.size > 0 ? ['--remote', Array.from(remoteHosts).join(',')] : []
   return new Promise((resolve, reject) => {
-    execFile(python3Path(), [py, ...args], {}, (err, stdout, stderr) => {
+    execFile(python3Path(), [py, ...remoteDevices, ...args], {}, (err, stdout, stderr) => {
       if (err) {
         if (stderr.includes('Unable to import frida')) {
           window.showErrorMessage('Frida python module not detected. Do you want to install now?', 'Install', 'Calcel')
@@ -68,8 +97,15 @@ export function setupDebugServer(id: string) {
   return exec('sign-debugserver', id);
 }
 
+function deviceParam(device: string) {
+  const prefix = 'socket@';
+  return device.startsWith(prefix) ?
+    ['-H', device.substring(prefix.length)] :
+    ['--device', device];
+}
+
 export async function launch(device: string, bundle: string): Promise<Number> {
-  const params = ['-f', bundle, '--device', device, bundle, '--no-pause', '-q', '-e', 'Process.id'];
+  const params = ['-f', bundle, ...deviceParam(device), bundle, '--no-pause', '-q', '-e', 'Process.id'];
   const args = ['-m', 'frida_tools.repl', ...params];
   return new Promise((resolve, reject) => {
     execFile(python3Path(), args, {}, (err, stdout) => {
@@ -87,7 +123,7 @@ export async function launch(device: string, bundle: string): Promise<Number> {
 }
 
 export function terminate(device: string, target: string) {
-  const args = ['-m', 'frida_tools.kill', '--device', device, target];
+  const args = ['-m', 'frida_tools.kill', ...deviceParam(device), target];
   return new Promise((resolve, reject) => {
     execFile(python3Path(), args, {}, (err, stdout) => {
       if (err) {

@@ -15,6 +15,13 @@ def main(args):
     from backend.fruit.debugserver import setup
     from backend.fruit.installer import apps
 
+    if args.remote:
+        import frida
+        remote_list = args.remote.split(',')
+        mgr = frida.get_device_manager()
+        for host in remote_list:
+            mgr.add_remote_device(host)
+
     if args.action == 'devices':
         return core.devices()
 
@@ -90,6 +97,7 @@ if __name__ == '__main__':
     group.required = True
 
     parser = argparse.ArgumentParser(description='frida driver')
+    parser.add_argument('--remote', type=str)
     subparsers = parser.add_subparsers(dest='action', required=True)
     subparsers.add_parser('devices')
     subparsers.add_parser('apps', parents=[requires_device])

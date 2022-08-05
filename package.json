@@ -24,6 +24,7 @@
 		"onCommand:frida.device.connect",
 		"onCommand:frida.ps.refresh",
 		"onCommand:frida.app.refresh",
+		"onCommand:frida.remote.add",
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.external.objection",
@@ -74,8 +75,8 @@
 				"category": "Frida"
 			},
 			{
-				"command": "frida.device.connect",
-				"title": "Connect Remote Device",
+				"command": "frida.remote.add",
+				"title": "Connect Remote Device...",
 				"icon": {
 					"light": "resources/light/add.svg",
 					"dark": "resources/dark/add.svg"
@@ -230,6 +231,9 @@
 					"command": "frida.apps.refresh"
 				},
 				{
+					"command": "frida.remote.add"
+				},
+				{
 					"command": "frida.typing.init"
 				},
 				{
@@ -301,14 +305,24 @@
 			],
 			"view/title": [
 				{
+					"command": "frida.remote.add",
+					"when": "view == fridaApps",
+					"group": "navigation@1"
+				},
+				{
 					"command": "frida.apps.refresh",
 					"when": "view == fridaApps",
+					"group": "navigation@2"
+				},
+				{
+					"command": "frida.remote.add",
+					"when": "view == fridaPs",
 					"group": "navigation@1"
 				},
 				{
 					"command": "frida.ps.refresh",
 					"when": "view == fridaPs",
-					"group": "navigation@1"
+					"group": "navigation@2"
 				}
 			],
 			"view/item/context": [

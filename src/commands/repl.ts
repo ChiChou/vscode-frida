@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
 import { DeviceType } from '../types';
-import { terminate } from '../driver/frida';
+import { connect, terminate } from '../driver/frida';
 import { refresh, python3Path, sleep } from '../utils';
 import { EOL, platform } from 'os';
 
@@ -26,13 +26,26 @@ function repl(args: string[], id: string) {
 
 vscode.window.onDidCloseTerminal(t => terminals.delete(t));
 
+function expandDevParam(node: AppItem | ProcessItem) {
+  switch (node.device.type) {
+    case DeviceType.Local:
+      return [];
+    case DeviceType.Remote:
+      return ['-H', node.device.id.substring('socket@'.length)];
+    case DeviceType.USB:
+      return ['-U'];
+    default:
+      return ['--device', node.device.id];
+  }
+}
+
 export function spawn(node?: AppItem) {
   if (!node) {
     vscode.window.showInformationMessage('Please use this command in the context menu of frida sidebar');
     return;
   }
 
-  repl(['-f', node.data.identifier, '--device', node.device.id, '--no-pause'], node.data.name);
+  repl(['-f', node.data.identifier, ...expandDevParam(node), '--no-pause'], node.data.name);
   refresh();
 }
 
@@ -42,7 +55,7 @@ export function spawnSuspended(node?: AppItem) {
     return;
   }
 
-  repl(['-f', node.data.identifier, '--device', node.device.id], node.data.name);
+  repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
   refresh();
 }
 
@@ -70,8 +83,7 @@ export function attach(node?: TargetItem) {
       vscode.window.showErrorMessage(`App "${node.data.name}" must be running before attaching to it`);
     }
 
-    const device = node.device.type === DeviceType.Local ? [] : ['--device', node.device.id];
-    repl([node.data.pid.toString(), ...device], node.data.pid.toString());
+    repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString());
   }
 }
 
@@ -113,4 +125,19 @@ export async function exec() {
   term.sendText(text);
   await sleep(100);
   term.sendText(EOL);
+}
+
+export async function addRemote() {
+  const host = await vscode.window.showInputBox({
+    placeHolder: "192.168.1.2:27042",
+    prompt: "Host or IP of the remote device",
+    value: ''
+  });
+
+  if (typeof host !== 'string' || host.length === 0) {
+    return;
+  }
+
+  connect(host);
+  refresh();
 }
