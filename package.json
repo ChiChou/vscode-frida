@@ -10,7 +10,7 @@
 	"description": "Unofficial frida workbench for VSCode",
 	"version": "0.3.17",
 	"engines": {
-		"vscode": "^1.45.1"
+		"vscode": "^1.69.1"
 	},
 	"categories": [
 		"Other"
