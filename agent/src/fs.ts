@@ -1,4 +1,4 @@
-import { FileStat, FileType } from '../vscode';
+import { FileStat, FileType } from '../vscode.js';
 import * as fs from 'fs';
 
 export abstract class FileSystem {

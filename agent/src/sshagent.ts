@@ -1,4 +1,4 @@
-import { unlinkSync, writeFileSync, readFileSync, createWriteStream } from 'fs';
+import { unlinkSync, readFileSync, createWriteStream } from 'fs';
 
 const system = new NativeFunction(
   Module.findExportByName(null, 'system')!, 'int', ['pointer']);

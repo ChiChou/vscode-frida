@@ -1,6 +1,6 @@
-import * as fs from './fs';
-import { start, stop } from './log';
-import { copyid, signDebugserver } from './sshagent';
+import * as fs from './fs.js';
+import { start, stop } from './log.js';
+import { copyid, signDebugserver } from './sshagent.js';
 
 const ping = () => Process.id;
 
