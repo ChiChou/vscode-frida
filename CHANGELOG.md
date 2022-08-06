@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.3.19 - 06 Aug, 2022
+
+* Supports connecting / disconnecting remote devices
+
 ### v0.3.17 - 05 Aug, 2022
 
 * Bring back `execute` command
