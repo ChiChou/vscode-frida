@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
+import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { DeviceType } from '../types';
-import { connect, terminate } from '../driver/frida';
+import { connect, disconnect, terminate } from '../driver/frida';
 import { refresh, python3Path, sleep } from '../utils';
 import { EOL, platform } from 'os';
 
@@ -139,5 +139,12 @@ export async function addRemote() {
   }
 
   connect(host);
+  refresh();
+}
+
+export function delRemote(node?: TargetItem) {
+  if (node instanceof DeviceItem && node.data.type === DeviceType.Remote) {
+    disconnect(node.data.id.substring('socket@'.length));
+  }
   refresh();
 }

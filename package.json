@@ -25,6 +25,7 @@
 		"onCommand:frida.ps.refresh",
 		"onCommand:frida.app.refresh",
 		"onCommand:frida.remote.add",
+		"onCommand:frida.remote.remove",
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.external.objection",
@@ -80,6 +81,15 @@
 				"icon": {
 					"light": "resources/light/add.svg",
 					"dark": "resources/dark/add.svg"
+				},
+				"category": "Frida"
+			},
+			{
+				"command": "frida.remote.remove",
+				"title": "Disconnect Remote Device...",
+				"icon": {
+					"light": "resources/light/del.svg",
+					"dark": "resources/dark/del.svg"
 				},
 				"category": "Frida"
 			},
@@ -234,6 +244,9 @@
 					"command": "frida.remote.add"
 				},
 				{
+					"command": "frida.remote.remove"
+				},
+				{
 					"command": "frida.typing.init"
 				},
 				{
@@ -326,6 +339,16 @@
 				}
 			],
 			"view/item/context": [
+				{
+					"command": "frida.remote.remove",
+					"when": "view == fridaApps && viewItem =~ /^device\\|socket@/",
+					"group": "inline"
+				},
+				{
+					"command": "frida.remote.remove",
+					"when": "view == fridaPs && viewItem =~ /^device\\|socket@/",
+					"group": "inline"
+				},
 				{
 					"command": "frida.attach",
 					"when": "view == fridaApps && viewItem == 'app|running'",

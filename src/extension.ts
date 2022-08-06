@@ -37,6 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(vscode.commands.registerCommand('frida.kill', repl.kill));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.snippet.execute', repl.exec));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.remote.add', repl.addRemote));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.remote.remove', repl.delRemote));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog', syslog.show));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));

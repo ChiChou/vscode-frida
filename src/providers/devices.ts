@@ -80,7 +80,7 @@ export class DeviceItem extends TargetItem {
 
   get contextValue() {
     // todo: Android / iOS
-    return `device|${this.data.type}`;
+    return `device|${this.data.id}`;
   }
 
 }
