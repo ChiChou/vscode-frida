@@ -3,9 +3,11 @@ import * as path from 'path';
 
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { DeviceType } from '../types';
-import { connect, disconnect, terminate } from '../driver/frida';
+import { terminate } from '../driver/frida';
+import { connect, disconnect } from '../driver/remote';
 import { refresh, python3Path, sleep } from '../utils';
 import { EOL, platform } from 'os';
+import { all } from '../driver/remote';
 
 const terminals = new Set<vscode.Terminal>();
 
@@ -142,8 +144,13 @@ export async function addRemote() {
   refresh();
 }
 
-export function delRemote(node?: TargetItem) {
-  if (node instanceof DeviceItem && node.data.type === DeviceType.Remote) {
+export async function delRemote(node?: TargetItem) {
+  if (!node) {
+    const selected = await vscode.window.showQuickPick(all());
+    if (typeof selected === 'string') {
+      disconnect(selected);
+    }
+  } else if (node instanceof DeviceItem && node.data.type === DeviceType.Remote) {
     disconnect(node.data.id.substring('socket@'.length));
   }
   refresh();

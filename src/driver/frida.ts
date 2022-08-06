@@ -6,40 +6,13 @@ import { logger } from '../logger';
 import { VSCodeWriteFileOptions } from '../providers/filesystem';
 import { python3Path } from '../utils';
 import { run } from '../term';
-import { window, workspace } from 'vscode';
+import { window } from 'vscode';
+import { asParam } from './remote';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
 
-const remoteHosts = new Set<string>()
-function loadRemoteHosts() {
-  const hosts = workspace.getConfiguration('frida').get<Array<string>>('remoteHosts');
-  if (Array.isArray(hosts)) {
-    hosts.forEach(host => {
-      if (typeof host === 'string') {
-        remoteHosts.add(host);
-      }
-    });
-  }
-}
-
-loadRemoteHosts();
-
-function saveRemoteHosts() {
-  workspace.getConfiguration('frida').update('remoteHosts', Array.from(remoteHosts), true);
-}
-
-export function connect(remote: string) {
-  remoteHosts.add(remote);
-  saveRemoteHosts();
-}
-
-export function disconnect(remote: string) {
-  remoteHosts.delete(remote);
-  saveRemoteHosts();
-}
-
 export function exec(...args: string[]): Promise<any> {
-  const remoteDevices = remoteHosts.size > 0 ? ['--remote', Array.from(remoteHosts).join(',')] : []
+  const remoteDevices = asParam();
   return new Promise((resolve, reject) => {
     execFile(python3Path(), [py, ...remoteDevices, ...args], {}, (err, stdout, stderr) => {
       if (err) {
