@@ -42,29 +42,21 @@ function expandDevParam(node: AppItem | ProcessItem) {
 }
 
 export function spawn(node?: AppItem) {
-  if (!node) {
-    vscode.window.showInformationMessage('Please use this command in the context menu of frida sidebar');
-    return;
-  }
+  if (!node) return;
 
   repl(['-f', node.data.identifier, ...expandDevParam(node), '--no-pause'], node.data.name);
   refresh();
 }
 
 export function spawnSuspended(node?: AppItem) {
-  if (!node) {
-    vscode.window.showInformationMessage('Please use this command in the context menu of frida sidebar');
-    return;
-  }
+  if (!node) return;
 
   repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
   refresh();
 }
 
 export function kill(node?: TargetItem) {
-  if (!node) {
-    return;
-  }
+  if (!node) return;
 
   if ((node instanceof AppItem && node.data.pid) || node instanceof ProcessItem) {
     terminate(node.device.id, node.data.pid.toString());
@@ -75,10 +67,7 @@ export function kill(node?: TargetItem) {
 }
 
 export function attach(node?: TargetItem) {
-  if (!node) {
-    // todo: select from list
-    return;
-  }
+  if (!node) return;
 
   if (node instanceof AppItem || node instanceof ProcessItem) {
     if (!node.data.pid) {
