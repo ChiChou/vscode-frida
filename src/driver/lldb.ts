@@ -1,7 +1,7 @@
 import * as cp from 'child_process';
 import { IProxy } from "../iproxy";
 import { location, port } from './frida';
-import { RemoteTool } from "./remote";
+import { RemoteTool } from "./ssh";
 
 const LLDB_PATH = '/usr/bin/debugserver';
 

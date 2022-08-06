@@ -3,7 +3,7 @@ import { logger } from "../logger";
 import { python3Path } from "../utils";
 import { fruit } from "./backend";
 import { location } from "./frida";
-import { RemoteTool } from "./remote";
+import { RemoteTool } from "./ssh";
 
 type Bar = Progress<{ message?: string; increment?: number }>;
 
