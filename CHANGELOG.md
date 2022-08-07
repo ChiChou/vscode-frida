@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.4.2 - 07 Aug, 2022
+
+* Bugfix: Debug config only works for local device
+* Bugfix: Debug config does not handle attaching to app properly
+* Bugfix: Context menu for USB devices is missing
+
 ### v0.4.0 - 07 Aug, 2022
 
 * Supports frida js debug!
