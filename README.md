@@ -56,7 +56,6 @@ All the SSH related commands take port 22 as the default port. If you are on `ch
 
 ## Todo
 
-* Handle device connection and disconnection. Support remote TCP
 * More Android features
 * More mobile security terminal tools intergration
 
