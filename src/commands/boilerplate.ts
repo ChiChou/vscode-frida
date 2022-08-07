@@ -75,7 +75,7 @@ function* tokenize(cmd: string) {
 }
 
 export async function debug(node?: AppItem | ProcessItem) {
-  if (!node) return;
+  if (!node) { return; }
 
   const { activeTextEditor, showInformationMessage, showInputBox } = vscode.window;
   const { workspaceFolders } = vscode.workspace;
@@ -98,8 +98,8 @@ export async function debug(node?: AppItem | ProcessItem) {
       if (await fsp.access(file, fsc.F_OK).then(() => true).catch(() => false)) {
         const msg = `${file} already exists. Do you want to overwrite it?`;
         const answer = await showInformationMessage(msg, 'Yes', 'No');
-        if (answer === 'No') return;
-        if (answer === 'Yes') break; // only have to answer yes once
+        if (answer === 'No') { return; }
+        if (answer === 'Yes') { break; } // only have to answer yes once
       }
     }
   }
@@ -136,7 +136,7 @@ export async function debug(node?: AppItem | ProcessItem) {
   });
 
   // user cancelled
-  if (!userInput) return;
+  if (!userInput) { return; }
 
   // copy launch.json to workspace
   await new Promise<boolean>((resolve, reject) => {

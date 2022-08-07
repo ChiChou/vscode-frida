@@ -52,14 +52,14 @@ export function showInFolder(destination: vscode.Uri): void {
   const folder = vscode.Uri.joinPath(destination, '..').fsPath;
   if (o === 'win32') {
     detached('explorer.exe', '/select,', destination.fsPath);
-    return
+    return;
   } else if (o === 'linux') {
     for (const tool of ['xdg-open', 'gnome-open']) {
       try {
-        detached(tool, folder)
-        return
+        detached(tool, folder);
+        return;
       } catch(e) {
-        continue
+        continue;
       }
     }
   } else if (o === 'darwin') {

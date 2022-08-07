@@ -28,7 +28,7 @@ export class RemoteTool {
   }
 
   get port() {
-    return this.sshProxy?.local
+    return this.sshProxy?.local;
   }
 
   async exec(...cmd: string[]) {
@@ -38,10 +38,10 @@ export class RemoteTool {
 
   ssh(...cmd: string[]): [string, string[]] {
     const escaped = cmd.map(s => {
-      if (s.includes(' ') || s.includes('"'))
-        return `"${s.replace(/"/g, '\\"')}"`;  
-      return s;
-    })
+      return (s.includes(' ') || s.includes('"')) ?
+        `"${s.replace(/"/g, '\\"')}"` :
+        s;
+    });
     return [executable('ssh'), [...SHARED_ARGS, '-q', `-p${this.port}`, 'root@localhost', ...escaped]];
   }
 
@@ -92,7 +92,7 @@ export class RemoteTool {
   }
 
   async execInTerminal(shellPath: string, shellArgs: string[]): Promise<void> {
-    const escape = (args: string[]) => args.map(a => `"${a.replace(/"/g, '\\"')}"`).join(' ')
+    const escape = (args: string[]) => args.map(a => `"${a.replace(/"/g, '\\"')}"`).join(' ');
     logger.appendLine(`[fouldecrypt] Execute command: ${shellPath} ${escape(shellArgs)}`);
     return run({
       name: 'FoulDecrypt Utils',
