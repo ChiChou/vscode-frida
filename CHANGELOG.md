@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.4.0 - 07 Aug, 2022
+
+* Supports frida js debug!
+
 ### v0.3.19 - 06 Aug, 2022
 
 * Supports connecting / disconnecting remote devices
