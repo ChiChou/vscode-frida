@@ -5,7 +5,7 @@ import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devic
 import { DeviceType } from '../types';
 import { terminate } from '../driver/frida';
 import { connect, disconnect } from '../driver/remote';
-import { refresh, python3Path, sleep } from '../utils';
+import { refresh, python3Path, sleep, expandDevParam } from '../utils';
 import { EOL, platform } from 'os';
 import { all } from '../driver/remote';
 
@@ -27,19 +27,6 @@ function repl(args: string[], id: string) {
 }
 
 vscode.window.onDidCloseTerminal(t => terminals.delete(t));
-
-function expandDevParam(node: AppItem | ProcessItem) {
-  switch (node.device.type) {
-    case DeviceType.Local:
-      return [];
-    case DeviceType.Remote:
-      return ['-H', node.device.id.substring('socket@'.length)];
-    case DeviceType.USB:
-      return ['-U'];
-    default:
-      return ['--device', node.device.id];
-  }
-}
 
 export function spawn(node?: AppItem) {
   if (!node) return;

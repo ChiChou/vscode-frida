@@ -1,7 +1,8 @@
 import * as vscode from 'vscode';
-import { promises as fsp } from 'fs';
+import { join as joinPath } from 'path';
+import { promises as fsp, constants as fsc, createReadStream, createWriteStream } from 'fs';
 
-import { executable, python3Path, resource } from '../utils';
+import { executable, expandDevParam, python3Path, resource } from '../utils';
 import { AppItem, ProcessItem } from '../providers/devices';
 import { run } from '../term';
 
@@ -56,8 +57,27 @@ export function module() {
   return create('module');
 }
 
+function* tokenize(cmd: string) {
+  let inQuote = false;
+  let buf = [];
+  for (const c of cmd) {
+    if (c === '\"') {
+      inQuote = !inQuote;
+    } else if (c === ' ' && !inQuote) {
+      yield buf.join('');
+      buf.length = 0;
+    } else {
+      buf.push(c);
+    }
+  }
+
+  yield buf.join('');
+}
+
 export async function debug(node?: AppItem | ProcessItem) {
-  const { activeTextEditor, activeTerminal, showInformationMessage } = vscode.window;
+  if (!node) return;
+
+  const { activeTextEditor, showInformationMessage, showInputBox } = vscode.window;
   const { workspaceFolders } = vscode.workspace;
 
   if (!workspaceFolders?.length) {
@@ -65,14 +85,71 @@ export async function debug(node?: AppItem | ProcessItem) {
     return;
   }
 
+  const FILE_LAUNCH = 'launch.json';
+  const FILE_TASKS = 'tasks.json';
+
   const dest = workspaceFolders[0].uri;
-  const template = async (name: string) => {
-    const source = await fsp.readFile(resource('templates', name).fsPath, 'utf8');
-    return JSON.parse(source);
+  const launchJSON = joinPath(dest.fsPath, '.vscode', FILE_LAUNCH);
+  const tasksJSON = joinPath(dest.fsPath, '.vscode', FILE_TASKS);
+
+  {
+    // check if launch.json exists    
+    for (const file of [launchJSON, tasksJSON]) {
+      if (await fsp.access(file, fsc.F_OK).then(() => true).catch(() => false)) {
+        const msg = `${file} already exists. Do you want to overwrite it?`;
+        const answer = await showInformationMessage(msg, 'Yes', 'No');
+        if (answer === 'No') return;
+        if (answer === 'Yes') break; // only have to answer yes once
+      }
+    }
   }
 
-  const tasks = await template('tasks.json');
-  const launch = await template('launch.json');
+  let cmd: string[] = [];
+  // create debug command line
+  cmd.push.apply(expandDevParam(node));
 
-  // todo: get input from user
+  if (node instanceof AppItem) {
+    if (node.data.pid) {
+      cmd.push(node.data.identifier); // attach to app
+    } else {
+      cmd.push('-f', node.data.identifier, '--no-pause'); // spawn
+    }
+  } else if (node instanceof ProcessItem) {
+    cmd.push(node.data.pid.toString()); // attach to pid
+  }
+
+  // attach current document to the target
+  if (activeTextEditor && !activeTextEditor.document.isDirty) {
+    const { fsPath } = activeTextEditor.document.uri;
+    cmd.push('-l', fsPath.includes(' ') ? `"${fsPath}"` : fsPath);
+  }
+
+  // enable v8 debug
+  cmd.push('--runtime=v8', '--debug');
+
+  const placeHolder = cmd.join(' ');
+  const userInput = await showInputBox({
+    placeHolder,
+    prompt: "Debug Command",
+    value: placeHolder,
+  });
+
+  // user cancelled
+  if (!userInput) return;
+
+  // copy launch.json to workspace
+  await new Promise<boolean>((resolve, reject) => {
+    createReadStream(resource('templates', FILE_LAUNCH).fsPath)
+      .pipe(createWriteStream(launchJSON))
+      .on('finish', () => resolve(true))
+      .on('error', (err) => reject(err));
+  });
+
+  const tasksTemplatePath = resource('templates', FILE_TASKS).fsPath;
+  const content = JSON.parse(await fsp.readFile(tasksTemplatePath, 'utf8'));
+  // replace the command line in tasks.json
+  content.tasks[0].args = [...tokenize(userInput)];
+  await fsp.writeFile(tasksJSON, JSON.stringify(content, null, 2));
+
+  showInformationMessage('Debug config added to workspace. Press F5 to start debugging.');
 }

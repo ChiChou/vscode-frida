@@ -3,6 +3,8 @@ import * as net from 'net';
 import * as cp from 'child_process';
 import { join } from 'path';
 import { platform } from 'os';
+import { DeviceType } from './types';
+import { AppItem, ProcessItem } from './providers/devices';
 
 export function resource(...paths: string[]): vscode.Uri {
   const file = join(__dirname, '..', 'resources', ...paths);
@@ -66,4 +68,17 @@ export function showInFolder(destination: vscode.Uri): void {
   }
 
   vscode.window.showWarningMessage('Your platform does not support this command');
+}
+
+export function expandDevParam(node: AppItem | ProcessItem) {
+  switch (node.device.type) {
+    case DeviceType.Local:
+      return [];
+    case DeviceType.Remote:
+      return ['-H', node.device.id.substring('socket@'.length)];
+    case DeviceType.USB:
+      return ['-U'];
+    default:
+      return ['--device', node.device.id];
+  }
 }
