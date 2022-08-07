@@ -1,0 +1,35 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "isBackground": true,
+      "label": "frida",
+      "command": "frida",
+      "args": [
+        "explorer.exe",
+        "-l",
+        "pid.js",
+        "--debug",
+        "--runtime=v8"
+      ],
+      "type": "shell",
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+          }
+        }
+      ]
+    }
+  ]
+}
