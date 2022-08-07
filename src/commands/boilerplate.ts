@@ -104,15 +104,17 @@ export async function debug(node?: AppItem | ProcessItem) {
     }
   }
 
+  const quote = (s: string) => s.includes(' ') ? `"${s}"` : s;
+
   let cmd: string[] = [];
   // create debug command line
-  cmd.push.apply(expandDevParam(node));
+  cmd.push(...expandDevParam(node));
 
   if (node instanceof AppItem) {
     if (node.data.pid) {
-      cmd.push(node.data.identifier); // attach to app
+      cmd.push(quote(node.data.name)); // attach to app
     } else {
-      cmd.push('-f', node.data.identifier, '--no-pause'); // spawn
+      cmd.push('-f', quote(node.data.identifier), '--no-pause'); // spawn
     }
   } else if (node instanceof ProcessItem) {
     cmd.push(node.data.pid.toString()); // attach to pid
@@ -120,8 +122,7 @@ export async function debug(node?: AppItem | ProcessItem) {
 
   // attach current document to the target
   if (activeTextEditor && !activeTextEditor.document.isDirty) {
-    const { fsPath } = activeTextEditor.document.uri;
-    cmd.push('-l', fsPath.includes(' ') ? `"${fsPath}"` : fsPath);
+    cmd.push('-l', quote(activeTextEditor.document.uri.fsPath));
   }
 
   // enable v8 debug
