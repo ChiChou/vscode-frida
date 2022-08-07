@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import * as ipc from '../driver/frida';
 
 import { resource } from '../utils';
-import { ProviderType, App, Process, Device } from '../types';
+import { ProviderType, App, Process, Device, DeviceType } from '../types';
 
 export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
 
@@ -80,6 +80,9 @@ export class DeviceItem extends TargetItem {
 
   get contextValue() {
     // todo: Android / iOS
+    if (this.data.type === DeviceType.USB)
+      return 'device|usb';
+
     return `device|${this.data.id}`;
   }
 
