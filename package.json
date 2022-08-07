@@ -21,6 +21,7 @@
 		"onCommand:frida.attach",
 		"onCommand:frida.spawn",
 		"onCommand:frida.spawn.suspended",
+		"onCommand:frida.debug.setup",
 		"onCommand:frida.device.connect",
 		"onCommand:frida.ps.refresh",
 		"onCommand:frida.app.refresh",
@@ -127,6 +128,11 @@
 			{
 				"command": "frida.kill",
 				"title": "End Process",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.debug.setup",
+				"title": "Create Debugger Configuration",
 				"category": "Frida"
 			},
 			{
@@ -297,6 +303,10 @@
 					"when": "false"
 				},
 				{
+					"command": "frida.debug.setup",
+					"when": "false"
+				},
+				{
 					"command": "frida.spawn.suspended",
 					"when": "false"
 				},
@@ -363,6 +373,16 @@
 					"command": "frida.spawn",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "inline"
+				},
+				{
+					"command": "frida.debug.setup",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "1_frida_info@1"
+				},
+				{
+					"command": "frida.debug.setup",
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
+					"group": "1_frida_info@1"
 				},
 				{
 					"command": "frida.bundle.copy",

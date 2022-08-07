@@ -59,6 +59,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
 	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));
+	context.subscriptions.push(vscode.commands.registerCommand('frida.debug.setup', boilerplate.debug));
 
 	context.subscriptions.push(vscode.commands.registerCommand('frida.typing.init', typing.init));
 }
