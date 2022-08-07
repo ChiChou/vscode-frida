@@ -1,9 +1,8 @@
 import { join } from 'path';
-import { execFile, spawn } from 'child_process';
+import { execFile } from 'child_process';
 import { Device, App, Process } from '../types';
 import { logger } from '../logger';
 
-import { VSCodeWriteFileOptions } from '../providers/filesystem';
 import { python3Path } from '../utils';
 import { run } from '../term';
 import { window } from 'vscode';
@@ -108,38 +107,3 @@ export function terminate(device: string, target: string) {
   });
 }
 
-export namespace fs {
-  export async function download(device: string, pid: number, uri: string): Promise<Uint8Array> {
-    const args = [py, 'download', uri, '--device', device, '--pid', pid.toString()];
-
-    return new Promise((resolve, reject) => {
-      const p = spawn(python3Path(), args);
-      const parts: Buffer[] = [];
-      p.stdout.on('data', data => parts.push(data));
-      p.on('close', (code, signal) => {
-        if (code === 0) {
-          resolve(new Uint8Array(Buffer.concat(parts)));
-        } else {
-          reject(new Error(`process exited with code ${code}`));
-        }
-      });
-    });
-  }
-
-  export async function upload(device: string, pid: number, uri: string, content: Uint8Array,
-    options: VSCodeWriteFileOptions): Promise<void> {
-    // todo: options
-    const args = [py, 'upload', uri, '--device', device, '--pid', pid.toString()];
-    return new Promise((resolve, reject) => {
-      const p = spawn(python3Path(), args);
-      p.on('close', (code: number, signal: NodeJS.Signals) => {
-        if (code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`process exited with code ${code}`));
-        }
-      });
-      p.stdin.end(Buffer.from(content));
-    });
-  }
-}

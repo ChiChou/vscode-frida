@@ -4,7 +4,6 @@ import * as vscode from 'vscode';
 
 import { ProviderType } from './types';
 import { DevicesProvider } from './providers/devices';
-import { FileSystemProvider } from './providers/filesystem';
 
 import * as iproxy from './iproxy';
 import * as ssh from './commands/ssh';
@@ -19,10 +18,6 @@ import * as clipboard from './commands/clipboard';
 import * as boilerplate from './commands/boilerplate';
 
 export function activate(context: vscode.ExtensionContext) {
-	const fs = new FileSystemProvider();
-	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('frida-app', fs, { isCaseSensitive: true }));
-	context.subscriptions.push(vscode.workspace.registerFileSystemProvider('frida-pid', fs, { isCaseSensitive: true }));
-
 	const appsProvider = new DevicesProvider(ProviderType.Apps);
 	vscode.window.registerTreeDataProvider('fridaApps', appsProvider);
 	context.subscriptions.push(vscode.commands.registerCommand('frida.apps.refresh', () => appsProvider.refresh()));
