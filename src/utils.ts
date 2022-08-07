@@ -77,7 +77,7 @@ export function expandDevParam(node: AppItem | ProcessItem) {
     case DeviceType.Remote:
       return ['-H', node.device.id.substring('socket@'.length)];
     case DeviceType.USB:
-      return ['-U'];
+      // return ['-U'];
     default:
       return ['--device', node.device.id];
   }
