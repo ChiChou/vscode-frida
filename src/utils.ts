@@ -38,8 +38,12 @@ export function idle(): Promise<number> {
 
 export function python3Path(): string {
   let interpreter = 'python3';
-  const pyext = vscode.extensions.getExtension('ms-python.python');
-  if (pyext) { interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0]; }
+  try {
+    const pyext = vscode.extensions.getExtension('ms-python.python');
+    if (pyext) { interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0]; }
+  } catch(_) {
+
+  }
   if (platform() === 'win32' && !interpreter.endsWith('.exe')) { interpreter += '.exe'; }
   return interpreter;
 }
