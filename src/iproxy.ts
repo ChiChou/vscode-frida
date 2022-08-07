@@ -30,6 +30,8 @@ export class IProxy extends EventEmitter {
       rl.on('line', (line: string) => logger.appendLine(`[iproxy ${this.remote}] ${line}`));
     }
 
+    process.on('beforeExit', () => p.kill());
+
     const MAX = 50;
     for (let i = 0; i < MAX; i++) {
       await sleep(100);
