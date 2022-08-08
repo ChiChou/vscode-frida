@@ -89,19 +89,29 @@ export async function debug(node?: AppItem | ProcessItem) {
   const FILE_TASKS = 'tasks.json';
 
   const dest = workspaceFolders[0].uri;
-  const launchJSON = joinPath(dest.fsPath, '.vscode', FILE_LAUNCH);
-  const tasksJSON = joinPath(dest.fsPath, '.vscode', FILE_TASKS);
 
-  {
+  const folder = joinPath(dest.fsPath, '.vscode');
+  const launchJSON = joinPath(folder, FILE_LAUNCH);
+  const tasksJSON = joinPath(folder, FILE_TASKS);
+
+  const isDir = (path: string) =>
+    fsp.stat(path).then(stat => stat.isDirectory()).catch(() => false);
+
+  const isFile = (path: string) =>
+    fsp.stat(path).then(stat => stat.isFile()).catch(() => false);
+
+  if (await isDir(folder)) {
     // check if launch.json exists    
     for (const file of [launchJSON, tasksJSON]) {
-      if (await fsp.access(file, fsc.F_OK).then(() => true).catch(() => false)) {
+      if (await isFile(file)) {
         const msg = `${file} already exists. Do you want to overwrite it?`;
         const answer = await showInformationMessage(msg, 'Yes', 'No');
         if (answer === 'No') { return; }
         if (answer === 'Yes') { break; } // only have to answer yes once
       }
     }
+  } else {
+    await fsp.mkdir(folder);
   }
 
   const quote = (s: string) => s.includes(' ') ? `"${s}"` : s;
