@@ -170,7 +170,7 @@ def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Sessio
     return session
 
 
-# TODO: rename _agent.js
 def read_agent():
-    with (Path(__file__).parent.parent / 'agent' / '_agent.js').open('r', encoding='utf8') as fp:
+    filename = Path(__file__).parent.parent / 'agent' / '_agent.js'
+    with (filename).open('r', encoding='utf8', newline='\n') as fp:
         return fp.read()
