@@ -28,7 +28,7 @@ async function create(template: string) {
     }
   }
 
-  const args = ['-m', 'frida_tools.creator', template];
+  const args = ['-m', 'frida_tools.creator', '-t', template];
 
   await run({
     cwd: dest,
