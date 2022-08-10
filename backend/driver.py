@@ -9,8 +9,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def main(args):
     from backend import core, rpc, syslog
-    from backend.file import upload, download
-    from backend.fs import FileSystem
     from backend.fruit.copyid import install
     from backend.fruit.debugserver import setup
     from backend.fruit.installer import apps
@@ -62,22 +60,6 @@ def main(args):
         syslog.pipe(agent)
         return
 
-    fs = FileSystem(agent)
-
-    if args.action == 'fs':
-        method = getattr(fs, args.method)
-        return method(*args.args)
-
-    if args.action == 'download':
-        download(fs, args.path)
-        return
-
-    if args.action == 'upload':
-        upload(fs, args.path)
-        return
-
-    raise RuntimeError('NOTREACHED')
-
 
 if __name__ == '__main__':
     import argparse
@@ -114,13 +96,6 @@ if __name__ == '__main__':
     rpc_parser.add_argument('args', metavar='N', nargs='*', default=[])
 
     subparsers.add_parser('syslog', parents=[requires_app])
-    subparsers.add_parser('download', parents=[requires_app, requires_path])
-    subparsers.add_parser('upload', parents=[requires_app, requires_path])
-
-    fs_parser = subparsers.add_parser('fs', parents=[requires_app])
-    fs_parser.add_argument(
-        'method', choices=['cp', 'mkdir', 'rm', 'ls', 'mv', 'stat'])
-    fs_parser.add_argument('args', metavar='N', nargs='*', default=[])
 
     args = parser.parse_args()
 
