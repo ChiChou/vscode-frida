@@ -135,7 +135,7 @@ def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Sessio
         raise ValueError('app "%s" not found' % bundle)
 
     if app.pid > 0:
-        if device.get_frontmost_application(identifiers=[bundle]):
+        if device.get_frontmost_application().identifier == bundle:
             return device.attach(app.pid)
 
         raise RuntimeError(
