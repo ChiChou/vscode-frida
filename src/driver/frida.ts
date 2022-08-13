@@ -69,6 +69,14 @@ export function setupDebugServer(id: string) {
   return exec('sign-debugserver', id);
 }
 
+export function lockdownSyslog(id: string, bundleOrPid: string[]) {
+  return run({
+    name: `Syslog: ${bundleOrPid}`,
+    shellPath: python3Path(),
+    shellArgs: [py, 'syslog2', '--device', id, ...bundleOrPid]
+  });
+}
+
 function deviceParam(device: string) {
   const prefix = 'socket@';
   return device.startsWith(prefix) ?

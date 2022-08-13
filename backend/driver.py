@@ -48,6 +48,9 @@ def main(args):
     if args.action == 'location':
         return next(app['Path'] for app in apps(device) if app['CFBundleIdentifier'] == args.bundle)
 
+    if args.action == 'syslog2':
+        return syslog.start(device, pid=args.pid, bundle=args.app)
+
     target = args.pid or args.name
     agent = rpc.ProcessAgent(device, target) if target else \
         rpc.AppAgent(device, args.app)
@@ -96,10 +99,11 @@ if __name__ == '__main__':
     rpc_parser.add_argument('args', metavar='N', nargs='*', default=[])
 
     subparsers.add_parser('syslog', parents=[requires_app])
+    subparsers.add_parser('syslog2', parents=[requires_app])
 
     args = parser.parse_args()
 
-    if 'DEBUG' in os.environ:
+    if 'DEBUG' in os.environ or args.action == 'syslog2':
         result = main(args)
     else:
         try:

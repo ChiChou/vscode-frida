@@ -113,6 +113,7 @@ def find_port(device: frida.core.Device) -> int:
 
 
 def device_type(device: frida.core.Device) -> str:
+    # todo: use query_system_parameters
     mapping = {
         'SpringBoard': 'iOS',
         'Dock': 'macOS',
@@ -127,19 +128,25 @@ def device_type(device: frida.core.Device) -> str:
         return 'Linux'
 
 
-def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Session:
+def find_app(device: frida.core.Device, bundle: str):
     try:
         app = next(app for app in device.enumerate_applications()
                    if app.identifier == bundle)
     except StopIteration:
         raise ValueError('app "%s" not found' % bundle)
 
+    return app
+
+
+def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Session:
+    app = find_app(device, bundle)
+
     if app.pid > 0:
-        if device.get_frontmost_application(identifiers=[bundle]):
+        frontmost = device.get_frontmost_application()
+        if frontmost and frontmost.identifier == bundle:
             return device.attach(app.pid)
 
-        raise RuntimeError(
-            'Unable to attach to "%s"(%d) as it is a background app.' % (bundle, app.pid))
+        device.kill(app.pid)
 
     devtype = device_type(device)
     if devtype == 'Android':
