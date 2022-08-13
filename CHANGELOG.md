@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.4.6 - 13 Aug, 2022
+
+* add idevicesyslog
+
 ### v0.4.2 - 07 Aug, 2022
 
 * Bugfix: Debug config only works for local device

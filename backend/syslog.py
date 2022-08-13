@@ -58,13 +58,13 @@ class Level(Enum):
 
 
 def parse_level(level_text: str) -> Level:
-    if level_text == '<Notice>':
+    if level_text == b'<Notice>':
         return Level.Notice
 
-    if level_text == '<Warning>':
+    if level_text == b'<Warning>':
         return Level.Warning
 
-    if level_text == '<Error>':
+    if level_text == b'<Error>':
         return Level.Error
 
     return Level.Unknown
