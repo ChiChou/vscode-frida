@@ -18,45 +18,49 @@ import * as clipboard from './commands/clipboard';
 import * as boilerplate from './commands/boilerplate';
 
 export function activate(context: vscode.ExtensionContext) {
+	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
+	const push = (item: vscode.Disposable) => context.subscriptions.push(item);
+
 	const appsProvider = new DevicesProvider(ProviderType.Apps);
 	vscode.window.registerTreeDataProvider('fridaApps', appsProvider);
-	context.subscriptions.push(vscode.commands.registerCommand('frida.apps.refresh', () => appsProvider.refresh()));
+
+	push(register('frida.apps.refresh', () => appsProvider.refresh()));
 
 	const psProvider = new DevicesProvider(ProviderType.Processes);
 	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.ps.refresh', () => psProvider.refresh()));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn', repl.spawn));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.spawn.suspended', repl.spawnSuspended));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.attach', repl.attach));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.kill', repl.kill));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.snippet.execute', repl.exec));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.remote.add', repl.addRemote));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.remote.remove', repl.delRemote));
+	push(register('frida.ps.refresh', () => psProvider.refresh()));
+	push(register('frida.spawn', repl.spawn));
+	push(register('frida.spawn.suspended', repl.spawnSuspended));
+	push(register('frida.attach', repl.attach));
+	push(register('frida.kill', repl.kill));
+	push(register('frida.snippet.execute', repl.exec));
+	push(register('frida.remote.add', repl.addRemote));
+	push(register('frida.remote.remove', repl.delRemote));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog', syslog.show));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.syslog.vacuum', syslog.vacuum));
+	push(register('frida.syslog', syslog.show));
+	push(register('frida.syslog.vacuum', syslog.vacuum));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.browse', file.browse));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.bundle.copy', clipboard.copy));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.name.copy', clipboard.copy));
+	push(register('frida.browse', file.browse));
+	push(register('frida.bundle.copy', clipboard.copy));
+	push(register('frida.name.copy', clipboard.copy));
 	
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.objection', objection.explore));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.installfoul', foul.install));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.fouldecrypt', foul.decrypt));
+	push(register('frida.external.objection', objection.explore));
+	push(register('frida.external.installfoul', foul.install));
+	push(register('frida.external.fouldecrypt', foul.decrypt));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.setuplldb', lldb.setup));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.lldb', lldb.debug));
+	push(register('frida.external.setuplldb', lldb.setup));
+	push(register('frida.external.lldb', lldb.debug));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.shell', ssh.shell));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.copyid', ssh.copyid));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.external.sshkeygen', ssh.keygen));
+	push(register('frida.external.shell', ssh.shell));
+	push(register('frida.external.copyid', ssh.copyid));
+	push(register('frida.external.sshkeygen', ssh.keygen));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.agent', boilerplate.agent));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.boilerplate.module', boilerplate.module));
-	context.subscriptions.push(vscode.commands.registerCommand('frida.debug.setup', boilerplate.debug));
+	push(register('frida.boilerplate.agent', boilerplate.agent));
+	push(register('frida.boilerplate.module', boilerplate.module));
+	push(register('frida.debug.setup', boilerplate.debug));
 
-	context.subscriptions.push(vscode.commands.registerCommand('frida.typing.init', typing.init));
+	push(register('frida.typing.init', typing.init));
 }
 
 // this method is called when your extension is deactivated
