@@ -97,8 +97,8 @@ async def main(opt):
 
     local_port = opt.local or find_free_port()
 
-    if run_iproxy(local_port, port):
-        sys.exit()
+    # if run_iproxy(local_port, port):
+    #     sys.exit()
 
     # fallback to python (bad performace)
     handler = make_handler(dev, port)
