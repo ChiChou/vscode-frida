@@ -6,13 +6,14 @@
 
 * Python >= 3.7
 * `pip3 install -U frida-tools` (If you have more than one python3 in your path, you should config the python path with this pip3 in settings.)
-* [iproxy](https://libimobiledevice.org/#get-started) * (For Windows build, see https://github.com/libimobiledevice-win32/imobiledevice-net/releases)
 * SSH client (`ssh` command) *
 * iTunes on Windows
 
 [*] Optional. Only some of the functionalities rely on it
 
-FoulDecrypt depends on SSH. You need to generate a public key before using it.
+If you are on Windows, you need to keep iTunes open in order to interact with iOS devices. 
+
+FoulDecrypt relies on SSH. You need to generate a public key before using it.
 
 ## Features
 
@@ -48,7 +49,7 @@ This shortcut requires `zip` and `fouldecrypt` to be installed on iDevice. You n
 
 ### Shell
 
-For Android devices, **Open Shell** is simply a wrapper for `adb shell`. iOS requires libimobiledevice. This command will automatically launch `iproxy` at the background and then give you a shell.
+For Android devices, **Open Shell** is simply a wrapper for `adb shell`. For iOS it gives a SSH shell.
 
 There's also a shortcut for copying SSH public key to jailbroken iDevice.
 
