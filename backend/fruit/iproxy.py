@@ -44,6 +44,39 @@ def find_free_port():
     return port
 
 
+def run_iproxy(local_port: int, port: int):
+    import shutil
+    import subprocess
+    import os
+
+    cli = shutil.which('iproxy')
+    if not cli:
+        return False
+
+    try:
+        output = subprocess.check_output([cli, '--help'])
+    except:
+        return False
+
+    args = [cli]
+    if b'LOCAL_PORT:DEVICE_PORT' in output:  # new
+        args += [f'{local_port}:{port}']
+        if opt.device != 'usb':
+            args += ['-u', opt.device]
+    else:
+        args += [str(local_port), str(port)]
+        if opt.device != 'usb':
+            if b'--udid UDID' in output:
+                args += ['--udid']
+            args += [opt.device]
+
+    if sys.platform == 'win32':
+        subprocess.call(args)
+        sys.exit()
+    else:
+        os.execv(cli, args)
+
+
 async def main(opt):
     if opt.device == 'usb':
         dev = frida.get_usb_device()
@@ -62,32 +95,10 @@ async def main(opt):
     else:
         port = int(opt.port)
 
+    local_port = opt.local or find_free_port()
 
-    import shutil
-    import subprocess
-    import os
-
-    cli = shutil.which('iproxy')
-    if cli:
-        output = subprocess.check_output([cli, '--help'])
-        local_port = opt.local or find_free_port()
-        args = [cli]
-        if b'LOCAL_PORT:DEVICE_PORT' in output: # new
-            args += [f'{local_port}:{port}']
-            if opt.device != 'usb':
-                args += ['-u', opt.device]
-        else:
-            args += [str(local_port), str(port)]
-            if opt.device != 'usb':
-                if b'--udid UDID' in output:
-                    args += ['--udid']
-                args += [opt.device]
-
-        if sys.platform == 'win32':
-            subprocess.call(args)
-            return
-        else:
-            os.execv(cli, args)
+    if run_iproxy(local_port, port):
+        sys.exit()
 
     # fallback to python (bad performace)
     handler = make_handler(dev, port)
