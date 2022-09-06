@@ -8,7 +8,7 @@
 	},
 	"displayName": "frida Workbench",
 	"description": "Unofficial frida workbench for VSCode",
-	"version": "0.4.8",
+	"version": "0.4.9",
 	"engines": {
 		"vscode": "^1.69.1"
 	},
