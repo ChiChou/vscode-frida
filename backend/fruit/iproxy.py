@@ -97,12 +97,12 @@ async def main(opt):
 
     local_port = opt.local or find_free_port()
 
-    # if run_iproxy(local_port, port):
-    #     sys.exit()
+    if sys.platform == 'win32' and run_iproxy(local_port, port):
+        sys.exit()
 
     # fallback to python (bad performace)
     handler = make_handler(dev, port)
-    server = await asyncio.start_server(handler, '127.0.0.1', port=opt.local, start_serving=False)
+    server = await asyncio.start_server(handler, '127.0.0.1', port=local_port, start_serving=False)
     sys.stdout.write('waiting for connection\n')
     # _, local_port = server.sockets[0].getsockname()
     # print(local_port, flush=True)
