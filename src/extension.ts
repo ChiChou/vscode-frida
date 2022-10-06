@@ -35,6 +35,8 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.attach', repl.attach));
 	push(register('frida.kill', repl.kill));
 	push(register('frida.snippet.execute', repl.exec));
+	push(register('frida.snippet.execute.auto', () => repl.execAuto('auto')));
+	push(register('frida.snippet.execute.package', () => repl.execAuto('package')));
 	push(register('frida.remote.add', repl.addRemote));
 	push(register('frida.remote.remove', repl.delRemote));
 

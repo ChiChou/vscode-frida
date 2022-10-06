@@ -40,6 +40,8 @@
 		"onCommand:frida.boilerplate.agent",
 		"onCommand:frida.boilerplate.module",
 		"onCommand:frida.snippet.execute",
+		"onCommand:frida.snippet.execute.auto",
+		"onCommand:frida.snippet.execute.package",
 		"onLanguage:javascript"
 	],
 	"main": "./out/extension.js",
@@ -207,8 +209,17 @@
 			{
 				"command": "frida.snippet.execute",
 				"title": "Execute",
-				"category": "Frida",
-				"icon": "resources/run.svg"
+				"category": "Frida"
+			},
+			{
+				"command": "frida.snippet.execute.auto",
+				"title": "Execute(Auto)",
+				"category": "Frida"
+			},
+			{
+				"command": "frida.snippet.execute.package",
+				"title": "Execute(Package Name)",
+				"category": "Frida"
 			}
 		],
 		"viewsContainers": {
@@ -322,7 +333,7 @@
 			"editor/title": [
 				{
 					"when": "resourceLangId == javascript || resourceLangId == typescript",
-					"command": "frida.snippet.execute",
+					"submenu": "frida.snippet.execute.menu",
 					"group": "navigation@1"
 				}
 			],
@@ -454,8 +465,26 @@
 					"when": "viewItem == 'device|usb'",
 					"group": "2_frida_dev_setup@3"
 				}
+			],
+			"frida.snippet.execute.menu": [
+				{
+					"command": "frida.snippet.execute"
+				},
+				{
+					"command": "frida.snippet.execute.auto"
+				},
+				{
+					"command": "frida.snippet.execute.package"
+				}
 			]
-		}
+		},
+		"submenus": [
+			{
+				"id": "frida.snippet.execute.menu",
+				"label": "Execute",
+				"icon": "resources/run.svg"
+			}
+		]
 	},
 	"scripts": {
 		"vscode:prepublish": "npm run compile",

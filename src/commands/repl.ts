@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
+import * as child_process from "child_process";
 
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
 import { DeviceType } from '../types';
@@ -103,6 +104,41 @@ export async function exec() {
   term.sendText(text);
   await sleep(100);
   term.sendText(EOL);
+}
+
+export async function execAuto(type: string) {
+  const { activeTextEditor, activeTerminal, showErrorMessage } = vscode.window;
+  if (!activeTextEditor) {
+    showErrorMessage("No active document");
+    return;
+  }
+
+  const { document } = activeTextEditor;
+  const { fsPath } = document.uri;
+  const escaped = platform() === "win32" ? JSON.stringify(fsPath) : fsPath;
+
+  try {
+    child_process.exec(
+      "adb shell dumpsys window | findstr mCurrentFocus",
+      function (error, stdout, stderr) {
+        let package_name = /.+ (.+)\/.+/.exec(stdout)![1];
+        let term: vscode.Terminal | null = null;
+        term = vscode.window.createTerminal();
+        if (type == "auto") {
+          term.sendText(`frida -UF -l ${escaped}`);
+        } else if ((type = "package")) {
+          term.sendText(`frida -U -l ${escaped} -f ${package_name} --no-pause`);
+        } else {
+          showErrorMessage(`Auto attachment failure code：${package_name}`);
+          return;
+        }
+        term.show();
+        terminals.add(term);
+      }
+    );
+  } catch (error:any) {
+    showErrorMessage(error);
+  }
 }
 
 export async function addRemote() {
