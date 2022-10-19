@@ -3,10 +3,12 @@
 import subprocess
 import urllib.request
 import json
+import lzma
 import shutil
 import tempfile
 from pathlib import Path
 
+dst = '/data/local/tmp/frida-server'
 
 class Downloader(object):
     def __init__(self, uuid):
@@ -28,27 +30,43 @@ class Downloader(object):
         }
 
         arch = mapping[self.adb('shell', 'getprop', 'ro.product.cpu.abi')]
-        suffix = '-android-%s.tar.xz' % arch
+        suffix = '-android-%s.xz' % arch
+
         with urllib.request.urlopen('https://api.github.com/repos/frida/frida/releases/latest') as response:
             info = json.loads(response.read())
 
         for asset in info['assets']:
             name = asset['name']
-            if name.endswith(suffix):
+            print(name)
+            if name.startswith('frida-server') and name.endswith(suffix):
                 url = asset['browser_download_url']
                 break
         else:
             raise RuntimeError('Unable to find frida-server for %s' % arch)
 
         print('download frida-server')
-        tmp = Path(tempfile.gettempdir()) / name
-        with urllib.request.urlopen(url) as response, tmp.open('wb') as fp:
-            shutil.copyfileobj(response, fp)
 
-        self.adb('push', tmp, '/data/local/tmp/frida-server')
+        tmp = Path(tempfile.gettempdir()) / 'frida-server'
+        with urllib.request.urlopen(url) as response:
+            with lzma.LZMAFile(response) as archive:
+                with tmp.open('wb') as fp:
+                    shutil.copyfileobj(archive, fp)
+
+        self.adb('push', tmp, dst)
 
     def start(self):
-        self.adb('shell', '/data/local/tmp/frida-server')
+        if not self.sanity_check():
+            self.download()
+            self.adb('shell', 'chmod 0755 %s' % dst)
+        self.adb('shell', dst)
+
+    def sanity_check(self):
+        try:
+            self.adb('shell', '%s --version' % dst)
+        except:
+            return False
+
+        return True
 
 
 if __name__ == "__main__":
@@ -60,4 +78,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     d = Downloader(args.uuid)
-    d.download()
+    d.start()
