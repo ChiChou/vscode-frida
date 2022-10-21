@@ -124,7 +124,7 @@ export async function debug(node?: AppItem | ProcessItem) {
     if (node.data.pid) {
       cmd.push(quote(node.data.name)); // attach to app
     } else {
-      cmd.push('-f', quote(node.data.identifier), '--no-pause'); // spawn
+      cmd.push('-f', quote(node.data.identifier)); // spawn
     }
   } else if (node instanceof ProcessItem) {
     cmd.push(node.data.pid.toString()); // attach to pid

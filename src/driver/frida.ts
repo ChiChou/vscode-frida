@@ -85,7 +85,7 @@ function deviceParam(device: string) {
 }
 
 export async function launch(device: string, bundle: string): Promise<Number> {
-  const params = ['-f', bundle, ...deviceParam(device), bundle, '--no-pause', '-q', '-e', 'Process.id'];
+  const params = ['-f', bundle, ...deviceParam(device), bundle, '-q', '-e', 'Process.id'];
   const args = ['-m', 'frida_tools.repl', ...params];
   return new Promise((resolve, reject) => {
     execFile(python3Path(), args, {}, (err, stdout) => {

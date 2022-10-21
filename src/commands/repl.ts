@@ -31,14 +31,14 @@ vscode.window.onDidCloseTerminal(t => terminals.delete(t));
 export function spawn(node?: AppItem) {
   if (!node) return;
 
-  repl(['-f', node.data.identifier, ...expandDevParam(node), '--no-pause'], node.data.name);
+  repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
   refresh();
 }
 
 export function spawnSuspended(node?: AppItem) {
   if (!node) return;
 
-  repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
+  repl(['-f', node.data.identifier, ...expandDevParam(node), '--pause'], node.data.name);
   refresh();
 }
 
