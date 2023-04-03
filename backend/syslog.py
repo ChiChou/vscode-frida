@@ -6,7 +6,6 @@ from enum import Enum
 import frida
 import sys
 
-from backend.fruit.installer import apps
 from backend.rpc import BaseAgent
 
 
@@ -123,17 +122,15 @@ def color(level: Level):
 
 
 def get_proc_name(device: frida.core.Device, bundle: str):
-    pid = next(app for app in device.enumerate_applications()
-               if app.identifier == bundle).pid
+    try:
+        info = next(app for app in device.enumerate_applications(scope='metadata') if app.identifier == bundle)
+    except StopIteration:
+        raise RuntimeError('app with bundle %s does not exist' % bundle)
 
-    if pid == 0:
+    if info.pid == 0:
         device.resume(device.spawn(bundle))
 
-    for app in apps(device):
-        if app['CFBundleIdentifier'] == bundle:
-            return app['CFBundleExecutable']
-
-    raise RuntimeError('app with bundle %s does not exist' % bundle)
+    return info.parameters.get('path')    
 
 
 def stream(device: frida.core.Device, filter_cb: Callable[[int, str], bool]):

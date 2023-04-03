@@ -11,7 +11,6 @@ def main(args):
     from backend import core, rpc, syslog
     from backend.fruit.copyid import install
     from backend.fruit.debugserver import setup
-    from backend.fruit.installer import apps
 
     if args.remote:
         import frida
@@ -46,7 +45,9 @@ def main(args):
         return core.find_port(device)
 
     if args.action == 'location':
-        return next(app['Path'] for app in apps(device) if app['CFBundleIdentifier'] == args.bundle)
+        for app in device.enumerate_applications(identifiers=[args.bundle], scope='metadata'):
+            return app.parameters.get('path')
+        raise RuntimeError('app with bundle %s does not exist' % args.bundle)
 
     if args.action == 'syslog2':
         return syslog.start(device, pid=args.pid, bundle=args.app)
