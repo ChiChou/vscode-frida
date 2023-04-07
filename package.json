@@ -30,10 +30,8 @@
 		"onCommand:frida.syslog",
 		"onCommand:frida.syslog.vacuum",
 		"onCommand:frida.external.objection",
-		"onCommand:frida.external.fouldecrypt",
 		"onCommand:frida.external.lldb",
 		"onCommand:frida.external.setuplldb",
-		"onCommand:frida.external.installfoul",
 		"onCommand:frida.external.shell",
 		"onCommand:frida.external.copyid",
 		"onCommand:frida.external.sshkeygen",
@@ -160,16 +158,6 @@
 				"category": "iOS"
 			},
 			{
-				"command": "frida.external.fouldecrypt",
-				"title": "FoulDecrypt",
-				"category": "iOS"
-			},
-			{
-				"command": "frida.external.installfoul",
-				"title": "Install FoulDecrypt",
-				"category": "iOS"
-			},
-			{
 				"command": "frida.external.setuplldb",
 				"title": "Setup LLDB debugserver",
 				"category": "iOS"
@@ -260,19 +248,11 @@
 					"when": "false"
 				},
 				{
-					"command": "frida.external.fouldecrypt",
-					"when": "false"
-				},
-				{
 					"command": "frida.external.lldb",
 					"when": "false"
 				},
 				{
 					"command": "frida.external.setuplldb",
-					"when": "false"
-				},
-				{
-					"command": "frida.external.installfoul",
 					"when": "false"
 				},
 				{
@@ -430,19 +410,9 @@
 					"group": "4_frida_external@2"
 				},
 				{
-					"command": "frida.external.fouldecrypt",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "4_frida_external@3"
-				},
-				{
 					"command": "frida.external.shell",
 					"when": "viewItem == 'device|usb'",
 					"group": "1_frida_dev_external@1"
-				},
-				{
-					"command": "frida.external.installfoul",
-					"when": "viewItem == 'device|usb'",
-					"group": "2_frida_dev_setup@1"
 				},
 				{
 					"command": "frida.external.setuplldb",

@@ -78,13 +78,13 @@ export class RemoteTool {
         await this.exec('which', tool);
       } catch (_) {
         remoteMissing.push(tool);
-        logger.appendLine(`[fouldecrypt] ERROR: failed to check the existence for ${tool}, reason:`);
+        logger.appendLine(`[SSH] ERROR: failed to check the existence for ${tool}, reason:`);
         logger.appendLine(`${_}`);
       }
     }
 
     if (remoteMissing.length) {
-      throw new Error(`FoulDecrypt requires these command(s) to be installed on device: ${remoteMissing.join(', ')}`);
+      throw new Error(`These command(s) are required on the device: ${remoteMissing.join(', ')}`);
     }
 
     registry.add(this.id);
@@ -93,19 +93,11 @@ export class RemoteTool {
 
   async execInTerminal(shellPath: string, shellArgs: string[]): Promise<void> {
     const escape = (args: string[]) => args.map(a => `"${a.replace(/"/g, '\\"')}"`).join(' ');
-    logger.appendLine(`[fouldecrypt] Execute command: ${shellPath} ${escape(shellArgs)}`);
+    logger.appendLine(`[SSH] Execute command: ${shellPath} ${escape(shellArgs)}`);
     return run({
-      name: 'FoulDecrypt Utils',
+      name: 'SSH',
       shellPath,
       shellArgs
     });
-  }
-
-  async download(remote: string): Promise<string> {
-    const cwd = await fsp.mkdtemp(join(tmpdir(), 'foul-'));
-    const local = join(cwd, 'archive.zip');
-    const [bin, arg] = this.scp(remote, local);
-    await this.execInTerminal(bin, arg);
-    return local;
   }
 }

@@ -13,8 +13,6 @@
 
 If you are on Windows, you need to keep iTunes open in order to interact with iOS devices. 
 
-FoulDecrypt relies on SSH. You need to generate a public key before using it.
-
 ## Features
 
 ![demo](resources/doc/demo.gif)
@@ -40,12 +38,6 @@ Now supports both iOS syslog and Android logcat!
 ### Javascript REPL shortcut
 
 Open and activate an REPL at the bottom. Use the "frida" button at the top of any active `js` / `typescript` document, it will send the code to the active REPL.
-
-### FoulDecrypt
-
-[FoulDecrypt](https://github.com/NyaMisty/fouldecrypt) by [NyaMisty](https://twitter.com/miscmisty) is based on FlexDecrypt but with bug fixes. Also there is no unnessary swift code base at all, making the package extremely slim. It almost act like a static decryptor, without running the actual app. So you don't have to worry about jailbreak detection or abnormal crash.
-
-This shortcut requires `zip` and `fouldecrypt` to be installed on iDevice. You need to run **Install FoulDecrypt** command before the first use.
 
 ### Shell
 

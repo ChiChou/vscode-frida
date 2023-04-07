@@ -12,7 +12,6 @@ import * as repl from './commands/repl';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
 import * as lldb from './commands/lldb';
-import * as foul from './commands/fouldecrypt';
 import * as objection from './commands/objection';
 import * as clipboard from './commands/clipboard';
 import * as boilerplate from './commands/boilerplate';
@@ -46,8 +45,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.name.copy', clipboard.copy));
 	
 	push(register('frida.external.objection', objection.explore));
-	push(register('frida.external.installfoul', foul.install));
-	push(register('frida.external.fouldecrypt', foul.decrypt));
+	// push(register('frida.external.bagbak', bagbak.dump));
 
 	push(register('frida.external.setuplldb', lldb.setup));
 	push(register('frida.external.lldb', lldb.debug));
