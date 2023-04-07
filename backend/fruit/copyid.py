@@ -11,7 +11,7 @@ def install(device: frida.core.Device):
     
     pubkey = Path.home() / '.ssh' / 'id_rsa.pub'
     if not (pubkey.exists() and pubkey.is_file()):
-        raise RuntimeError('id_rsa.pub does not exists')
+        raise RuntimeError('id_rsa.pub does not exist')
 
     with pubkey.open('r') as fp:
         content = fp.read().strip()
