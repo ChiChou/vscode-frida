@@ -78,7 +78,7 @@ export class IProxy extends EventEmitter {
 
 const map = new Map<string, IProxy>();
 
-export async function ssh(uuid: string): Promise<IProxy> {
+export async function useSSH(uuid: string): Promise<IProxy> {
   const existing = map.get(uuid)
   if (existing) {
     existing.retain();

@@ -2,7 +2,7 @@ import { promises as fsp } from 'fs';
 import { window } from 'vscode';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { os, copyid as fridaCopyId } from '../driver/frida';
-import { IProxy, ssh as proxySSH } from '../iproxy';
+import { IProxy, useSSH } from '../iproxy';
 import { executable } from '../utils';
 import { run } from '../term';
 import { keyPath } from '../libs/ssh';
@@ -74,7 +74,7 @@ export async function shell(node: TargetItem) {
   let iproxy: IProxy | null = null;
 
   if (deviceType === 'ios') {
-    iproxy = await proxySSH(node.data.id);
+    iproxy = await useSSH(node.data.id);
     shellPath = executable('ssh');
     shellArgs = ['-q', `-p${iproxy.local}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
   } else if (deviceType === 'android') {

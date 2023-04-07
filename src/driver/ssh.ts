@@ -1,9 +1,6 @@
 import * as cp from 'child_process';
 
-import { ssh as proxySSH } from '../iproxy';
-import { promises as fsp } from 'fs';
-import { tmpdir } from 'os';
-import { join } from 'path';
+import { useSSH } from '../iproxy';
 import { promisify } from "util";
 import { window } from 'vscode';
 import { IProxy } from "../iproxy";
@@ -23,7 +20,7 @@ export class RemoteTool {
   constructor(public id: string) { }
 
   async connect() {
-    this.sshProxy = await proxySSH(this.id);
+    this.sshProxy = await useSSH(this.id);
     await this.checkRequirement();
   }
 
