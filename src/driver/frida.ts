@@ -58,7 +58,7 @@ export async function os(id: string) {
     }
   }
 
-  const result = await exec('type', id) as result;
+  const result = await exec('info', id) as result;
   return result.os.id;
 }
 
