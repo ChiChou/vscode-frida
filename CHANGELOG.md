@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.4.11 - 07 Apr, 2023
+
+* Remove Fouldecrypt
+
 ### v0.4.6 - 13 Aug, 2022
 
 * add idevicesyslog
