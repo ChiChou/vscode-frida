@@ -6,6 +6,7 @@ import { IProxy, ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
 import { run } from '../term';
 import { keyPath } from '../libs/ssh';
+import { logger } from '../logger';
 
 
 export async function keygen(): Promise<boolean> {
@@ -13,7 +14,7 @@ export async function keygen(): Promise<boolean> {
 
   try {
     await fsp.access(path);
-    window.showInformationMessage(`Private key (${path}) already exists`);
+    logger.appendLine(`Private key (${path}) already exists`);
     return Promise.resolve(true);
   } catch(err) {
 
