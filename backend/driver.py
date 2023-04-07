@@ -32,8 +32,8 @@ def main(args):
     if args.action == 'apps':
         return core.apps(device)
 
-    if args.action == 'type':
-        return core.device_type(device)
+    if args.action == 'info':
+        return core.device_info(device)
 
     if args.action == 'ssh-copy-id':
         return install(device)
@@ -89,6 +89,7 @@ if __name__ == '__main__':
     subparsers.add_parser('apps', parents=[requires_device])
     subparsers.add_parser('ps', parents=[requires_device])
     subparsers.add_parser('port', parents=[requires_device])
+    subparsers.add_parser('info', parents=[requires_device])
     subparsers.add_parser('type', parents=[requires_device])
     subparsers.add_parser('ssh-copy-id', parents=[requires_device])
     subparsers.add_parser('sign-debugserver', parents=[requires_device])

@@ -112,20 +112,12 @@ def find_port(device: frida.core.Device) -> int:
     return script.exports.find()
 
 
-def device_type(device: frida.core.Device) -> str:
-    # todo: use query_system_parameters
-    mapping = {
-        'SpringBoard': 'iOS',
-        'Dock': 'macOS',
-        'explorer.exe': 'win32',
-        'zygote': 'Android',
-    }
+def os_id(device: frida.core.Device) -> bool:
+    return device_info(device).get('os', {}).get('id')
 
-    for proc in device.enumerate_processes():
-        if proc.name in mapping:
-            return mapping[proc.name]
-    else:
-        return 'Linux'
+
+def device_info(device: frida.core.Device) -> dict:
+    return device.query_system_parameters()
 
 
 def find_app(device: frida.core.Device, bundle: str):
@@ -148,32 +140,9 @@ def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Sessio
 
         device.kill(app.pid)
 
-    devtype = device_type(device)
-    if devtype == 'Android':
-        module = 'libc.so'
-    elif devtype == 'iOS':
-        module = 'Foundation'
-    else:
-        raise RuntimeError('Unknown device type %s' % devtype)
-
-    source = 'Module.ensureInitialized("%s"); rpc.exports.ok = function() { return true }' % module
     pid = device.spawn(bundle)
     session = device.attach(pid)
     device.resume(pid)
-    script = session.create_script(source)
-    script.load()
-    MAX_RETRY = 5
-    for i in range(MAX_RETRY):
-        try:
-            time.sleep(0.2)
-            if script.exports.ok():
-                break
-        except:
-            continue
-    else:
-        raise RuntimeError('Unable to create process')
-
-    script.unload()
     return session
 
 

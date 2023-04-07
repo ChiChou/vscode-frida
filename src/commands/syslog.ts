@@ -1,7 +1,7 @@
 import * as cp from 'child_process';
 
 import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
-import { devtype, lockdownSyslog } from '../driver/frida';
+import { os, lockdownSyslog } from '../driver/frida';
 import { python3Path, refresh } from '../utils';
 import { DeviceType } from '../types';
 
@@ -50,14 +50,14 @@ export function show(node?: TargetItem) {
     return;
   }
 
-  devtype(node.device.id).then(type => {
-    if (type === 'iOS' && node.device.type === DeviceType.USB) {
+  os(node.device.id).then(type => {
+    if (type === 'ios' && node.device.type === DeviceType.USB) {
       lockdownSyslog(node.device.id, bundleOrPid);
-    } else if (type === 'Linux' || type === 'macOS') {
+    } else if (type === 'linux' || type === 'macos') {
       const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
       const args = [py, 'syslog', '--device', node.device.id, ...bundleOrPid];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3Path(), args).show();
-    } else if (type === 'Android') {
+    } else if (type === 'android') {
       const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
     } else {

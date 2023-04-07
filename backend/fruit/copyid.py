@@ -2,11 +2,11 @@
 
 import frida
 from pathlib import Path
-from backend.core import device_type, read_agent
+from backend.core import os_id, read_agent
 
 
 def install(device: frida.core.Device):
-    if device_type(device) != 'iOS':
+    if os_id(device) != 'ios':
         raise ValueError('This command is for iOS only')
     
     pubkey = Path.home() / '.ssh' / 'id_rsa.pub'

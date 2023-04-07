@@ -49,8 +49,17 @@ export function ps(id: string) {
   return exec('ps', id) as Promise<Process[]>;
 }
 
-export function devtype(id: string) {
-  return exec('type', id) as Promise<string>;
+export async function os(id: string) {
+  interface result {
+    os: {
+      version: string;
+      id: 'ios' | 'macos' | 'windows' | 'linux' | 'android';
+      name: string;
+    }
+  }
+
+  const result = await exec('type', id) as result;
+  return result.os.id;
 }
 
 export function port(id: string) {

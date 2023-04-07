@@ -13,9 +13,6 @@ class TestDeviceOperations(unittest.TestCase):
         usb = self.usb
         local = self.local
 
-        self.assertIsInstance(core.device_type(local), str)
-        # need an iOS device
-        self.assertEqual(core.device_type(usb), 'iOS')
         self.assertIsInstance(core.devices(), list)
         self.assertIsInstance(core.ps(local), list)
         self.assertIsInstance(core.apps(usb), list)

@@ -1,5 +1,5 @@
 import { window } from "vscode";
-import { devtype, setupDebugServer } from "../driver/frida";
+import { os, setupDebugServer } from "../driver/frida";
 import { LLDB } from "../driver/lldb";
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from "../providers/devices";
 
@@ -8,7 +8,7 @@ const map = new Map<string, LLDB>();
 
 export async function setup(node: TargetItem): Promise<void> {
   if (node instanceof DeviceItem) {
-    if (await devtype(node.data.id) === 'iOS') {
+    if (await os(node.data.id) === 'ios') {
       if (await setupDebugServer(node.data.id)) {
         window.showInformationMessage('Successfully resigned debugserver');
       }

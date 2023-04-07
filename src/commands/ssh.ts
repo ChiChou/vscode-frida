@@ -1,7 +1,7 @@
 import { promises as fsp } from 'fs';
 import { window } from 'vscode';
 import { DeviceItem, TargetItem } from '../providers/devices';
-import { devtype, copyid as fridaCopyId } from '../driver/frida';
+import { os, copyid as fridaCopyId } from '../driver/frida';
 import { IProxy, ssh as proxySSH } from '../iproxy';
 import { executable } from '../utils';
 import { run } from '../term';
@@ -47,8 +47,8 @@ export async function copyid(node: TargetItem) {
 
   await keygen();
 
-  const deviceType = await devtype(node.data.id);
-  if (deviceType !== 'iOS') {
+  const deviceType = await os(node.data.id);
+  if (deviceType !== 'ios') {
     window.showErrorMessage(`Device type "${deviceType}" is not supported`);
     return;
   }
@@ -67,20 +67,20 @@ export async function shell(node: TargetItem) {
     return;
   }
 
-  const deviceType = await devtype(node.data.id);
+  const deviceType = await os(node.data.id);
   const name = `SSH: ${node.data.name}`;
   let shellPath, shellArgs;
   let iproxy: IProxy | null = null;
 
-  if (deviceType === 'iOS') {
+  if (deviceType === 'ios') {
     iproxy = await proxySSH(node.data.id);
     shellPath = executable('ssh');
     shellArgs = ['-q', `-p${iproxy.local}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
-  } else if (deviceType === 'Android') {
+  } else if (deviceType === 'android') {
     shellPath = executable('adb');
     shellArgs = ['-s', node.data.id, 'shell'];
   } else {
-    window.showErrorMessage(`Device type "${deviceType}" is not supported`);
+    window.showErrorMessage(`OS type "${deviceType}" is not supported`);
     return;
   }
 
