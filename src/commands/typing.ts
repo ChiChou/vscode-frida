@@ -1,15 +1,38 @@
-import { createWriteStream, promises as fsp, constants } from 'fs';
+import { createWriteStream, promises as fsp } from 'fs';
 import { get as httpGet } from 'https';
 import { join } from 'path';
-import { workspace, Uri, window, ProgressLocation, Position } from 'vscode';
+import { workspace, window, ProgressLocation, Position } from 'vscode';
 
 const URL = 'https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/frida-gum/index.d.ts';
 const NAME = 'frida-gum.d.ts';
 
+function npmInstall() {
+  const name = `npm`;
+  const shellPath = 'npm';
+  const shellArgs = ['install', '@types/frida-gum', '--save'];
+  const term = window.createTerminal({
+    name,
+    shellPath,
+    shellArgs,
+  });
+  window.onDidCloseTerminal(t => {
+    if (t === term && t.exitStatus?.code === 0) {
+      window.showInformationMessage('@types/frida-gum has been successfully installed');
+    }
+  })
+  term.show();
+}
+
+
 export async function init() {
+  if (workspace.workspaceFolders?.length) {
+    npmInstall();
+    return;
+  }
+
   const editor = window.activeTextEditor;
   if (!editor) {
-    window.showErrorMessage('The command requires an active document');
+    window.showErrorMessage('The command requires a workspace or an active document');
     return;
   }
 
@@ -27,6 +50,8 @@ export async function init() {
 
   const folder = workspace.getWorkspaceFolder(fileUri);
   const cwd = folder ? folder.uri.fsPath : join(fileUri.fsPath, '..');
+
+  // todo: refactor
 
   // will override existing one
   const dest = join(cwd, NAME);
