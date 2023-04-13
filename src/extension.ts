@@ -15,6 +15,7 @@ import * as lldb from './commands/lldb';
 import * as objection from './commands/objection';
 import * as clipboard from './commands/clipboard';
 import * as boilerplate from './commands/boilerplate';
+import * as android from './commands/android';
 
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
@@ -45,6 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.name.copy', clipboard.copy));
 	push(register('frida.device.copy', clipboard.copy));
 	
+	push(register('frida.device.androidserver', android.server));
 	push(register('frida.external.objection', objection.explore));
 	// push(register('frida.external.bagbak', bagbak.dump));
 

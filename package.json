@@ -45,6 +45,14 @@
 		"configuration": {
 			"title": "Frida",
 			"properties": {
+				"frida.githubToken": {
+					"type": [
+						"string",
+						"null"
+					],
+					"default": null,
+					"description": "Github token for downloading frida-server, etc."
+				},
 				"frida.decryptOutput": {
 					"type": [
 						"string",
@@ -165,6 +173,11 @@
 				"command": "frida.external.setuplldb",
 				"title": "Setup LLDB debugserver",
 				"category": "iOS"
+			},
+			{
+				"command": "frida.device.androidserver",
+				"title": "Start frida-server",
+				"category": "Android"
 			},
 			{
 				"command": "frida.external.shell",
@@ -313,7 +326,7 @@
 			],
 			"editor/title": [
 				{
-					"when": "resourceLangId == javascript || resourceLangId == typescript",
+					"when": "resourceLangId == javascript",
 					"command": "frida.snippet.execute",
 					"group": "navigation@1"
 				}
@@ -432,6 +445,11 @@
 					"group": "1_frida_dev_setup@1"
 				},
 				{
+					"command": "frida.device.androidserver",
+					"when": "viewItem =~ /^device\\|\\w+\\|android$/",
+					"group": "2_frida_dev_setup@2"
+				},
+				{
 					"command": "frida.external.setuplldb",
 					"when": "viewItem =~ /^device\\|\\w+\\|ios$/",
 					"group": "2_frida_dev_setup@2"
@@ -464,6 +482,7 @@
 		"vscode-test": "^1.6.1"
 	},
 	"dependencies": {
+		"@octokit/rest": "^19.0.7",
 		"lookpath": "^1.2.2"
 	},
 	"extensionDependencies": [
