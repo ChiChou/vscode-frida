@@ -1,5 +1,5 @@
 import { promises as fsp } from 'fs';
-import { window } from 'vscode';
+import { commands, window } from 'vscode';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { os, copyid as fridaCopyId } from '../driver/frida';
 import { IProxy, useSSH } from '../iproxy';
@@ -68,20 +68,26 @@ export async function shell(node: TargetItem) {
     return;
   }
 
-  const deviceType = await os(node.data.id);
+  if (node.data.id === 'local') {
+    // execute command to open a new terminal
+    commands.executeCommand('workbench.action.terminal.new');
+    return;
+  }
+
+  const system = await os(node.data.id);
   const name = `SSH: ${node.data.name}`;
   let shellPath, shellArgs;
   let iproxy: IProxy | null = null;
 
-  if (deviceType === 'ios') {
+  if (system === 'ios') {
     iproxy = await useSSH(node.data.id);
     shellPath = executable('ssh');
     shellArgs = ['-q', `-p${iproxy.local}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
-  } else if (deviceType === 'android') {
+  } else if (system === 'android') {
     shellPath = executable('adb');
     shellArgs = ['-s', node.data.id, 'shell'];
   } else {
-    window.showErrorMessage(`OS type "${deviceType}" is not supported`);
+    window.showErrorMessage(`OS type "${system}" is not supported`);
     return;
   }
 

@@ -79,11 +79,8 @@ export class DeviceItem extends TargetItem {
   }
 
   get contextValue() {
-    // todo: Android / iOS
-    if (this.data.type === DeviceType.USB)
-      return 'device|usb';
-
-    return `device|${this.data.id}`;
+    const { type, os } = this.data;
+    return `device|${type}|${os}`;
   }
 
 }

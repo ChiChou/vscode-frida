@@ -43,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.browse', file.browse));
 	push(register('frida.bundle.copy', clipboard.copy));
 	push(register('frida.name.copy', clipboard.copy));
+	push(register('frida.device.copy', clipboard.copy));
 	
 	push(register('frida.external.objection', objection.explore));
 	// push(register('frida.external.bagbak', bagbak.dump));

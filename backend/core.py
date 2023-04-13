@@ -16,9 +16,13 @@ from backend import png
 def devices() -> list:
     props = ['id', 'name', 'type']
 
-    def wrap(dev):
+    def wrap(dev: frida.core.Device):
         obj = {prop: getattr(dev, prop) for prop in props}
         obj['icon'] = png.to_uri(dev.icon)
+        try:
+            obj['os'] = dev.query_system_parameters()['os']['id']
+        except (frida.ServerNotRunningError, KeyError):
+            obj['os'] = 'unknown'
         return obj
 
     # workaround

@@ -102,6 +102,10 @@
 				"category": "Frida"
 			},
 			{
+				"command": "frida.device.copy",
+				"title": "Copy Device ID"
+			},
+			{
 				"command": "frida.bundle.copy",
 				"title": "Copy Bundle ID"
 			},
@@ -295,8 +299,16 @@
 					"when": "false"
 				},
 				{
+					"command": "frida.name.copy",
+					"when": "false"
+				},
+				{
+					"command": "frida.device.copy",
+					"when": "false"
+				},
+				{
 					"command": "frida.snippet.execute",
-					"when": "(editorLangId == javascript || editorLangId == typescript) && terminalFocus"
+					"when": "editorLangId == javascript && terminalFocus"
 				}
 			],
 			"editor/title": [
@@ -411,17 +423,22 @@
 				},
 				{
 					"command": "frida.external.shell",
-					"when": "viewItem == 'device|usb'",
+					"when": "viewItem =~ /^device\\|\\w+\\|(android|ios)$/ || viewItem =~ /^device\\|\\local/",
 					"group": "1_frida_dev_external@1"
 				},
 				{
+					"command": "frida.device.copy",
+					"when": "viewItem =~ /^device\\|/",
+					"group": "1_frida_dev_setup@1"
+				},
+				{
 					"command": "frida.external.setuplldb",
-					"when": "viewItem == 'device|usb'",
+					"when": "viewItem =~ /^device\\|\\w+\\|ios$/",
 					"group": "2_frida_dev_setup@2"
 				},
 				{
 					"command": "frida.external.copyid",
-					"when": "viewItem == 'device|usb'",
+					"when": "viewItem =~ /^device\\|\\w+\\|ios$/",
 					"group": "2_frida_dev_setup@3"
 				}
 			]
