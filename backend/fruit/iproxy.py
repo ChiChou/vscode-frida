@@ -86,7 +86,7 @@ async def main(opt):
     if opt.port == 'ssh':
         for port in (22, 44):
             try:
-                dev.open_channel('tcp:22').close()
+                dev.open_channel('tcp:%d' % port).close()
                 break
             except frida.ServerNotRunningError:
                 continue
