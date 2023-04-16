@@ -10,21 +10,25 @@ import { asParam } from './remote';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');
 
+function promptInstallFrida() {
+  window.showErrorMessage('Frida python module not detected. Do you want to install now?', 'Install', 'Cancel')
+    .then(selected => {
+      if (selected === 'Install') {
+        run({
+          shellPath: python3Path(),
+          shellArgs: ['-m', 'pip', 'install', 'frida-tools']
+        });
+      }
+    });
+}
+
 export function exec(...args: string[]): Promise<any> {
   const remoteDevices = asParam();
   return new Promise((resolve, reject) => {
     execFile(python3Path(), [py, ...remoteDevices, ...args], {}, (err, stdout, stderr) => {
       if (err) {
         if (stderr.includes('Unable to import frida')) {
-          window.showErrorMessage('Frida python module not detected. Do you want to install now?', 'Install', 'Calcel')
-            .then(selected => {
-              if (selected === 'Install') {
-                run({
-                  shellPath: python3Path(),
-                  shellArgs: ['-m', 'pip', 'install', 'frida-tools']
-                });
-              }
-          });
+          promptInstallFrida();
         }
         logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
         logger.appendLine(stderr);
