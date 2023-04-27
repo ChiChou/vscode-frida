@@ -7,15 +7,10 @@ import { DeviceItem, TargetItem } from '../providers/devices';
 import { executable } from '../utils';
 import { run } from '../term';
 
-export async function server(target: TargetItem) {
-  if (!(target instanceof DeviceItem)) {
-    vscode.window.showErrorMessage('This command is only expected to be used in the context menu');
-    return;
-  }
-
-  const device = target.data.id;
-  const abi = await adbShell('getprop ro.product.cpu.abi', device);
-  const mapping: {[key: string]: string} = {
+async function downloadServer(device: string) {
+  const adb = new ADB(device);
+  const abi = await adb.shell(['getprop', 'ro.product.cpu.abi']);
+  const mapping: { [key: string]: string } = {
     'arm64-v8a': 'arm64',
     'armeabi-v7a': 'arm',
     'x86_64': 'x86_64',
@@ -39,7 +34,7 @@ export async function server(target: TargetItem) {
   });
 
   const suffix = `-android-${arch}.xz`
-  
+
   // use Octokit to access github api and get latest release from
   // https://api.github.com/repos/frida/frida/releases/latest
 
@@ -48,40 +43,86 @@ export async function server(target: TargetItem) {
     repo: 'frida',
   });
 
-  const asset = release.data.assets.find(asset => 
+  const asset = release.data.assets.find(asset =>
     asset.name.startsWith('frida-server') && asset.name.endsWith(suffix))
   const url = asset?.browser_download_url;
   if (!url) {
     vscode.window.showErrorMessage(`Failed to find frida-server for ${abi}`);
     return;
-  }  
-
-  // todo: download
+  }
 }
 
-async function adbShell(cmd?: string, device?: string, interactive?: boolean): Promise<string> {
-  const shellArgs = ['shell'];
-  if (device) {
-    shellArgs.unshift('-s', device);
+export async function startServer(target: TargetItem) {
+  if (!(target instanceof DeviceItem)) {
+    vscode.window.showErrorMessage('This command is only expected to be used in the context menu');
+    return;
   }
 
-  if (cmd) {
-    shellArgs.push(cmd);
+  const adb = new ADB(target.data.id);
+  const term = adb.interactive();
+
+  // todo: download frida-server
+  setTimeout(() => {
+    term.sendText('su', true);
+    term.sendText('/data/local/tmp/frida-server', true);
+  }, 500);
+}
+
+class ADB {
+  path: string;
+
+  constructor(private device: string) {
+    this.path = executable('adb');
   }
 
-  if (interactive) {
-    const shellPath = executable('adb');
-    await run({
-      name: 'adb',
+  async push(local: vscode.Uri, remote: string) {
+    const shellPath = this.path;
+    const shellArgs = ['-s', this.device, 'push', local.fsPath, remote];
+    return run({
       shellPath,
-      shellArgs,
-    });
+      shellArgs
+    })
+  }
 
-    return Promise.resolve('');
-  } else {
-    return new Promise((resolve, reject) => {
-      cp.execFile('adb', shellArgs, (err, stdout, stderr) => {
-        resolve(stdout);
+  async pull(remote: string, local: vscode.Uri) {
+    const shellPath = this.path;
+    const shellArgs = ['-s', this.device, 'pull', remote, local.fsPath];
+    return run({
+      shellPath,
+      shellArgs
+    })
+  }
+
+  interactive(cmd?: string[]) {
+    const name = 'adb';
+    const shellPath = this.path;
+    const shellArgs = ['-s', this.device, 'shell'];
+    if (cmd) {
+      shellArgs.push.apply(shellArgs, cmd);
+    }
+
+    const term = vscode.window.createTerminal({
+      name,
+      shellPath,
+      shellArgs
+    });
+    term.show();
+    return term;
+  }
+
+  async shell(cmd?: string[]) {
+    const shellPath = this.path;
+    const shellArgs = ['-s', this.device, 'shell'];
+    if (cmd) {
+      shellArgs.push.apply(shellArgs, cmd);
+    }
+
+    return new Promise<string>((resolve, reject) => {
+      cp.execFile(shellPath, shellArgs, (err, stdout, stderr) => {
+        if (err)
+          reject(err);
+        else
+          resolve(stdout);
       })
     })
   }

@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.name.copy', clipboard.copy));
 	push(register('frida.device.copy', clipboard.copy));
 	
-	push(register('frida.device.androidserver', android.server));
+	push(register('frida.device.androidserver', android.startServer));
 	push(register('frida.external.objection', objection.explore));
 	// push(register('frida.external.bagbak', bagbak.dump));
 
