@@ -16,28 +16,6 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onView:fridaApps",
-		"onView:fridaPs",
-		"onCommand:frida.attach",
-		"onCommand:frida.spawn",
-		"onCommand:frida.spawn.suspended",
-		"onCommand:frida.debug.setup",
-		"onCommand:frida.device.connect",
-		"onCommand:frida.ps.refresh",
-		"onCommand:frida.app.refresh",
-		"onCommand:frida.remote.add",
-		"onCommand:frida.remote.remove",
-		"onCommand:frida.syslog",
-		"onCommand:frida.syslog.vacuum",
-		"onCommand:frida.external.objection",
-		"onCommand:frida.external.lldb",
-		"onCommand:frida.external.setuplldb",
-		"onCommand:frida.external.shell",
-		"onCommand:frida.external.copyid",
-		"onCommand:frida.external.sshkeygen",
-		"onCommand:frida.boilerplate.agent",
-		"onCommand:frida.boilerplate.module",
-		"onCommand:frida.snippet.execute",
 		"onLanguage:javascript"
 	],
 	"main": "./out/extension.js",
@@ -165,6 +143,11 @@
 				"category": "Frida"
 			},
 			{
+				"command": "frida.external.bagbak",
+				"title": "Dump app",
+				"category": "Frida"
+			},
+			{
 				"command": "frida.external.lldb",
 				"title": "Debug with lldb",
 				"category": "iOS"
@@ -262,6 +245,10 @@
 				},
 				{
 					"command": "frida.external.objection",
+					"when": "false"
+				},
+				{
+					"command": "frida.external.bagbak",
 					"when": "false"
 				},
 				{
@@ -433,6 +420,11 @@
 					"command": "frida.external.objection",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "4_frida_external@2"
+				},
+				{
+					"command": "frida.external.bagbak",
+					"when": "view == fridaApps && viewItem =~ /^app\\|/",
+					"group": "5_frida_external@2"
 				},
 				{
 					"command": "frida.external.shell",

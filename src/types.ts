@@ -14,7 +14,7 @@ export enum DeviceType {
 export class Device {
   id: string = '';
   name: string = '';
-  os: string = '';
+  os: 'ios' | 'macos' | 'windows' | 'linux' | 'android' | 'n/a' = 'n/a';
   type: DeviceType = DeviceType.Local;
   icon: string = '';
 }
