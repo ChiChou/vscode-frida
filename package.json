@@ -143,7 +143,7 @@
 				"category": "Frida"
 			},
 			{
-				"command": "frida.external.bagbak",
+				"command": "frida.external.dump",
 				"title": "Dump app",
 				"category": "Frida"
 			},
@@ -248,7 +248,7 @@
 					"when": "false"
 				},
 				{
-					"command": "frida.external.bagbak",
+					"command": "frida.external.dump",
 					"when": "false"
 				},
 				{
@@ -422,7 +422,7 @@
 					"group": "4_frida_external@2"
 				},
 				{
-					"command": "frida.external.bagbak",
+					"command": "frida.external.dump",
 					"when": "view == fridaApps && viewItem =~ /^app\\|/",
 					"group": "5_frida_external@2"
 				},
