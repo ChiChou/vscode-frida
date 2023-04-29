@@ -398,12 +398,12 @@
 				},
 				{
 					"command": "frida.external.lldb",
-					"when": "!isWindows && view == fridaApps && viewItem =~ /^app\\|/",
+					"when": "!isWindows && view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
 					"group": "2_frida_process@2"
 				},
 				{
 					"command": "frida.external.lldb",
-					"when": "!isWindows && view == fridaPs && viewItem =~ /^process\\|/",
+					"when": "!isWindows && view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
 					"group": "2_frida_process@2"
 				},
 				{
@@ -423,8 +423,8 @@
 				},
 				{
 					"command": "frida.external.dump",
-					"when": "view == fridaApps && viewItem =~ /^app\\|/",
-					"group": "5_frida_external@2"
+					"when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|(android|ios)$/",
+					"group": "4_frida_external@3"
 				},
 				{
 					"command": "frida.external.shell",

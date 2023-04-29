@@ -142,7 +142,7 @@ export class AppItem extends TargetItem {
   }
 
   get contextValue() {
-    return `app|${this.data.pid ? 'running' : 'dead'}`;
+    return `app|${this.data.pid ? 'running' : 'dead'}|${this.device.os}`;
   }
 }
 
