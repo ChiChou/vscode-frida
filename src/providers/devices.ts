@@ -130,15 +130,7 @@ export class AppItem extends TargetItem {
   }
 
   get iconPath() {
-    if (this.data.largeIcon) {
-      return vscode.Uri.parse(this.data.largeIcon);
-    }
-
-    const img = this.data.pid ? 'statusRun.svg' : 'statusStop.svg';
-    return {
-      dark: resource('dark', img),
-      light: resource('light', img)
-    };
+    return this.data.largeIcon ? vscode.Uri.parse(this.data.largeIcon) : resource('terminal.png');
   }
 
   get contextValue() {
@@ -167,15 +159,7 @@ export class ProcessItem extends TargetItem {
   }
 
   get iconPath() {
-    if (this.data.largeIcon) {
-      return vscode.Uri.parse(this.data.largeIcon);
-    }
-
-    const img = this.data.pid ? 'statusRun.svg' : 'statusStop.svg';
-    return {
-      dark: resource('dark', img),
-      light: resource('light', img)
-    };
+    return this.data.largeIcon ? vscode.Uri.parse(this.data.largeIcon) : resource('terminal.png');
   }
 
   get contextValue() {
