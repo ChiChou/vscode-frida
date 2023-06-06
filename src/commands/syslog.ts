@@ -1,12 +1,12 @@
 import * as cp from 'child_process';
 
-import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
-import { os, lockdownSyslog } from '../driver/frida';
-import { python3Path, refresh } from '../utils';
+import { lockdownSyslog, os } from '../driver/frida';
+import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
+import { python3Path, refresh } from '../utils';
 
-import { window, OutputChannel } from 'vscode';
 import { join } from 'path';
+import { OutputChannel, window } from 'vscode';
 
 const active: { [key: string]: OutputChannel } = {};
 

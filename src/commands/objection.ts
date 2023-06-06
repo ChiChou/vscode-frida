@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
 import { launch } from '../driver/frida';
-import { TargetItem, AppItem, ProcessItem } from "../providers/devices";
+import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { run } from '../term';
 import { DeviceType } from '../types';
 import { python3Path } from '../utils';

@@ -1,11 +1,11 @@
-import { join } from 'path';
 import { execFile } from 'child_process';
-import { Device, App, Process } from '../types';
-import { logger } from '../logger';
-
-import { python3Path } from '../utils';
-import { run } from '../term';
+import { join } from 'path';
 import { window } from 'vscode';
+
+import { logger } from '../logger';
+import { run } from '../term';
+import { App, Device, Process } from '../types';
+import { python3Path } from '../utils';
 import { asParam } from './remote';
 
 const py = join(__dirname, '..', '..', 'backend', 'driver.py');

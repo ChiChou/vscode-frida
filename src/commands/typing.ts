@@ -1,7 +1,7 @@
 import { createWriteStream, promises as fsp } from 'fs';
 import { get as httpGet } from 'https';
 import { join } from 'path';
-import { workspace, window, ProgressLocation, Position } from 'vscode';
+import { Position, ProgressLocation, window, workspace } from 'vscode';
 
 const URL = 'https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/frida-gum/index.d.ts';
 const NAME = 'frida-gum.d.ts';

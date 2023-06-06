@@ -1,10 +1,10 @@
+import { homedir } from 'os';
 import * as vscode from 'vscode';
 
-import { AppItem, TargetItem } from "../providers/devices";
-import { executable } from '../utils';
-import { DeviceType } from '../types';
-import { homedir } from 'os';
 import ADB from '../driver/adb';
+import { AppItem, TargetItem } from "../providers/devices";
+import { DeviceType } from '../types';
+import { executable } from '../utils';
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {

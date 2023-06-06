@@ -1,10 +1,10 @@
-import * as vscode from 'vscode';
+import { createReadStream, createWriteStream, promises as fsp } from 'fs';
 import { join as joinPath } from 'path';
-import { promises as fsp, constants as fsc, createReadStream, createWriteStream } from 'fs';
+import * as vscode from 'vscode';
 
-import { executable, expandDevParam, python3Path, resource } from '../utils';
 import { AppItem, ProcessItem } from '../providers/devices';
 import { run } from '../term';
+import { executable, expandDevParam, python3Path, resource } from '../utils';
 
 
 async function create(template: string) {

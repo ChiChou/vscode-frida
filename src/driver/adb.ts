@@ -1,5 +1,5 @@
-import * as vscode from 'vscode';
 import * as cp from 'child_process';
+import * as vscode from 'vscode';
 import { run } from '../term';
 import { executable } from "../utils";
 

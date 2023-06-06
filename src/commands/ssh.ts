@@ -1,12 +1,13 @@
 import { promises as fsp } from 'fs';
 import { commands, window } from 'vscode';
-import { DeviceItem, TargetItem } from '../providers/devices';
-import { os, copyid as fridaCopyId } from '../driver/frida';
+
+import { copyid as fridaCopyId, os } from '../driver/frida';
 import { IProxy, useSSH } from '../iproxy';
-import { executable } from '../utils';
-import { run } from '../term';
 import { keyPath } from '../libs/ssh';
 import { logger } from '../logger';
+import { DeviceItem, TargetItem } from '../providers/devices';
+import { run } from '../term';
+import { executable } from '../utils';
 
 
 export async function keygen(): Promise<boolean> {

@@ -1,13 +1,12 @@
-import * as vscode from 'vscode';
-import * as path from 'path';
-
-import { TargetItem, AppItem, ProcessItem, DeviceItem } from '../providers/devices';
-import { DeviceType } from '../types';
-import { terminate } from '../driver/frida';
-import { connect, disconnect } from '../driver/remote';
-import { refresh, python3Path, sleep, expandDevParam } from '../utils';
 import { EOL, platform } from 'os';
-import { all } from '../driver/remote';
+import * as path from 'path';
+import * as vscode from 'vscode';
+
+import { terminate } from '../driver/frida';
+import { all, connect, disconnect } from '../driver/remote';
+import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
+import { DeviceType } from '../types';
+import { expandDevParam, python3Path, refresh, sleep } from '../utils';
 
 const terminals = new Set<vscode.Terminal>();
 
