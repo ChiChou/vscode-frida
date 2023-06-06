@@ -29,7 +29,7 @@
 						"null"
 					],
 					"default": null,
-					"description": "Github token for downloading frida-server, etc."
+					"description": "Github token to download frida-server, etc."
 				},
 				"frida.decryptOutput": {
 					"type": [
