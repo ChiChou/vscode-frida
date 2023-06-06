@@ -1,5 +1,5 @@
 import * as cp from 'child_process';
-import { IProxy } from "../iproxy";
+import { IProxy } from '../iproxy';
 import { location, port } from './frida';
 import { RemoteTool } from "./ssh";
 

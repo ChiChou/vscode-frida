@@ -1,12 +1,12 @@
 import * as cp from 'child_process';
 
-import { useSSH } from '../iproxy';
 import { promisify } from "util";
 import { window } from 'vscode';
-import { IProxy } from "../iproxy";
+
+import { IProxy, useSSH } from '../iproxy';
 import { logger } from '../logger';
-import { executable } from '../utils';
 import { run } from '../term';
+import { executable } from '../utils';
 
 const exec = promisify(cp.execFile);
 const SHARED_ARGS = ['-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
