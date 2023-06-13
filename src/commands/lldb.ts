@@ -34,7 +34,7 @@ export async function debug(node: TargetItem): Promise<void> {
   }
 
   if (map.has(id)) {
-    window.showErrorMessage(`Debice ${id} has an active debug session. Only one debugger is allowed at the moment`);
+    window.showErrorMessage(`Device ${id} has an active debug session. Only one debugger is allowed at the moment`);
     return;
   }
 
