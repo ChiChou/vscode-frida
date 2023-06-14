@@ -16,7 +16,6 @@ import * as repl from './commands/repl';
 import * as ssh from './commands/ssh';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
-import * as iproxy from './iproxy';
 
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
@@ -63,5 +62,5 @@ export function activate(context: vscode.ExtensionContext) {
 
 // this method is called when your extension is deactivated
 export function deactivate() {
-	iproxy.cleanup();
+
 }
