@@ -1,13 +1,12 @@
 import * as vscode from 'vscode';
 
-import { Octokit } from '@octokit/rest';
-
 import ADB from '../driver/adb';
 import { DeviceItem, TargetItem } from '../providers/devices';
+// import { DownloadDelegate, download } from '../driver/github';
 
 
-async function downloadServer(device: string) {
-  const adb = new ADB(device);
+export async function downloadServer(device: DeviceItem) {
+  const adb = new ADB(device.data.id);
   const abi = await adb.shell(['getprop', 'ro.product.cpu.abi']);
   const mapping: { [key: string]: string } = {
     'arm64-v8a': 'arm64',
@@ -22,33 +21,15 @@ async function downloadServer(device: string) {
     return;
   }
 
-  const token = vscode.workspace.getConfiguration('frida').get('githubToken');
+  const token = vscode.workspace.getConfiguration('frida').get('githubToken', undefined);
   if (!token) {
     vscode.window.showInformationMessage(
-      'GitHub token is not set, your access might be denied. Please consider setting "frida.githubToken" in your settings');
+      'GitHub token is not set, your access is limited. Please consider setting "frida.githubToken" in your settings');
   }
 
-  const octokit = new Octokit({
-    auth: token,
-  });
-
-  const suffix = `-android-${arch}.xz`
-
-  // use Octokit to access github api and get latest release from
-  // https://api.github.com/repos/frida/frida/releases/latest
-
-  const release = await octokit.repos.getLatestRelease({
-    owner: 'frida',
-    repo: 'frida',
-  });
-
-  const asset = release.data.assets.find(asset =>
-    asset.name.startsWith('frida-server') && asset.name.endsWith(suffix))
-  const url = asset?.browser_download_url;
-  if (!url) {
-    vscode.window.showErrorMessage(`Failed to find frida-server for ${abi}`);
-    return;
-  }
+  const predicate = (filename: string) => filename.startsWith('frida-server') && filename.endsWith(`-android-${arch}.xz`);
+  
+  // todo: download frida-server
 }
 
 export async function startServer(target: TargetItem) {
