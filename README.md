@@ -5,13 +5,13 @@
 ## Prerequisites
 
 * Python >= 3.7
-* `pip3 install -U frida-tools` (If you have more than one python3 in your path, you should config the python path with this pip3 in settings.)
-* SSH client (`ssh` command) *
+* `pip3 install -U frida-tools` If you have more than one python3 in your path, you need to config the python path in settings
+* nodejs and `npm install -g fruity-frida` (optional, for lldb related features)
 * iTunes on Windows
 
-[*] Optional. Only some of the functionalities rely on it
-
 If you are on Windows, you need to keep iTunes open in order to interact with iOS devices. 
+
+You only need to install `fruity-frida` for iOS specific features, like lldb debugging and remote shell. For more information, please refer to [fruity-frida](https://github.com/chichou/fruity-frida).
 
 ## Features
 
