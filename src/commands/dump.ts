@@ -38,7 +38,9 @@ export default async function dump(target: TargetItem) {
 
   try {
     if (target.device.os === 'ios') {
-      await bagbak(target, output);
+      vscode.window.showErrorMessage('Having issues with iOS now :(, please wait for a fix');
+      return;
+      // await bagbak(target, output);
     } else if (target.device.os === 'android') {
       await pull(target, destURI);
     }
@@ -70,19 +72,18 @@ async function bagbak(target: AppItem, output: string) {
   const shellArgs: string[] = [];
   switch (target.device.type) {
     case DeviceType.Remote:
-    case DeviceType.TCP:
       shellArgs.push.apply(shellArgs, ['-H', target.device.id]);
       break;
     case DeviceType.USB:
       if (target.device.id !== 'usb')
-        shellArgs.push.apply(shellArgs, ['-u', target.device.id]);
+        shellArgs.push.apply(shellArgs, ['-D', target.device.id]);
       break;
     default:
       vscode.window.showErrorMessage('Unsupported device type');
       return;
   }
 
-  shellArgs.push.apply(shellArgs, [target.data.identifier, '-o', output, '-z']);
+  shellArgs.push.apply(shellArgs, [target.data.identifier, '-o', output]);
 
   const term = vscode.window.createTerminal({
     name: 'bagbak',
