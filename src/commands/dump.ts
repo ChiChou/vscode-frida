@@ -30,7 +30,8 @@ export default async function dump(target: TargetItem) {
 
   if (!destinations?.length) return;
 
-  const output = destinations[0].fsPath;
+  const destURI = destinations[0]
+  const output = destURI.fsPath;
 
   // save preferred path
   vscode.workspace.getConfiguration('frida').update('decryptOutput', output, true);
@@ -39,7 +40,7 @@ export default async function dump(target: TargetItem) {
     if (target.device.os === 'ios') {
       await bagbak(target, output);
     } else if (target.device.os === 'android') {
-      await pull(target, destinations[0]);
+      await pull(target, destURI);
     }
   } catch (e) {
     vscode.window.showInformationMessage(`failed to dump application:\n${(e as Error).message}`);
@@ -50,7 +51,7 @@ export default async function dump(target: TargetItem) {
     `Successfully pulled package ${target.data.identifier}`, 'Open', 'Dismiss')
   if (option === 'Open') {
     // open folder in finder/explorer)
-    vscode.commands.executeCommand('revealFileInOS', destinations[0]);
+    vscode.commands.executeCommand('revealFileInOS', destURI);
   }
 }
 

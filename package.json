@@ -144,7 +144,7 @@
 			},
 			{
 				"command": "frida.external.dump",
-				"title": "Dump app",
+				"title": "Dump App Package",
 				"category": "Frida"
 			},
 			{
