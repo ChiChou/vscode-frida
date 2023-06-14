@@ -1,5 +1,14 @@
 # Change Log
 
+### v0.7.3 - 25 Jun, 2023
+
+* Bring back `bagbak`
+
+### v0.7.0 - 14 Jun, 2023
+
+* Use `fruity-frida` to support iOS debugging and SSH
+* Temporary disable bagbak for compatibility issue
+
 ### v0.4.11 - 07 Apr, 2023
 
 * Remove Fouldecrypt
