@@ -18,19 +18,18 @@ export async function debug(node: TargetItem): Promise<void> {
     return;
   }
 
-  const args = ['-D', node.device.id];
+  const shellArgs = ['-D', node.device.id];
   if (node instanceof AppItem) {
     if (node.data.pid) {
-      args.push('attach', node.data.pid.toString());
+      shellArgs.push('attach', node.data.pid.toString());
     } else {
-      args.push('app', node.data.identifier);
+      shellArgs.push('app', node.data.identifier);
     }
   } else if (node instanceof ProcessItem) {
-    args.push('attach', node.data.pid.toString());
+    shellArgs.push('attach', node.data.pid.toString());
   }
 
   const shellPath = executable('ios-debug');
-  const shellArgs = ['attach'];
 
   return run({
     name: `lldb - ${node.data.name}`,
