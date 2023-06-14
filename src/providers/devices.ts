@@ -163,6 +163,6 @@ export class ProcessItem extends TargetItem {
   }
 
   get contextValue() {
-    return `process|${this.data.pid ? 'running' : 'dead'}`;
+    return `process|${this.data.pid ? 'running' : 'dead'}|${this.device.os}`;
   }
 }
