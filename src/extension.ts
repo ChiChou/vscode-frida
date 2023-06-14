@@ -13,6 +13,7 @@ import * as file from './commands/file';
 import * as lldb from './commands/lldb';
 import * as objection from './commands/objection';
 import * as repl from './commands/repl';
+import * as rootless from './commands/rootless';
 import * as ssh from './commands/ssh';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
@@ -52,6 +53,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	push(register('frida.external.lldb', lldb.debug));
 	push(register('frida.external.shell', ssh.shell));
+	push(register('frida.external.rootless-frida-server', rootless.start));
 
 	push(register('frida.boilerplate.agent', boilerplate.agent));
 	push(register('frida.boilerplate.module', boilerplate.module));
