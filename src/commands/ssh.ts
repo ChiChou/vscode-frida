@@ -1,65 +1,22 @@
-import { promises as fsp } from 'fs';
 import { commands, window } from 'vscode';
 
-import { copyid as fridaCopyId, os } from '../driver/frida';
-import { IProxy, useSSH } from '../iproxy';
-import { keyPath } from '../libs/ssh';
-import { logger } from '../logger';
+import { os } from '../driver/frida';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { run } from '../term';
 import { executable } from '../utils';
 
 
-export async function keygen(): Promise<boolean> {
-  const path = keyPath();
-
-  try {
-    await fsp.access(path);
-    logger.appendLine(`Private key (${path}) already exists`);
-    return Promise.resolve(true);
-  } catch(err) {
-
-  }
-
-  const choice = await window.showErrorMessage(
-    'SSH key pair not found. Generate now?', 'Yes', 'Cancel');
+// https://github.com/ChiChou/fruity-frida
+async function askToInstallDeployTool() {
+  const selected = await window.showErrorMessage(
+    'fruity-frida is not installed. Would you like to install it now?', 'Yes', 'No');
   
-  if (choice === 'Yes') {
-    try {
-      await run({
-        name: 'ssh-keygen',
-        shellPath: executable('ssh-keygen'),
-        shellArgs: ['-f', path],
-      });
-    } catch(_) {
-      throw new Error('Failed to generate SSH key pair');
-    }
-
-    return true;
-  } else {
-    return false;
-  }
-}
-
-export async function copyid(node: TargetItem) {
-  if (!(node instanceof DeviceItem)) {
-    window.showErrorMessage('This command is only avaliable on context menu');
-    return;
-  }
-
-  await keygen();
-
-  const deviceType = await os(node.data.id);
-  if (deviceType !== 'ios') {
-    window.showErrorMessage(`Device type "${deviceType}" is not supported`);
-    return;
-  }
-
-  const result = await fridaCopyId(node.data.id);
-  if (result) {
-    window.showInformationMessage(`Succesfully installed SSH public key on "${node.data.name}"`);
-  } else {
-    window.showErrorMessage(`Failed to deploy SSH key to ${node.data.name}`);
+  if (selected === 'Yes') {
+    return run({
+      name: 'install fruity-frida',
+      shellPath: executable('npm'),
+      shellArgs: ['install', '-g', 'fruity-frida'],
+    })
   }
 }
 
@@ -78,12 +35,10 @@ export async function shell(node: TargetItem) {
   const system = await os(node.data.id);
   const name = `SSH: ${node.data.name}`;
   let shellPath, shellArgs;
-  let iproxy: IProxy | null = null;
 
   if (system === 'ios') {
-    iproxy = await useSSH(node.data.id);
-    shellPath = executable('ssh');
-    shellArgs = ['-q', `-p${iproxy.local}`, 'root@localhost', '-o', 'StrictHostKeyChecking=no', '-o', 'UserKnownHostsFile=/dev/null'];
+    shellPath = executable('ios-shell');
+    shellArgs = ['-D', node.data.id];
   } else if (system === 'android') {
     shellPath = executable('adb');
     shellArgs = ['-s', node.data.id, 'shell'];
@@ -92,15 +47,17 @@ export async function shell(node: TargetItem) {
     return;
   }
 
-  try {
-    await run({
-      name,
-      shellArgs,
-      shellPath,
-      hideFromUser: true,
-    });
-  } finally {
-    if (iproxy)
-      iproxy.release();
-  }
+  return run({
+    name,
+    shellArgs,
+    shellPath,
+    hideFromUser: true,
+  }).catch(err => {
+    if (err.message === 'Command not found: ios-shell') {
+      askToInstallDeployTool();
+      return;
+    }
+
+    throw err;
+  });
 }

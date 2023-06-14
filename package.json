@@ -153,11 +153,6 @@
 				"category": "iOS"
 			},
 			{
-				"command": "frida.external.setuplldb",
-				"title": "Setup LLDB debugserver",
-				"category": "iOS"
-			},
-			{
 				"command": "frida.device.androidserver",
 				"title": "Start frida-server",
 				"category": "Android"
@@ -165,16 +160,6 @@
 			{
 				"command": "frida.external.shell",
 				"title": "Open Shell",
-				"category": "SSH over USB"
-			},
-			{
-				"command": "frida.external.copyid",
-				"title": "Install SSH Public Key",
-				"category": "SSH over USB"
-			},
-			{
-				"command": "frida.external.sshkeygen",
-				"title": "Generate SSH Keypair",
 				"category": "SSH over USB"
 			},
 			{
@@ -256,19 +241,8 @@
 					"when": "false"
 				},
 				{
-					"command": "frida.external.setuplldb",
-					"when": "false"
-				},
-				{
 					"command": "frida.external.shell",
 					"when": "false"
-				},
-				{
-					"command": "frida.external.copyid",
-					"when": "false"
-				},
-				{
-					"command": "frida.external.sshkeygen"
 				},
 				{
 					"command": "frida.syslog",
@@ -440,16 +414,6 @@
 					"command": "frida.device.androidserver",
 					"when": "viewItem =~ /^device\\|\\w+\\|android$/",
 					"group": "2_frida_dev_setup@2"
-				},
-				{
-					"command": "frida.external.setuplldb",
-					"when": "viewItem =~ /^device\\|\\w+\\|ios$/",
-					"group": "2_frida_dev_setup@2"
-				},
-				{
-					"command": "frida.external.copyid",
-					"when": "viewItem =~ /^device\\|\\w+\\|ios$/",
-					"group": "2_frida_dev_setup@3"
 				}
 			]
 		}

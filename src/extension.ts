@@ -2,21 +2,21 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 
-import { ProviderType } from './types';
 import { DevicesProvider } from './providers/devices';
+import { ProviderType } from './types';
 
-import * as iproxy from './iproxy';
-import * as ssh from './commands/ssh';
+import * as android from './commands/android';
+import * as boilerplate from './commands/boilerplate';
+import * as clipboard from './commands/clipboard';
+import dump from './commands/dump';
 import * as file from './commands/file';
-import * as repl from './commands/repl';
-import * as syslog from './commands/syslog';
-import * as typing from './commands/typing';
 import * as lldb from './commands/lldb';
 import * as objection from './commands/objection';
-import * as clipboard from './commands/clipboard';
-import * as boilerplate from './commands/boilerplate';
-import * as android from './commands/android';
-import dump from './commands/dump';
+import * as repl from './commands/repl';
+import * as ssh from './commands/ssh';
+import * as syslog from './commands/syslog';
+import * as typing from './commands/typing';
+import * as iproxy from './iproxy';
 
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
@@ -51,12 +51,8 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.external.objection', objection.explore));
 	push(register('frida.external.dump', dump));
 
-	push(register('frida.external.setuplldb', lldb.setup));
 	push(register('frida.external.lldb', lldb.debug));
-
 	push(register('frida.external.shell', ssh.shell));
-	push(register('frida.external.copyid', ssh.copyid));
-	push(register('frida.external.sshkeygen', ssh.keygen));
 
 	push(register('frida.boilerplate.agent', boilerplate.agent));
 	push(register('frida.boilerplate.module', boilerplate.module));
@@ -68,5 +64,4 @@ export function activate(context: vscode.ExtensionContext) {
 // this method is called when your extension is deactivated
 export function deactivate() {
 	iproxy.cleanup();
-	lldb.cleanup();
 }

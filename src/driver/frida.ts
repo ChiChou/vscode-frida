@@ -74,14 +74,6 @@ export function location(id: string, bundle: string) {
   return exec('location', id, bundle);
 }
 
-export function copyid(id: string) {
-  return exec('ssh-copy-id', id);
-}
-
-export function setupDebugServer(id: string) {
-  return exec('sign-debugserver', id);
-}
-
 export function lockdownSyslog(id: string, bundleOrPid: string[]) {
   return run({
     name: `Syslog: ${bundleOrPid}`,

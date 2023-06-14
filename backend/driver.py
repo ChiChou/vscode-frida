@@ -9,8 +9,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def main(args):
     from backend import core, rpc, syslog
-    from backend.fruit.copyid import install
-    from backend.fruit.debugserver import setup
 
     if args.remote:
         import frida
@@ -34,12 +32,6 @@ def main(args):
 
     if args.action == 'info':
         return core.device_info(device)
-
-    if args.action == 'ssh-copy-id':
-        return install(device)
-
-    if args.action == 'sign-debugserver':
-        return setup(device)
 
     if args.action == 'port':
         return core.find_port(device)
