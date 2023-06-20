@@ -2,13 +2,14 @@ import { createWriteStream, promises as fsp } from 'fs';
 import { get as httpGet } from 'https';
 import { join } from 'path';
 import { Position, ProgressLocation, window, workspace } from 'vscode';
+import { executable } from '../utils';
 
 const URL = 'https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/frida-gum/index.d.ts';
 const NAME = 'frida-gum.d.ts';
 
 function npmInstall() {
   const name = `npm`;
-  const shellPath = 'npm';
+  const shellPath = executable('npm');
   const shellArgs = ['install', '@types/frida-gum', '--save'];
   const term = window.createTerminal({
     name,
