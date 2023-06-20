@@ -4,9 +4,6 @@ import { join } from 'path';
 import { Position, ProgressLocation, window, workspace } from 'vscode';
 import { executable } from '../utils';
 
-const URL = 'https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/frida-gum/index.d.ts';
-const NAME = 'frida-gum.d.ts';
-
 function npmInstall() {
   const name = `npm`;
   const shellPath = executable('npm');
@@ -22,6 +19,48 @@ function npmInstall() {
     }
   })
   term.show();
+}
+
+async function downloadTypeHint(cwd: string) {
+  const URL = 'https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/frida-gum/index.d.ts';
+  const NAME = 'frida-gum.d.ts';
+
+  // will override existing one
+  const dest = join(cwd, NAME);
+  const stream = createWriteStream(dest);
+
+  window.withProgress({
+    location: ProgressLocation.Notification,
+    title: `Downloading typing info for frida-gum`,
+    cancellable: false,
+  }, (progress, token) => {
+    return new Promise<string>(resolve => {
+      const req = httpGet(URL, resp => {
+        const rawLen = resp.headers['content-length'];
+        const len = rawLen ? parseInt(rawLen, 10) : NaN;
+        resp.pipe(stream);
+
+        if (rawLen) {
+          resp.on('data', chunk =>
+            progress.report({
+              increment: chunk.length / len * 100
+            })
+          );
+        }
+      });
+
+      req
+        .on('finish', async () => {
+          resolve(NAME);
+        })
+        .on('error', (err) => {
+          stream.close();
+          window.showErrorMessage(`Failed to download typing info: ${err}`);
+          fsp.unlink(dest);
+        });
+    });
+  })
+
 }
 
 
@@ -51,47 +90,9 @@ export async function init() {
 
   const folder = workspace.getWorkspaceFolder(fileUri);
   const cwd = folder ? folder.uri.fsPath : join(fileUri.fsPath, '..');
-
-  // todo: refactor
-
-  // will override existing one
-  const dest = join(cwd, NAME);
-  const stream = createWriteStream(dest);
-
-  window.withProgress({
-    location: ProgressLocation.Notification,
-    title: `Downloading typing info for frida-gum`,
-    cancellable: false,
-  }, (progress, token) => {
-    return new Promise<void>(resolve => {
-      const req = httpGet(URL, resp => {
-        const rawLen = resp.headers['content-length'];
-        const len = rawLen ? parseInt(rawLen, 10) : NaN;
-        resp.pipe(stream);
-
-        if (rawLen) {
-          resp.on('data', chunk =>
-            progress.report({
-              increment: chunk.length / len * 100
-            })
-          );
-        }
-      });
-
-      req
-        .on('finish', async () => {
-          resolve();
-          await editor.edit(e => {
-            e.insert(new Position(0, 0), `/// <reference path="${NAME}" />\n`);
-          });
-          editor.document.save();
-        })
-        .on('error', (err) => {
-          stream.close();
-          window.showErrorMessage(`Failed to download typing info: ${err}`);
-          fsp.unlink(dest);
-        });
-    });
-  })
-
+  const name = await downloadTypeHint(cwd);
+  await editor.edit(e => {
+    e.insert(new Position(0, 0), `/// <reference path="${name}" />\n`);
+  });
+  editor.document.save();
 }
