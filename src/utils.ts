@@ -28,18 +28,6 @@ export function executable(name: string) {
   return name + (platform() === 'win32' ? '.exe' : '');
 }
 
-export function idle(): Promise<number> {
-  return new Promise((resolve, reject) => {
-    const server = net.createServer()
-      .on('error', reject)
-      .listen(0, () => {
-        const { port } = server.address() as net.AddressInfo;
-        resolve(port);
-        server.close();
-      });
-  });
-}
-
 export function python3Path(): string {
   let interpreter = 'python3';
   try {
@@ -50,32 +38,6 @@ export function python3Path(): string {
   }
   if (platform() === 'win32' && !interpreter.endsWith('.exe')) { interpreter += '.exe'; }
   return interpreter;
-}
-
-export function showInFolder(destination: vscode.Uri): void {
-  const o = platform();
-  const detached = (bin: string, ...args: string[]) =>
-    cp.spawn(bin, args, { detached: true, stdio: 'ignore' }).unref();
-
-  const folder = vscode.Uri.joinPath(destination, '..').fsPath;
-  if (o === 'win32') {
-    detached('explorer.exe', '/select,', destination.fsPath);
-    return;
-  } else if (o === 'linux') {
-    for (const tool of ['xdg-open', 'gnome-open']) {
-      try {
-        detached(tool, folder);
-        return;
-      } catch(e) {
-        continue;
-      }
-    }
-  } else if (o === 'darwin') {
-    detached('open', '-a', 'Finder', folder);
-    return;
-  }
-
-  vscode.window.showWarningMessage('Your platform does not support this command');
 }
 
 export function expandDevParam(node: AppItem | ProcessItem) {
