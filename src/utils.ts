@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import * as net from 'net';
-import * as cp from 'child_process';
 import { join } from 'path';
 import { platform } from 'os';
 import { DeviceType } from './types';
@@ -32,11 +30,16 @@ export function python3Path(): string {
   let interpreter = 'python3';
   try {
     const pyext = vscode.extensions.getExtension('ms-python.python');
-    if (pyext) { interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0]; }
-  } catch(_) {
+    if (pyext) {
+      interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0];
+    }
+  } catch (_) {
 
   }
-  if (platform() === 'win32' && !interpreter.endsWith('.exe')) { interpreter += '.exe'; }
+
+  if (platform() === 'win32' && !interpreter.endsWith('.exe')) {
+    interpreter += '.exe';
+  }
   return interpreter;
 }
 
@@ -47,7 +50,7 @@ export function expandDevParam(node: AppItem | ProcessItem) {
     case DeviceType.Remote:
       return ['-H', node.device.id.substring('socket@'.length)];
     case DeviceType.USB:
-      // return ['-U'];
+    // return ['-U'];
     default:
       return ['--device', node.device.id];
   }
