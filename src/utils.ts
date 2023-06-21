@@ -20,8 +20,12 @@ export function refresh() {
   vscode.commands.executeCommand('frida.apps.refresh');
 }
 
-export function executable(cmd: string) {
-  return cmd + (platform() === 'win32' ? '.exe' : '');
+export function cmd(name: string) {
+  return name + (platform() === 'win32' ? '.cmd' : '');
+}
+
+export function executable(name: string) {
+  return name + (platform() === 'win32' ? '.exe' : '');
 }
 
 export function idle(): Promise<number> {

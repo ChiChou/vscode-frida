@@ -2,11 +2,11 @@ import { createWriteStream, promises as fsp } from 'fs';
 import { get as httpGet } from 'https';
 import { join } from 'path';
 import { Position, ProgressLocation, window, workspace } from 'vscode';
-import { executable } from '../utils';
+import { cmd } from '../utils';
 
 function npmInstall() {
-  const name = `npm`;
-  const shellPath = executable('npm');
+  const name = 'Install typescript typings';
+  const shellPath = cmd('npm');
   const shellArgs = ['install', '@types/frida-gum', '--save'];
   const term = window.createTerminal({
     name,

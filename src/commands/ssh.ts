@@ -3,7 +3,7 @@ import { commands, window } from 'vscode';
 import { os } from '../driver/frida';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { run } from '../term';
-import { executable } from '../utils';
+import { cmd, executable } from '../utils';
 
 
 // https://github.com/ChiChou/fruity-frida
@@ -14,7 +14,7 @@ async function askToInstallDeployTool() {
   if (selected === 'Yes') {
     return run({
       name: 'install fruity-frida',
-      shellPath: executable('npm'),
+      shellPath: cmd('npm'),
       shellArgs: ['install', '-g', 'fruity-frida'],
     })
   }
@@ -37,9 +37,10 @@ export async function shell(node: TargetItem) {
   let shellPath, shellArgs;
 
   if (system === 'ios') {
-    shellPath = executable('ios-shell');
+    shellPath = cmd('ios-shell');
     shellArgs = ['-D', node.data.id];
   } else if (system === 'android') {
+    // todo: use adb.ts
     shellPath = executable('adb');
     shellArgs = ['-s', node.data.id, 'shell'];
   } else {

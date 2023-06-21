@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import { AppItem, ProcessItem } from '../providers/devices';
 import { run } from '../term';
-import { executable, expandDevParam, python3Path, resource } from '../utils';
+import { cmd, expandDevParam, python3Path, resource } from '../utils';
 
 
 async function create(template: string) {
@@ -44,7 +44,7 @@ async function create(template: string) {
   await run({
     cwd: dest.path,
     name: `npm install`,
-    shellPath: executable('npm'),
+    shellPath: cmd('npm'),
     shellArgs: ['install']
   });
 }

@@ -1,7 +1,7 @@
 import { window } from "vscode";
 
 import { DeviceItem, TargetItem } from "../providers/devices";
-import { executable } from "../utils";
+import { cmd } from "../utils";
 import { run } from '../term';
 
 
@@ -11,7 +11,7 @@ export async function start(node: TargetItem) {
     return;
   }
 
-  const shellPath = executable('run-frida-server');
+  const shellPath = cmd('run-frida-server');
   const shellArgs = ['-D', node.data.id];
 
   return run({

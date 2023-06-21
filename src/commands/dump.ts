@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import ADB from '../driver/adb';
 import { AppItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
-import { executable } from '../utils';
+import { cmd } from '../utils';
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {
@@ -87,7 +87,7 @@ async function bagbak(target: AppItem, output: string) {
 
   const term = vscode.window.createTerminal({
     name: 'bagbak',
-    shellPath: executable('bagbak'),
+    shellPath: cmd('bagbak'),
     shellArgs,
   });
 
