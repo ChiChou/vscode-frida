@@ -5,6 +5,7 @@ import ADB from '../driver/adb';
 import { AppItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
 import { cmd } from '../utils';
+import path = require('path');
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {
@@ -36,13 +37,18 @@ export default async function dump(target: TargetItem) {
   // save preferred path
   vscode.workspace.getConfiguration('frida').update('decryptOutput', output, true);
 
+  let artifact: vscode.Uri;
+
   try {
     if (target.device.os === 'ios') {
-      vscode.window.showErrorMessage('Having issues with iOS now :(, please wait for a fix');
-      return;
-      // await bagbak(target, output);
+      artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.ipa`);
+      await bagbak(target, artifact);
     } else if (target.device.os === 'android') {
-      await pull(target, destURI);
+      artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.apk`);
+      await pull(target, artifact);
+    } else {
+      vscode.window.showErrorMessage('This command only supports iOS or Android');
+      return;
     }
   } catch (e) {
     vscode.window.showInformationMessage(`failed to dump application:\n${(e as Error).message}`);
@@ -50,10 +56,9 @@ export default async function dump(target: TargetItem) {
   }
 
   const option = await vscode.window.showInformationMessage(
-    `Successfully pulled package ${target.data.identifier}`, 'Open', 'Dismiss')
+    `Successfully pulled package ${target.data.identifier}`, 'Open', 'Dismiss');
   if (option === 'Open') {
-    // open folder in finder/explorer)
-    vscode.commands.executeCommand('revealFileInOS', destURI);
+    vscode.commands.executeCommand('revealFileInOS', artifact);
   }
 }
 
@@ -68,7 +73,7 @@ async function pull(target: AppItem, output: vscode.Uri) {
   }
 }
 
-async function bagbak(target: AppItem, output: string) {
+async function bagbak(target: AppItem, output: vscode.Uri) {
   const shellArgs: string[] = [];
   switch (target.device.type) {
     case DeviceType.Remote:
@@ -83,7 +88,7 @@ async function bagbak(target: AppItem, output: string) {
       return;
   }
 
-  shellArgs.push.apply(shellArgs, [target.data.identifier, '-o', output]);
+  shellArgs.push.apply(shellArgs, [target.data.identifier, '-o', output.fsPath]);
 
   const term = vscode.window.createTerminal({
     name: 'bagbak',
