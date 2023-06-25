@@ -33,9 +33,6 @@ def main(args):
     if args.action == 'info':
         return core.device_info(device)
 
-    if args.action == 'port':
-        return core.find_port(device)
-
     if args.action == 'location':
         for app in device.enumerate_applications(identifiers=[args.bundle], scope='metadata'):
             return app.parameters.get('path')
@@ -80,7 +77,6 @@ if __name__ == '__main__':
     subparsers.add_parser('devices')
     subparsers.add_parser('apps', parents=[requires_device])
     subparsers.add_parser('ps', parents=[requires_device])
-    subparsers.add_parser('port', parents=[requires_device])
     subparsers.add_parser('info', parents=[requires_device])
     subparsers.add_parser('type', parents=[requires_device])
     subparsers.add_parser('ssh-copy-id', parents=[requires_device])

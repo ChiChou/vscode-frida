@@ -66,10 +66,6 @@ export async function os(id: string) {
   return result.os.id;
 }
 
-export function port(id: string) {
-  return exec('port', id) as Promise<number>;
-}
-
 export function location(id: string, bundle: string) {
   return exec('location', id, bundle);
 }

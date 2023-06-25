@@ -6,7 +6,8 @@ try:
     import frida
 except ImportError:
     import sys
-    sys.stderr.write('Unable to import frida. Please ensure you have installed frida-tools via pip\n')
+    sys.stderr.write(
+        'Unable to import frida. Please ensure you have installed frida-tools via pip\n')
     sys.exit(-1)
 
 
@@ -60,7 +61,7 @@ def tmpicon(uid: str, params: dict):
 def info_wrap(props, fmt):
     def wrap(target):
         obj = {prop: getattr(target, prop) for prop in props}
-        
+
         # is new API?
         params = getattr(target, 'parameters')
         try:
@@ -68,7 +69,8 @@ def info_wrap(props, fmt):
             obj['smallIcon'] = png.to_uri(target.get_small_icon())
         except AttributeError:
             if params is None:
-                raise RuntimeError('frida (%s) not compatable' % frida.__version__)
+                raise RuntimeError('frida (%s) not compatable' %
+                                   frida.__version__)
             obj['largeIcon'] = tmpicon(fmt(target), params)
         return obj
 
@@ -84,7 +86,8 @@ def apps(device: frida.core.Device) -> list:
     try:
         apps = device.enumerate_applications(scope='full')
     except TypeError:
-        raise RuntimeError('Your frida python package is out of date. Please upgrade it')
+        raise RuntimeError(
+            'Your frida python package is out of date. Please upgrade it')
     except frida.TransportError:
         apps = device.enumerate_applications()
     return [wrap(app) for app in apps]
@@ -100,24 +103,11 @@ def ps(device: frida.core.Device) -> list:
     try:
         ps = device.enumerate_processes(scope='full')
     except TypeError:
-        raise RuntimeError('Your frida python package is out of date. Please upgrade it')
+        raise RuntimeError(
+            'Your frida python package is out of date. Please upgrade it')
     except frida.TransportError:
         ps = device.enumerate_processes()
     return [wrap(p) for p in ps]
-
-
-def find_port(device: frida.core.Device) -> int:
-    pid = device.spawn('/bin/sh')
-    session = device.attach(pid)
-    with (Path(__file__).parent.parent / 'agent' / 'socket.js').open('r', encoding='utf8') as fp:
-        source = fp.read()
-    script = session.create_script(source)
-    script.load()
-    return script.exports.find()
-
-
-def os_id(device: frida.core.Device) -> bool:
-    return device_info(device).get('os', {}).get('id')
 
 
 def device_info(device: frida.core.Device) -> dict:
