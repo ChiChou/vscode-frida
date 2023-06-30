@@ -29,7 +29,7 @@ async function downloadTypeHint(cwd: string) {
   const dest = join(cwd, NAME);
   const stream = createWriteStream(dest);
 
-  window.withProgress({
+  await window.withProgress({
     location: ProgressLocation.Notification,
     title: `Downloading typing info for frida-gum`,
     cancellable: false,
@@ -59,8 +59,9 @@ async function downloadTypeHint(cwd: string) {
           fsp.unlink(dest);
         });
     });
-  })
+  });
 
+  return dest;
 }
 
 
