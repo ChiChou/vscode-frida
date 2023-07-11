@@ -22,7 +22,7 @@ def devices() -> list:
         obj['icon'] = png.to_uri(dev.icon)
         try:
             obj['os'] = dev.query_system_parameters()['os']['id']
-        except (frida.ServerNotRunningError, KeyError):
+        except (frida.ServerNotRunningError, KeyError, frida.TransportError):
             obj['os'] = 'unknown'
         return obj
 
