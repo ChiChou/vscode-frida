@@ -26,12 +26,12 @@ export async function debug(node: TargetItem): Promise<void> {
   const shellArgs = ['-D', node.device.id];
   if (node instanceof AppItem) {
     if (node.data.pid) {
-      shellArgs.push('attach', node.data.pid.toString());
+      shellArgs.push('--attach', node.data.pid.toString());
     } else {
-      shellArgs.push('app', node.data.identifier);
+      shellArgs.push('--app', node.data.identifier);
     }
   } else if (node instanceof ProcessItem) {
-    shellArgs.push('attach', node.data.pid.toString());
+    shellArgs.push('--attach', node.data.pid.toString());
   }
 
   const shellPath = 'ios-debug';
