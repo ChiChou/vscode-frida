@@ -8,7 +8,7 @@
 	},
 	"displayName": "frida Workbench",
 	"description": "Unofficial frida workbench for VSCode",
-	"version": "0.7.6",
+	"version": "0.7.7",
 	"engines": {
 		"vscode": "^1.69.1"
 	},
@@ -345,7 +345,7 @@
 				},
 				{
 					"command": "frida.attach",
-					"when": "view == fridaPs && viewItem == 'process|running'",
+					"when": "view == fridaPs && viewItem =~ /^process\\|/",
 					"group": "inline"
 				},
 				{
