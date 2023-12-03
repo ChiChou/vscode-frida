@@ -456,7 +456,6 @@
 		"vscode-test": "^1.6.1"
 	},
 	"dependencies": {
-		"@octokit/rest": "^19.0.7",
 		"lookpath": "^1.2.2"
 	},
 	"extensionDependencies": [

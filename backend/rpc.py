@@ -4,7 +4,6 @@ import backend.core
 from typing import List, Union
 
 
-
 class BaseAgent(object):
     def __init__(self, device: frida.core.Device):
         self.device = device
