@@ -123,14 +123,15 @@ def color(level: Level):
 
 def get_proc_name(device: frida.core.Device, bundle: str):
     try:
-        info = next(app for app in device.enumerate_applications(scope='metadata') if app.identifier == bundle)
+        info = next(app for app in device.enumerate_applications(
+            scope='metadata') if app.identifier == bundle)
     except StopIteration:
         raise RuntimeError('app with bundle %s does not exist' % bundle)
 
     if info.pid == 0:
         device.resume(device.spawn(bundle))
 
-    return info.parameters.get('path')    
+    return info.parameters.get('path')
 
 
 def stream(device: frida.core.Device, filter_cb: Callable[[int, str], bool]):

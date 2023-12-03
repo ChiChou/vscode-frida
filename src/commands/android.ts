@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 
 import ADB from '../driver/adb';
 import { DeviceItem, TargetItem } from '../providers/devices';
-// import { DownloadDelegate, download } from '../driver/github';
 
 
 export async function downloadServer(device: DeviceItem) {
@@ -28,7 +27,7 @@ export async function downloadServer(device: DeviceItem) {
   }
 
   const predicate = (filename: string) => filename.startsWith('frida-server') && filename.endsWith(`-android-${arch}.xz`);
-  
+
   // todo: download frida-server
 }
 

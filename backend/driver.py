@@ -81,7 +81,8 @@ if __name__ == '__main__':
     subparsers.add_parser('type', parents=[requires_device])
     subparsers.add_parser('ssh-copy-id', parents=[requires_device])
     subparsers.add_parser('sign-debugserver', parents=[requires_device])
-    location_parser = subparsers.add_parser('location', parents=[requires_device])
+    location_parser = subparsers.add_parser(
+        'location', parents=[requires_device])
     location_parser.add_argument('bundle')
 
     rpc_parser = subparsers.add_parser('rpc', parents=[requires_app])
