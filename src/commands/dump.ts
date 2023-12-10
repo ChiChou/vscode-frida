@@ -5,7 +5,6 @@ import ADB from '../driver/adb';
 import { AppItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
 import { cmd } from '../utils';
-import path = require('path');
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {
@@ -29,9 +28,9 @@ export default async function dump(target: TargetItem) {
     title: 'Select destination folder'
   });
 
-  if (!destinations?.length) return;
+  if (!destinations?.length) { return; }
 
-  const destURI = destinations[0]
+  const destURI = destinations[0];
   const output = destURI.fsPath;
 
   // save preferred path
@@ -80,8 +79,7 @@ async function bagbak(target: AppItem, output: vscode.Uri) {
       shellArgs.push.apply(shellArgs, ['-H', target.device.id]);
       break;
     case DeviceType.USB:
-      if (target.device.id !== 'usb')
-        shellArgs.push.apply(shellArgs, ['-D', target.device.id]);
+      if (target.device.id !== 'usb') { shellArgs.push.apply(shellArgs, ['-D', target.device.id]); }
       break;
     default:
       vscode.window.showErrorMessage('Unsupported device type');

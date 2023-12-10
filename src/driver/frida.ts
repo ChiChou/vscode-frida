@@ -54,15 +54,15 @@ export function ps(id: string) {
 }
 
 export async function os(id: string) {
-  interface result {
+  interface Result {
     os: {
       version: string;
       id: 'ios' | 'macos' | 'windows' | 'linux' | 'android';
       name: string;
-    }
-  }
+    };
+  };
 
-  const result = await exec('info', id) as result;
+  const result = await exec('info', id) as Result;
   return result.os.id;
 }
 
