@@ -15,32 +15,27 @@ export default class ADB {
     }
   }
 
-  async push(local: vscode.Uri, remote: string) {
+  async cmd(action: string, ...args: string[]) {
     const shellPath = this.path;
-    const shellArgs = ['-s', this.device, 'push', local.fsPath, remote];
+    const shellArgs = ['-s', this.device, action, ...args];
     return run({
       shellPath,
       shellArgs
     });
+  }
+
+  async push(local: vscode.Uri, remote: string) {
+    return this.cmd('push', local.fsPath, remote);
   }
 
   async pull(remote: string, local: vscode.Uri) {
-    const shellPath = this.path;
-    const shellArgs = ['-s', this.device, 'pull', remote, local.fsPath];
-    return run({
-      shellPath,
-      shellArgs
-    });
+    return this.cmd('pull', remote, local.fsPath);
   }
 
-  interactive(cmd?: string[]) {
+  interactive(...cmd: string[]) {
     const name = 'adb';
     const shellPath = this.path;
-    const shellArgs = ['-s', this.device, 'shell'];
-    if (cmd) {
-      shellArgs.push.apply(shellArgs, cmd);
-    }
-
+    const shellArgs = ['-s', this.device, 'shell', ...cmd];
     const term = vscode.window.createTerminal({
       name,
       shellPath,
@@ -50,7 +45,7 @@ export default class ADB {
     return term;
   }
 
-  async shell(cmd: string[]) {
+  async shell(...cmd: string[]) {
     const shellPath = this.path;
     const shellArgs = ['-s', this.device, 'shell', ...cmd];
 
