@@ -1,3 +1,6 @@
+/* eslint-disable curly */
+/* eslint-disable @typescript-eslint/naming-convention */
+
 import { start, stop } from './log.js';
 
 enum Runtime {
@@ -23,7 +26,7 @@ rpc.exports = {
 
     methodsOf: async (_name: string) => [] as string[],
     ownMethodsOf: async (_name: string) => [] as string[],
-    superClass: async (_name: string) => { throw new Error('Not implemented') },
+    superClass: async (_name: string) => { throw new Error('Not implemented'); },
 
     modules: () => Process.enumerateModules(),
     exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
