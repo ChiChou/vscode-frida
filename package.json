@@ -37,7 +37,15 @@
                         "null"
                     ],
                     "default": null,
-                    "description": "Preferred directory to save ipa"
+                    "description": "Preferred directory to save ipa or apk"
+                },
+                "frida.androidServerPath": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "default": "/data/local/tmp/frida-server",
+                    "description": "Path to frida-server on Android"
                 }
             }
         },

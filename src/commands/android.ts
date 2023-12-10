@@ -1,34 +1,17 @@
+/* eslint-disable @typescript-eslint/naming-convention */
 import * as vscode from 'vscode';
+import { join } from 'path';
+import { tmpdir } from 'os';
 
 import ADB from '../driver/adb';
 import { DeviceItem, TargetItem } from '../providers/devices';
+import { logger } from '../logger';
+import { python3Path } from '../utils';
+import { run } from '../term';
 
-
-export async function downloadServer(device: DeviceItem) {
-  const adb = new ADB(device.data.id);
-  const abi = await adb.shell(['getprop', 'ro.product.cpu.abi']);
-  const mapping: { [key: string]: string } = {
-    'arm64-v8a': 'arm64',
-    'armeabi-v7a': 'arm',
-    'x86_64': 'x86_64',
-    'x86': 'x86',
-  }
-
-  const arch = mapping[abi.trim()];
-  if (!arch) {
-    vscode.window.showErrorMessage(`Unsupported architecture: ${abi}`);
-    return;
-  }
-
-  const token = vscode.workspace.getConfiguration('frida').get('githubToken', undefined);
-  if (!token) {
-    vscode.window.showInformationMessage(
-      'GitHub token is not set, your access is limited. Please consider setting "frida.githubToken" in your settings');
-  }
-
-  const predicate = (filename: string) => filename.startsWith('frida-server') && filename.endsWith(`-android-${arch}.xz`);
-
-  // todo: download frida-server
+function getServerPath() {
+  return vscode.workspace.getConfiguration('frida')
+    .get('androidServerPath', '/data/local/tmp/frida-server');
 }
 
 export async function startServer(target: TargetItem) {
@@ -37,12 +20,46 @@ export async function startServer(target: TargetItem) {
     return;
   }
 
+  const server = getServerPath();
   const adb = new ADB(target.data.id);
-  const term = adb.interactive();
+  const installed = await adb.shell(server, '--version').then((ver: string) => {
+    logger.appendLine(`sanity check: frida-server version on device ${ver}`);
+    return true;
+  }).catch(() => {
+    logger.appendLine('frida-server not found on device, downloading...');
+    return false;
+  });
 
-  // todo: download frida-server
+  if (!installed) {
+    const abi = (await adb.shell('getprop', 'ro.product.cpu.abi')).trimEnd();
+    const py = join(__dirname, '..', '..', 'backend', 'android', 'get-frida.py');
+    const tmp = join(tmpdir(), `frida-server-${abi}`);
+
+    await vscode.window.withProgress({
+      location: vscode.ProgressLocation.Notification,
+      title: 'Downloading frida-server',
+      cancellable: false
+    }, async (progress) => {
+      await run({
+        name: `Download frida-server`,
+        shellPath: python3Path(),
+        shellArgs: [py, abi, tmp]
+      });
+      progress.report({ message: 'Done' });
+    });
+
+    const uri = vscode.Uri.file(tmp);
+    await adb.push(uri, server);
+
+    vscode.window.showInformationMessage(`frida-server deployed to ${server} successfully`);
+    await adb.shell('chmod', '755', server);
+  }
+
+  const term = adb.interactive();
   setTimeout(() => {
     term.sendText('su', true);
-    term.sendText('/data/local/tmp/frida-server', true);
+    term.sendText(server, true);
   }, 500);
+
+  return;
 }

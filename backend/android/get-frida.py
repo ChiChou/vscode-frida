@@ -1,81 +1,56 @@
 #!/usr/bin/env python3
 
-import subprocess
+import logging
 import urllib.request
 import json
 import lzma
 import shutil
-import tempfile
 from pathlib import Path
 
-dst = '/data/local/tmp/frida-server'
+MAPPING = {
+    'x86': 'x86',
+    'x86_64': 'x86_64',
+    'arm64-v8a': 'arm64',
+    'armeabi-v7a': 'arm',
+}
 
-class Downloader(object):
-    def __init__(self, uuid):
-        self.uuid = uuid
+RELEASE_URL = 'https://api.github.com/repos/frida/frida/releases/latest'
 
-    def adb(self, *args):
-        final_args = ['adb']
-        if self.uuid:
-            final_args += ['-s', self.uuid]
-        final_args += args
-        return subprocess.check_output(final_args).strip().decode()
 
-    def download(self):
-        mapping = {
-            'x86': 'x86',
-            'x86_64': 'x86_64',
-            'arm64-v8a': 'arm64',
-            'armeabi-v7a': 'arm',
-        }
+def download(abi: str, path: Path):
+    try:
+        arch = MAPPING[abi]
+    except KeyError:
+        raise RuntimeError('Unknown ABI: %s' % abi)
 
-        arch = mapping[self.adb('shell', 'getprop', 'ro.product.cpu.abi')]
-        suffix = '-android-%s.xz' % arch
+    suffix = '-android-%s.xz' % arch
+    with urllib.request.urlopen(RELEASE_URL) as response:
+        info = json.loads(response.read())
 
-        with urllib.request.urlopen('https://api.github.com/repos/frida/frida/releases/latest') as response:
-            info = json.loads(response.read())
+    for asset in info['assets']:
+        name = asset['name']
+        logging.debug('asset: %s', name)
+        if name.startswith('frida-server') and name.endswith(suffix):
+            url = asset['browser_download_url']
+            break
+    else:
+        raise RuntimeError('Unable to find frida-server for %s' % arch)
 
-        for asset in info['assets']:
-            name = asset['name']
-            print(name)
-            if name.startswith('frida-server') and name.endswith(suffix):
-                url = asset['browser_download_url']
-                break
-        else:
-            raise RuntimeError('Unable to find frida-server for %s' % arch)
-
-        print('download frida-server')
-
-        tmp = Path(tempfile.gettempdir()) / 'frida-server'
-        with urllib.request.urlopen(url) as response:
-            with lzma.LZMAFile(response) as archive:
-                with tmp.open('wb') as fp:
-                    shutil.copyfileobj(archive, fp)
-
-        self.adb('push', tmp, dst)
-
-    def start(self):
-        if not self.sanity_check():
-            self.download()
-            self.adb('shell', 'chmod 0755 %s' % dst)
-        self.adb('shell', dst)
-
-    def sanity_check(self):
-        try:
-            self.adb('shell', '%s --version' % dst)
-        except:
-            return False
-
-        return True
+    logging.debug('downloading %s to %s', url, path)
+    with urllib.request.urlopen(url) as response:
+        with lzma.LZMAFile(response) as archive:
+            with path.open('wb') as fp:
+                shutil.copyfileobj(archive, fp)
 
 
 if __name__ == "__main__":
-    import argparse
+    import sys
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        '-i', '--uuid', help='uuid of the device', required=False)
-    args = parser.parse_args()
+    if len(sys.argv) != 3:
+        print('usage: %s <abi> <path>' % sys.argv[0])
+        sys.exit(1)
 
-    d = Downloader(args.uuid)
-    d.start()
+    abi = sys.argv[1]
+    path = sys.argv[2]
+
+    download(abi, Path(path))

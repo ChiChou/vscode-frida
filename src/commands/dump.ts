@@ -63,7 +63,7 @@ export default async function dump(target: TargetItem) {
 
 async function pull(target: AppItem, output: vscode.Uri) {
   const adb = new ADB(target.device.id);
-  const path = await adb.shell(['pm', 'path', target.data.identifier]);
+  const path = await adb.shell('pm', 'path', target.data.identifier);
 
   if (path.startsWith('package:')) {
     await adb.pull(path.substring(8).trimEnd(), output);
