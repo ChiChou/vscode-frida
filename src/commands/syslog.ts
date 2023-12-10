@@ -58,8 +58,12 @@ export function show(node?: TargetItem) {
       const args = [py, 'syslog', '--device', node.device.id, ...bundleOrPid];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3Path(), args).show();
     } else if (type === 'android') {
-      const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
-      cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
+      if (node.data.pid > 0) {
+        const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
+        cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
+      } else {
+        window.showErrorMessage(`${node.data.name} (${node.device.name}) is not running`);
+      }
     } else {
       window.showErrorMessage(`Unimplemented type of device ${node.device.name}`);
     }
