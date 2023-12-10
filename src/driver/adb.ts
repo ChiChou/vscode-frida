@@ -8,6 +8,11 @@ export default class ADB {
 
   constructor(private device: string) {
     this.path = executable('adb');
+
+    if (!this.path) {
+      vscode.window.showErrorMessage('adb not found');
+      throw new Error('adb not found in $PATH');
+    }
   }
 
   async push(local: vscode.Uri, remote: string) {
@@ -16,7 +21,7 @@ export default class ADB {
     return run({
       shellPath,
       shellArgs
-    })
+    });
   }
 
   async pull(remote: string, local: vscode.Uri) {
@@ -25,7 +30,7 @@ export default class ADB {
     return run({
       shellPath,
       shellArgs
-    })
+    });
   }
 
   interactive(cmd?: string[]) {
@@ -45,20 +50,18 @@ export default class ADB {
     return term;
   }
 
-  async shell(cmd?: string[]) {
+  async shell(cmd: string[]) {
     const shellPath = this.path;
-    const shellArgs = ['-s', this.device, 'shell'];
-    if (cmd) {
-      shellArgs.push.apply(shellArgs, cmd);
-    }
+    const shellArgs = ['-s', this.device, 'shell', ...cmd];
 
     return new Promise<string>((resolve, reject) => {
       cp.execFile(shellPath, shellArgs, (err, stdout, stderr) => {
-        if (err)
+        if (err) {
           reject(err);
-        else
+        } else {
           resolve(stdout);
-      })
-    })
+        }
+      });
+    });
   }
 }
