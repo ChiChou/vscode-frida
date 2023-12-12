@@ -39,7 +39,10 @@ module.exports = {
                 }
             }
         ],
-        "@typescript-eslint/naming-convention": "warn",
+        "@typescript-eslint/naming-convention": ["warn", {
+            "selector": "enumMember",
+            "format": ["PascalCase"]
+        }],
         "@typescript-eslint/no-unused-expressions": "warn",
         "@typescript-eslint/semi": [
             "warn",
