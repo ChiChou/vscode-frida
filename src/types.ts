@@ -19,12 +19,6 @@ export class Device {
   icon: string = '';
 }
 
-export enum ItemType {
-  device = 'Device',
-  app = 'App',
-  process = 'Process'
-}
-
 export class App {
   identifier: string = '';
   name: string = '';
