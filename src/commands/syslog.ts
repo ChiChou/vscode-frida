@@ -1,12 +1,11 @@
 import * as cp from 'child_process';
+import { join } from 'path';
+import { OutputChannel, window } from 'vscode';
 
-import { lockdownSyslog, os } from '../driver/frida';
+import { driverScript, lockdownSyslog, os } from '../driver/backend';
 import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
 import { python3Path, refresh } from '../utils';
-
-import { join } from 'path';
-import { OutputChannel, window } from 'vscode';
 
 const active: { [key: string]: OutputChannel } = {};
 
@@ -16,7 +15,7 @@ export function vacuum() {
   }
 }
 
-export function show(node?: TargetItem) {
+export async function show(node?: TargetItem) {
   function cmdChannel(name: string, bin: string, args: string[]) {
     if (name in active) {
       return active[name];
@@ -50,22 +49,20 @@ export function show(node?: TargetItem) {
     return;
   }
 
-  os(node.device.id).then(type => {
-    if (type === 'ios' && node.device.type === DeviceType.USB) {
-      lockdownSyslog(node.device.id, bundleOrPid);
-    } else if (type === 'linux' || type === 'macos') {
-      const py: string = join(__dirname, '..', '..', 'backend', 'driver.py');
-      const args = [py, 'syslog', '--device', node.device.id, ...bundleOrPid];
-      cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3Path(), args).show();
-    } else if (type === 'android') {
-      if (node.data.pid > 0) {
-        const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
-        cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
-      } else {
-        window.showErrorMessage(`${node.data.name} (${node.device.name}) is not running`);
-      }
+  const type = await os(node.device.id);
+  if (type === 'ios' && node.device.type === DeviceType.USB) {
+    lockdownSyslog(node.device.id, bundleOrPid);
+  } else if (type === 'linux' || type === 'macos') {
+    const args = [driverScript(), 'syslog', '--device', node.device.id, ...bundleOrPid];
+    cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3Path(), args).show();
+  } else if (type === 'android') {
+    if (node.data.pid > 0) {
+      const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
+      cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
     } else {
-      window.showErrorMessage(`Unimplemented type of device ${node.device.name}`);
+      window.showErrorMessage(`${node.data.name} (${node.device.name}) is not running`);
     }
-  });
+  } else {
+    window.showErrorMessage(`Unimplemented type of device ${node.device.name}`);
+  }
 }

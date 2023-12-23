@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-import * as ipc from '../driver/frida';
+import * as ipc from '../driver/backend';
 
 import { resource } from '../utils';
 import { ProviderType, App, Process, Device, DeviceType } from '../types';
@@ -37,7 +37,7 @@ export abstract class TargetItem extends vscode.TreeItem {
   abstract children(): Thenable<TargetItem[]>;
   abstract tooltip?: string;
   abstract description?: string;
-  abstract iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri; } | vscode.ThemeIcon | undefined;
+  abstract iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon | undefined;
   abstract contextValue?: string | undefined;
 }
 

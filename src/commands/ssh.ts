@@ -1,6 +1,6 @@
 import { commands, window } from 'vscode';
 
-import { os } from '../driver/frida';
+import { os } from '../driver/backend';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { run } from '../term';
 import { cmd, executable } from '../utils';
