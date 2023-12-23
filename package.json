@@ -151,6 +151,11 @@
                 "category": "Frida"
             },
             {
+                "command": "frida.external.apk",
+                "title": "Pull APK from Device",
+                "category": "Frida"
+            },
+            {
                 "command": "frida.external.dump",
                 "title": "Dump App Package",
                 "category": "Frida"
@@ -247,6 +252,10 @@
                 },
                 {
                     "command": "frida.external.dump",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.external.apk",
                     "when": "false"
                 },
                 {
@@ -418,7 +427,12 @@
                 },
                 {
                     "command": "frida.external.dump",
-                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|(android|ios)$/",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "4_frida_external@3"
+                },
+                {
+                    "command": "frida.external.apk",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
                     "group": "4_frida_external@3"
                 },
                 {

@@ -50,6 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.device.androidserver', android.startServer));
 	push(register('frida.external.objection', objection.explore));
 	push(register('frida.external.dump', dump));
+	push(register('frida.external.apk', dump));
 
 	push(register('frida.external.lldb', lldb.debug));
 	push(register('frida.external.shell', ssh.shell));
