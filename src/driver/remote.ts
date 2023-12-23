@@ -1,6 +1,6 @@
 import { workspace } from "vscode";
 
-const remoteHosts = new Set<string>()
+const remoteHosts = new Set<string>();
 function loadRemoteHosts() {
   const hosts = workspace.getConfiguration('frida').get<Array<string>>('remoteHosts');
   if (Array.isArray(hosts)) {
