@@ -14,18 +14,6 @@ const py = join(base, 'driver.py');
 
 export const driverScript = () => py;
 
-export function flags(node: TargetItem) {
-  if (node instanceof DeviceItem) {
-    return ['--device', node.data.id];
-  } else if (node instanceof AppItem) {
-    return ['--app', node.data.identifier];
-  } else if (node instanceof ProcessItem) {
-    return ['--pid', node.data.pid.toString()];
-  }
-
-  throw new Error(`Invalid target "${node}"`);
-}
-
 function askInstallFrida() {
   window.showErrorMessage(`Frida python module not detected. Please check your Python interpreter setting,
 or pip install frida-tools. Do you want to install now?`, 'Install', 'Cancel')
@@ -42,7 +30,7 @@ or pip install frida-tools. Do you want to install now?`, 'Install', 'Cancel')
 export function exec(...args: string[]): Promise<any> {
   const remoteDevices = asParam();
   return new Promise((resolve, reject) => {
-    execFile(python3Path(), [py, ...remoteDevices, ...args], {}, (err, stdout, stderr) => {
+    execFile(python3Path(), [py, ...remoteDevices, ...args], { maxBuffer: 1024 * 1024 * 20}, (err, stdout, stderr) => {
       if (err) {
         if (stderr.includes('Unable to import frida')) {
           askInstallFrida();
@@ -85,6 +73,19 @@ export async function os(id: string) {
 
 export function location(id: string, bundle: string) {
   return exec('location', id, bundle);
+}
+
+export function rpc(target: TargetItem, method: string, ...args: string[]) {
+  let bundleOrPid: string[];
+  if (target instanceof AppItem) {
+    bundleOrPid = ['--app', target.data.identifier];
+  } else if (target instanceof ProcessItem) {
+    bundleOrPid = ['--pid', target.data.pid.toString()];
+  } else {
+    throw new Error(`Invalid target "${target}"`);
+  }
+
+  return exec('rpc', '--device', target.device.id, ...bundleOrPid, method, ...args);
 }
 
 export function lockdownSyslog(id: string, bundleOrPid: string[]) {

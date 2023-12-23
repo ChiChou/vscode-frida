@@ -15,7 +15,7 @@ export function vacuum() {
   }
 }
 
-export async function show(node?: TargetItem) {
+export async function show(node: TargetItem) {
   function cmdChannel(name: string, bin: string, args: string[]) {
     if (name in active) {
       return active[name];
@@ -43,9 +43,7 @@ export async function show(node?: TargetItem) {
   } else if (node instanceof ProcessItem) {
     bundleOrPid = ['--pid', node.data.pid.toString()];
   } else {
-    if (node) {
-      window.showErrorMessage(`Invalid target "${node.label}"`);
-    }
+    window.showErrorMessage(`Invalid target "${node.label}"`);
     return;
   }
 

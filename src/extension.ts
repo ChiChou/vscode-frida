@@ -17,6 +17,7 @@ import * as rootless from './commands/rootless';
 import * as ssh from './commands/ssh';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
+import * as print from './commands/print';
 
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
@@ -61,6 +62,9 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.debug.setup', boilerplate.debug));
 
 	push(register('frida.typing.init', typing.init));
+
+	push(register('frida.print.classes', print.classes));
+	push(register('frida.print.modules', print.modules));
 }
 
 // this method is called when your extension is deactivated
