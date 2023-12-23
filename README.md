@@ -41,11 +41,9 @@ Open and activate an REPL at the bottom. Use the "frida" button at the top of an
 
 ### Shell
 
-For Android devices, **Open Shell** is simply a wrapper for `adb shell`. For iOS it gives a SSH shell.
+For Android devices, **Open Shell** is simply a wrapper for `adb shell`. 
 
-There's also a shortcut for copying SSH public key to jailbroken iDevice.
-
-All the SSH related commands take port 22 as the default port. If you are on `chekra1n` jailbreak, please install OpenSSH on your device.
+For iOS it gives a SSH shell. It requires `fruity-frida` to be installed.
 
 ## Todo
 
