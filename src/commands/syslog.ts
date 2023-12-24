@@ -58,6 +58,9 @@ export async function show(node: TargetItem) {
       const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
       cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
     } else {
+      // todo: 
+      // adb shell monkey -p BUNDLE 1
+      // adb shell pidof BUNDLE
       window.showErrorMessage(`${node.data.name} (${node.device.name}) is not running`);
     }
   } else {
