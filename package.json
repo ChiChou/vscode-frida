@@ -198,7 +198,7 @@
             },
             {
                 "command": "frida.typing.init",
-                "title": "Get typing hint for frida",
+                "title": "Get type hint for frida",
                 "category": "Frida"
             },
             {
