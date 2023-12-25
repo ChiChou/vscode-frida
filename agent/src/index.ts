@@ -5,14 +5,18 @@ import { start, stop } from './log.js';
 
 enum Runtime {
     Java = 'Java',
-    ObjectiveC = 'ObjectiveC',
+    ObjectiveC = 'Objective-C',
     Generic = 'Generic',
 };
+
+const main = typeof Process.mainModule === 'object' && Process.mainModule !== null ?
+    Process.mainModule : Process.enumerateModules()[0];
 
 rpc.exports = {
     start,
     stop,
 
+    main: () => main.path,
     runtime() {
         if (Java.available) return Runtime.Java;
         if (ObjC.available) return Runtime.ObjectiveC;
@@ -45,7 +49,7 @@ if (Java.available) {
 
     rpc.exports.classes = async () => perform(() => Java.enumerateLoadedClassesSync());
     rpc.exports.ownMethodsOf =
-    rpc.exports.methodsOf =
+        rpc.exports.methodsOf =
         async (name: string) => perform(() => Java.use(name).class.getMethods());
     rpc.exports.fieldsOf = async (name: string) => perform(() => Java.use(name).class.getDeclaredFields());
     rpc.exports.superClass = async (name: string) => perform(() => Java.use(name).class.getSuperclass()?.getName());

@@ -10,7 +10,7 @@
     "watch": "npm run build -- -w"
   },
   "devDependencies": {
-    "@types/frida-gum": "^18.1.0",
+    "@types/frida-gum": "^18.5.1",
     "@types/node": "^18.6.4",
     "frida-compile": "^15.1.0"
   }
