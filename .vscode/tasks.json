@@ -27,9 +27,27 @@
 			}
 		},
 		{
+			"label": "webviwe-ui",
+			"type": "npm",
+			"script": "build",
+			"isBackground": false,
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			},
+			"group": {
+				"kind": "build"
+			},
+			"options": {
+				"cwd": "webview-ui"
+			}
+		},
+		{
 			"label": "beforeRun",
 			"dependsOn": [
 				"agent",
+				"webviwe-ui",
 				"watch"
 			],
 			"group": {

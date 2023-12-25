@@ -19,6 +19,8 @@ import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
 import * as print from './commands/print';
 
+import { HelloWorldPanel } from "./panels/HelloWorldPanel";
+
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
 	const push = (item: vscode.Disposable) => context.subscriptions.push(item);
@@ -47,7 +49,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.bundle.copy', clipboard.copy));
 	push(register('frida.name.copy', clipboard.copy));
 	push(register('frida.device.copy', clipboard.copy));
-	
+
 	push(register('frida.device.androidserver', android.startServer));
 	push(register('frida.external.objection', objection.explore));
 	push(register('frida.external.dump', dump));
@@ -65,6 +67,10 @@ export function activate(context: vscode.ExtensionContext) {
 
 	push(register('frida.print.classes', print.classes));
 	push(register('frida.print.modules', print.modules));
+
+	push(register("hello-world.showHelloWorld", () => {
+		HelloWorldPanel.render(context.extensionUri);
+	}));
 }
 
 // this method is called when your extension is deactivated

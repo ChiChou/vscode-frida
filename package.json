@@ -51,6 +51,10 @@
         },
         "commands": [
             {
+                "command": "hello-world.showHelloWorld",
+                "title": "Hello World (Vue): Show"
+            },
+            {
                 "command": "frida.ps.refresh",
                 "title": "Refresh Processes",
                 "icon": {
