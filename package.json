@@ -452,7 +452,7 @@
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile",
         "deploy": "vsce publish",
-        "install:all": "npm install && cd agent && npm install && cd ../webview-ui"
+        "install:all": "npm install && cd agent && npm install && cd ../webview-ui && npm install"
     },
     "devDependencies": {
         "@types/node": "^18.6.4",
