@@ -12,6 +12,8 @@ enum Runtime {
 const main = typeof Process.mainModule === 'object' && Process.mainModule !== null ?
     Process.mainModule : Process.enumerateModules()[0];
 
+const notImplemented = () => { throw new Error('Not implemented'); };
+
 rpc.exports = {
     start,
     stop,
@@ -28,9 +30,9 @@ rpc.exports = {
     classes: async () => [] as string[],
     protocols: async () => [] as string[],
 
-    methodsOf: async (_name: string) => [] as string[],
-    ownMethodsOf: async (_name: string) => [] as string[],
-    superClass: async (_name: string) => { throw new Error('Not implemented'); },
+    methodsOf: notImplemented,
+    ownMethodsOf: notImplemented,
+    superClass: notImplemented,
 
     modules: () => Process.enumerateModules(),
     exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
@@ -52,7 +54,7 @@ if (Java.available) {
         rpc.exports.methodsOf =
         async (name: string) => perform(() => Java.use(name).class.getMethods());
     rpc.exports.fieldsOf = async (name: string) => perform(() => Java.use(name).class.getDeclaredFields());
-    rpc.exports.superClass = async (name: string) => perform(() => Java.use(name).class.getSuperclass()?.getName());
+    rpc.exports.superClass = async (name: string) => perform<string>(() => Java.use(name).class.getSuperclass()?.getName());
 
 } else if (ObjC.available) {
     rpc.exports.classes = async () => Object.keys(ObjC.classes);
