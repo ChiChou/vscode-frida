@@ -501,7 +501,8 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile",
-        "deploy": "vsce publish"
+        "deploy": "vsce publish",
+        "install:all": "npm install && cd agent && npm install && cd ../webview-ui"
     },
     "devDependencies": {
         "@types/node": "^18.6.4",
