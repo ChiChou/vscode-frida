@@ -11,48 +11,42 @@
 			"isBackground": true,
 			"presentation": {
 				"reveal": "never"
+			},
+			"dependsOn": [
+				"agent",
+				"webview-ui",
+			],
+			"group": {
+				"kind": "build",
+				"isDefault": true
 			}
 		},
 		{
 			"label": "agent",
 			"type": "npm",
 			"script": "build",
+			"isBackground": false,
 			"presentation": {
 				"reveal": "silent",
 				"revealProblems": "onProblem",
-				"close": true
+				"close": false
 			},
 			"options": {
 				"cwd": "agent"
 			}
 		},
 		{
-			"label": "webviwe-ui",
+			"label": "webview-ui",
 			"type": "npm",
 			"script": "build",
 			"isBackground": false,
 			"presentation": {
 				"reveal": "silent",
 				"revealProblems": "onProblem",
-				"close": true
-			},
-			"group": {
-				"kind": "build"
+				"close": false
 			},
 			"options": {
 				"cwd": "webview-ui"
-			}
-		},
-		{
-			"label": "beforeRun",
-			"dependsOn": [
-				"agent",
-				"webviwe-ui",
-				"watch"
-			],
-			"group": {
-				"kind": "build",
-				"isDefault": true
 			}
 		}
 	]
