@@ -6,7 +6,7 @@ import { tmpdir } from 'os';
 import ADB from '../driver/adb';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { logger } from '../logger';
-import { python3Path } from '../utils';
+import { python3Path, sleep } from '../utils';
 import { run } from '../term';
 
 function getServerPath() {
@@ -56,10 +56,8 @@ export async function startServer(target: TargetItem) {
   }
 
   const term = adb.interactive();
-  setTimeout(() => {
-    term.sendText('su', true);
-    term.sendText(server, true);
-  }, 500);
-
-  return;
+  await sleep(1000);
+  term.sendText('su', true);
+  await sleep(500);
+  term.sendText(server, true);
 }
