@@ -20,6 +20,7 @@ or pip install frida-tools. Do you want to install now?`, 'Install', 'Cancel')
     .then(selected => {
       if (selected === 'Install') {
         run({
+          env: { PIP_BREAK_SYSTEM_PACKAGES: '1' },  // Externally Managed Environments
           shellPath: python3Path(),
           shellArgs: ['-m', 'pip', 'install', 'frida-tools']
         });
@@ -30,7 +31,7 @@ or pip install frida-tools. Do you want to install now?`, 'Install', 'Cancel')
 export function exec(...args: string[]): Promise<any> {
   const remoteDevices = asParam();
   return new Promise((resolve, reject) => {
-    execFile(python3Path(), [py, ...remoteDevices, ...args], { maxBuffer: 1024 * 1024 * 20}, (err, stdout, stderr) => {
+    execFile(python3Path(), [py, ...remoteDevices, ...args], { maxBuffer: 1024 * 1024 * 20 }, (err, stdout, stderr) => {
       if (err) {
         if (stderr.includes('Unable to import frida')) {
           askInstallFrida();
