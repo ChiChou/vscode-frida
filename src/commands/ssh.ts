@@ -1,23 +1,61 @@
+import { spawn } from 'node:child_process';
 import { commands, window } from 'vscode';
 
 import { os } from '../driver/backend';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { run } from '../term';
-import { cmd, executable } from '../utils';
+import { DeviceType } from '../types';
+import { executable } from '../utils';
 
 
-// https://github.com/ChiChou/fruity-frida
-async function askToInstallDeployTool() {
-  const selected = await window.showErrorMessage(
-    'fruity-frida is not installed. Would you like to install it now?', 'Yes', 'No');
-  
-  if (selected === 'Yes') {
-    return run({
-      name: 'install fruity-frida',
-      shellPath: cmd('npm'),
-      shellArgs: ['install', '-g', 'fruity-frida'],
-    })
+class PortNotFoundError extends Error { }
+class ToolNotFoundError extends Error { }
+class InvalidProtocolError extends Error { }
+
+
+const inetcat = executable('inetcat');
+
+async function verifySSH(...args: string[]) {
+  const magic = 'SSH-2.0-';
+
+  return new Promise((resolve, reject) => {
+    const cp = spawn(inetcat, args);
+    cp
+      .on('error', (err) => {
+        if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
+          reject(new ToolNotFoundError('inetcat not found'));
+        } else {
+          reject(err);
+        }
+      })
+      .on('close', (code) => {
+        if (code !== 0) {
+          reject(new InvalidProtocolError(`inetcat exited with code ${code}`));
+        }
+      });
+
+    cp.stdout.on('readable', () => {
+      const trunk = cp.stdout.read();
+      resolve(trunk && trunk.toString().startsWith(magic));
+    });
+  });
+}
+
+async function findSSHPort(args: string[] = []) {
+  const candidates = [22, 44];
+
+  for (const port of candidates) {
+    try {
+      if (await verifySSH(port.toString(), ...args)) {
+        return port;
+      }
+    } catch (err) {
+      if (err instanceof ToolNotFoundError) { throw err; }
+      console.error((err as Error).message);
+    }
   }
+
+  throw new PortNotFoundError('No valid SSH port found');
 }
 
 export async function shell(node: TargetItem) {
@@ -37,8 +75,33 @@ export async function shell(node: TargetItem) {
   let shellPath, shellArgs;
 
   if (system === 'ios') {
-    shellPath = cmd('ios-shell');
-    shellArgs = ['-D', node.data.id];
+    const args = ['-u', node.data.id];
+    if (node.data.type === DeviceType.Remote) {
+      args.push('-n');
+    }
+
+    try {
+      const port = await findSSHPort(args);
+      shellPath = executable('ssh');
+      shellArgs = [
+        '-o', 'StrictHostKeyChecking=no',
+        '-o', 'UserKnownHostsFile=/dev/null',
+        // there is a potential command injection
+        // {inetcat} is hardcoded, and the only risk is device uuid, 
+        // looks impossible to inject arbitrary text
+        '-o', `ProxyCommand=${inetcat} ${port} ${args.join(' ')}`,
+        `mobile@localhost`,  // todo: customize username
+        '-p', port.toString()
+      ];
+    } catch (err) {
+      if (err instanceof ToolNotFoundError) {
+        window.showErrorMessage('inetcat command not present in $PATH');
+        return;
+      } else if (err instanceof PortNotFoundError) {
+        window.showErrorMessage(`No valid SSH port found for device ${node.data.name}`);
+        return;
+      }
+    }
   } else if (system === 'android') {
     // todo: use adb.ts
     shellPath = executable('adb');
@@ -53,12 +116,5 @@ export async function shell(node: TargetItem) {
     shellArgs,
     shellPath,
     hideFromUser: true,
-  }).catch(err => {
-    if (err.message === 'Command not found: ios-shell') {
-      askToInstallDeployTool();
-      return;
-    }
-
-    throw err;
   });
 }
