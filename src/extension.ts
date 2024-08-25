@@ -9,7 +9,6 @@ import * as android from './commands/android';
 import * as boilerplate from './commands/boilerplate';
 import * as clipboard from './commands/clipboard';
 import dump from './commands/dump';
-import * as file from './commands/file';
 import * as lldb from './commands/lldb';
 import * as objection from './commands/objection';
 import * as repl from './commands/repl';
@@ -43,7 +42,6 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.syslog', syslog.show));
 	push(register('frida.syslog.vacuum', syslog.vacuum));
 
-	push(register('frida.browse', file.browse));
 	push(register('frida.bundle.copy', clipboard.copy));
 	push(register('frida.name.copy', clipboard.copy));
 	push(register('frida.device.copy', clipboard.copy));
