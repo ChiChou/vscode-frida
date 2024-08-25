@@ -28,21 +28,21 @@ function repl(args: string[], id: string) {
 vscode.window.onDidCloseTerminal(t => terminals.delete(t));
 
 export function spawn(node?: AppItem) {
-  if (!node) return;
+  if (!node) { return; }
 
   repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
   refresh();
 }
 
 export function spawnSuspended(node?: AppItem) {
-  if (!node) return;
+  if (!node) { return; }
 
   repl(['-f', node.data.identifier, ...expandDevParam(node), '--pause'], node.data.name);
   refresh();
 }
 
 export function kill(node?: TargetItem) {
-  if (!node) return;
+  if (!node) { return; }
 
   if ((node instanceof AppItem && node.data.pid) || node instanceof ProcessItem) {
     terminate(node.device.id, node.data.pid.toString());
@@ -53,7 +53,7 @@ export function kill(node?: TargetItem) {
 }
 
 export function attach(node?: TargetItem) {
-  if (!node) return;
+  if (!node) { return; }
 
   if (node instanceof AppItem || node instanceof ProcessItem) {
     if (!node.data.pid) {
