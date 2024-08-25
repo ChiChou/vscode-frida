@@ -200,12 +200,6 @@
                 "command": "frida.typing.init",
                 "title": "Get type hint for frida",
                 "category": "Frida"
-            },
-            {
-                "command": "frida.snippet.execute",
-                "title": "Execute",
-                "category": "Frida",
-                "icon": "resources/run.svg"
             }
         ],
         "viewsContainers": {
@@ -323,17 +317,6 @@
                 {
                     "command": "frida.device.copy",
                     "when": "false"
-                },
-                {
-                    "command": "frida.snippet.execute",
-                    "when": "editorLangId == javascript && terminalFocus"
-                }
-            ],
-            "editor/title": [
-                {
-                    "when": "resourceLangId == javascript",
-                    "command": "frida.snippet.execute",
-                    "group": "navigation@1"
                 }
             ],
             "view/title": [
