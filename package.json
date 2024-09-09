@@ -167,11 +167,6 @@
                 "category": "Frida"
             },
             {
-                "command": "frida.external.lldb",
-                "title": "Debug with lldb",
-                "category": "iOS"
-            },
-            {
                 "command": "frida.external.rootless-frida-server",
                 "title": "Run rootless frida-server",
                 "category": "iOS"
@@ -256,10 +251,6 @@
                 },
                 {
                     "command": "frida.external.apk",
-                    "when": "false"
-                },
-                {
-                    "command": "frida.external.lldb",
                     "when": "false"
                 },
                 {
@@ -396,16 +387,6 @@
                     "command": "frida.spawn.suspended",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
                     "group": "2_frida_process@1"
-                },
-                {
-                    "command": "frida.external.lldb",
-                    "when": "!isWindows && view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "2_frida_process@2"
-                },
-                {
-                    "command": "frida.external.lldb",
-                    "when": "!isWindows && view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "2_frida_process@2"
                 },
                 {
                     "command": "frida.syslog",

@@ -4,14 +4,12 @@
 
 ## Prerequisites
 
+* libimobiledevices (for `inetcat` command)
 * Python >= 3.7
 * `pip3 install -U frida-tools` If you have more than one python3 in your path, you need to config the python path in settings
-* nodejs and `npm install -g fruity-frida` (optional, for lldb related features)
 * iTunes on Windows
 
-If you are on Windows, you need to keep iTunes open in order to interact with iOS devices. 
-
-You only need to install `fruity-frida` for iOS specific features, like lldb debugging and remote shell. For more information, please refer to [fruity-frida](https://github.com/chichou/fruity-frida).
+If you are on Windows, you need to keep iTunes open in order to interact with iOS devices via USB.
 
 ## Features
 
@@ -43,7 +41,7 @@ Open and activate an REPL at the bottom. Use the "frida" button at the top of an
 
 For Android devices, **Open Shell** is simply a wrapper for `adb shell`. 
 
-For iOS it gives a SSH shell. It requires `fruity-frida` to be installed.
+For iOS it gives a SSH shell. It might ask for credentials depending on your setup.
 
 ## Todo
 

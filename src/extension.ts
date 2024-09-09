@@ -9,7 +9,6 @@ import * as android from './commands/android';
 import * as boilerplate from './commands/boilerplate';
 import * as clipboard from './commands/clipboard';
 import dump from './commands/dump';
-import * as lldb from './commands/lldb';
 import * as objection from './commands/objection';
 import * as repl from './commands/repl';
 import * as rootless from './commands/rootless';
@@ -50,7 +49,6 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.external.dump', dump));
 	push(register('frida.external.apk', dump));
 
-	push(register('frida.external.lldb', lldb.debug));
 	push(register('frida.external.shell', ssh.shell));
 	push(register('frida.external.rootless-frida-server', rootless.start));
 
