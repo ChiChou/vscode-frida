@@ -8,7 +8,7 @@
     },
     "displayName": "frida Workbench",
     "description": "Unofficial frida workbench for VSCode",
-    "version": "0.8.3",
+    "version": "0.8.4",
     "engines": {
         "vscode": "^1.69.1"
     },
@@ -167,11 +167,6 @@
                 "category": "Frida"
             },
             {
-                "command": "frida.external.rootless-frida-server",
-                "title": "Run rootless frida-server",
-                "category": "iOS"
-            },
-            {
                 "command": "frida.device.androidserver",
                 "title": "Start frida-server",
                 "category": "Android"
@@ -251,10 +246,6 @@
                 },
                 {
                     "command": "frida.external.apk",
-                    "when": "false"
-                },
-                {
-                    "command": "frida.external.rootless-frida-server",
                     "when": "false"
                 },
                 {
@@ -437,11 +428,6 @@
                     "command": "frida.external.shell",
                     "when": "viewItem =~ /^device\\|\\w+\\|(android|ios)$/ || viewItem =~ /^device\\|\\local/",
                     "group": "1_frida_dev_external@1"
-                },
-                {
-                    "command": "frida.external.rootless-frida-server",
-                    "when": "viewItem =~ /^device\\|\\w+\\|ios$/",
-                    "group": "1_frida_dev_external@2"
                 },
                 {
                     "command": "frida.device.copy",
