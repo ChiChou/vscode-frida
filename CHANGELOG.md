@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.8.3 - 9 Sep, 2024
+
+* **Remove** lldb shortcut because it's impossible to adapt to different jailbreaks
+
 ### v0.7.3 - 25 Jun, 2023
 
 * Bring back `bagbak`
