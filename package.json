@@ -23,14 +23,6 @@
         "configuration": {
             "title": "Frida",
             "properties": {
-                "frida.githubToken": {
-                    "type": [
-                        "string",
-                        "null"
-                    ],
-                    "default": null,
-                    "description": "Github token to download frida-server, etc."
-                },
                 "frida.decryptOutput": {
                     "type": [
                         "string",
