@@ -16,7 +16,7 @@ jobs:
     - name: Install Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 14.x
+        node-version: 23.x
     - run: npm install
     - run: npm install -g vsce
     - name: Build Agent
