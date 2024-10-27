@@ -27,11 +27,18 @@ export function executable(name: string) {
 }
 
 export function python3Path(): string {
+  interface Api {
+    settings: {
+      getExecutionDetails() : { execCommand: string[] }
+    };
+  }
+
   let interpreter = 'python3';
   try {
     const pyext = vscode.extensions.getExtension('ms-python.python');
     if (pyext) {
-      interpreter = pyext.exports.settings.getExecutionDetails().execCommand[0];
+      const api = pyext.exports as Api;
+      interpreter = api.settings.getExecutionDetails().execCommand[0];
     }
   } catch (_) {
 
@@ -40,6 +47,7 @@ export function python3Path(): string {
   if (platform() === 'win32' && !interpreter.endsWith('.exe')) {
     interpreter += '.exe';
   }
+
   return interpreter;
 }
 
