@@ -1,5 +1,4 @@
 import * as cp from 'child_process';
-import { join } from 'path';
 import { OutputChannel, window } from 'vscode';
 
 import { driverScript, lockdownSyslog, os } from '../driver/backend';

@@ -1,11 +1,11 @@
-import { exec, spawn } from 'child_process';
+import { spawn } from 'child_process';
 import { commands, window } from 'vscode';
 
 import { os } from '../driver/backend';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { run } from '../term';
 import { DeviceType } from '../types';
-import { cmd, executable } from '../utils';
+import { executable } from '../utils';
 
 
 class PortNotFoundError extends Error { }
