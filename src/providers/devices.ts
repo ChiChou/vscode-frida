@@ -130,7 +130,7 @@ export class AppItem extends TargetItem {
   }
 
   get iconPath() {
-    return this.data.largeIcon ? vscode.Uri.parse(this.data.largeIcon) : resource('terminal.png');
+    return this.data.icon ? vscode.Uri.parse(this.data.icon) : resource('terminal.png');
   }
 
   get contextValue() {
@@ -159,7 +159,7 @@ export class ProcessItem extends TargetItem {
   }
 
   get iconPath() {
-    return this.data.largeIcon ? vscode.Uri.parse(this.data.largeIcon) : resource('terminal.png');
+    return this.data.icon ? vscode.Uri.parse(this.data.icon) : resource('terminal.png');
   }
 
   get contextValue() {

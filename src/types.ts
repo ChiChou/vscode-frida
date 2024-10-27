@@ -23,13 +23,11 @@ export class App {
   identifier: string = '';
   name: string = '';
   pid: number = 0;
-  largeIcon: string = '';
-  smallIcon: string = '';
+  icon: string = '';
 }
 
 export class Process {
   name: string = '';
   pid: number = 0;
-  largeIcon: string = '';
-  smallIcon: string = '';
+  icon: string = '';
 }

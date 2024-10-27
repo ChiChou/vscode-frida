@@ -1,6 +1,7 @@
 from pathlib import Path
 import time
 import tempfile
+import base64
 
 try:
     import frida
@@ -11,15 +12,11 @@ except ImportError:
     sys.exit(-1)
 
 
-from backend import png
-
-
 def devices() -> list:
     props = ['id', 'name', 'type']
 
     def wrap(dev: frida.core.Device):
         obj = {prop: getattr(dev, prop) for prop in props}
-        obj['icon'] = png.to_uri(dev.icon)
         try:
             obj['os'] = dev.query_system_parameters()['os']['id']
         except (frida.ServerNotRunningError, KeyError, frida.TransportError):
@@ -44,34 +41,19 @@ def get_device(device_id: str) -> frida.core.Device:
         return frida.get_device(device_id, timeout=1)
 
 
-def tmpicon(uid: str, params: dict):
-    parent = Path(tempfile.gettempdir()) / '.vscode-frida'
-    parent.mkdir(parents=True, exist_ok=True)
-
-    icons = params.get('icons', [])
-    tmp = parent / ('icon-%s.png' % uid)
-    for icon in icons:
-        if icon.get('format') == 'png':
-            with tmp.open('wb') as fp:
-                fp.write(icon['image'])
-            return tmp.as_uri()
-    return None
-
-
 def info_wrap(props, fmt):
     def wrap(target):
         obj = {prop: getattr(target, prop) for prop in props}
 
-        # is new API?
-        params = getattr(target, 'parameters')
+        icons = target.parameters.get('icons', [])
         try:
-            obj['largeIcon'] = png.to_uri(target.get_large_icon())
-            obj['smallIcon'] = png.to_uri(target.get_small_icon())
-        except AttributeError:
-            if params is None:
-                raise RuntimeError('frida (%s) not compatable' %
-                                   frida.__version__)
-            obj['largeIcon'] = tmpicon(fmt(target), params)
+            icon = next(icon for icon in icons if icon.get('format') == 'png')
+            data = icon['image']
+            obj['icon'] = 'data:image/png;base64,' + \
+                base64.b64encode(data).decode('ascii')
+        except StopIteration:
+            pass
+
         return obj
 
     return wrap
@@ -85,9 +67,6 @@ def apps(device: frida.core.Device) -> list:
     wrap = info_wrap(props, fmt)
     try:
         apps = device.enumerate_applications(scope='full')
-    except TypeError:
-        raise RuntimeError(
-            'Your frida python package is out of date. Please upgrade it')
     except frida.TransportError:
         apps = device.enumerate_applications()
     return [wrap(app) for app in apps]
@@ -102,9 +81,6 @@ def ps(device: frida.core.Device) -> list:
 
     try:
         ps = device.enumerate_processes(scope='full')
-    except TypeError:
-        raise RuntimeError(
-            'Your frida python package is out of date. Please upgrade it')
     except frida.TransportError:
         ps = device.enumerate_processes()
     return [wrap(p) for p in ps]
@@ -141,6 +117,6 @@ def spawn_or_attach(device: frida.core.Device, bundle: str) -> frida.core.Sessio
 
 
 def read_agent():
-    filename = Path(__file__).parent.parent / 'agent' / '_agent.js'
-    with (filename).open('r', encoding='utf8', newline='\n') as fp:
+    agent_path = Path(__file__).parent.parent / 'agent' / '_agent.js'
+    with agent_path.open('r', encoding='utf8', newline='\n') as fp:
         return fp.read()
