@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.9.0 - 10 Sep, 2024
+
+* Support frida-tools installed from virtualenv, pipx, etc.
+
 ### v0.8.3 - 9 Sep, 2024
 
 * **Remove** lldb shortcut because it's impossible to adapt to different jailbreaks
