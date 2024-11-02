@@ -81,6 +81,11 @@ export async function shell(node: TargetItem) {
   let shellPath, shellArgs;
 
   if (system === 'ios') {
+    if (process.platform === 'win32') {
+      window.showErrorMessage('This feature is not enabled on Windows due to lack of inetcat');
+      return
+    }
+
     try {
       const port = await findSSHPort(node);
       shellPath = executable('ssh');
