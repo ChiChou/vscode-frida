@@ -48,6 +48,8 @@ For iOS it gives a SSH shell. It might ask for credentials depending on your set
 * More Android features
 * More mobile security terminal tools intergration
 
-## Release Note:
+## [CHANGELOG](CHANGELOG.md)
 
-Please refer to [CHANGELOG](CHANGELOG.md)
+## Contributors
+
+![](https://contrib.rocks/image?repo=chichou/vscode-frida)

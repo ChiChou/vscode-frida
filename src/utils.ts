@@ -29,9 +29,26 @@ export function executable(name: string) {
   return name + (platform() === 'win32' ? '.exe' : '');
 }
 
+interface PythonExtensionApi {
+  settings: {
+    getExecutionDetails(): { execCommand: string[] }
+  };
+}
+
+// todo: load interpreter from local virtualenv
+function virtualenv(): string {
+  const pyext = vscode.extensions.getExtension('ms-python.python');
+  if (!pyext) {
+    throw new Error('Python extension not found');
+  }
+
+  const api = pyext.exports as PythonExtensionApi;
+  return api.settings.getExecutionDetails().execCommand[0];
+}
+
 const cache = new Map<string, string>();
 
-export async function interpreter(cli='frida'): Promise<string> {
+export async function interpreter(cli = 'frida'): Promise<string> {
   if (cache.has(cli))
     return Promise.resolve(cache.get(cli) as string);
 
