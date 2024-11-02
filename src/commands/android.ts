@@ -6,7 +6,7 @@ import { tmpdir } from 'os';
 import ADB from '../driver/adb';
 import { DeviceItem, TargetItem } from '../providers/devices';
 import { logger } from '../logger';
-import { python3Path, sleep } from '../utils';
+import { interpreter, sleep } from '../utils';
 import { run } from '../term';
 
 function getServerPath() {
@@ -35,6 +35,7 @@ export async function startServer(target: TargetItem) {
     const py = join(__dirname, '..', '..', 'backend', 'android', 'get-frida.py');
     const tmp = join(tmpdir(), `frida-server-${abi}`);
 
+    const shellPath = await interpreter();
     await vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification,
       title: 'Downloading frida-server',
@@ -42,7 +43,7 @@ export async function startServer(target: TargetItem) {
     }, async (progress) => {
       await run({
         name: `Download frida-server`,
-        shellPath: python3Path(),
+        shellPath,
         shellArgs: [py, abi, tmp]
       });
       progress.report({ message: 'Done' });

@@ -4,7 +4,7 @@ import { OutputChannel, window } from 'vscode';
 import { driverScript, lockdownSyslog, os } from '../driver/backend';
 import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
-import { python3Path, refresh } from '../utils';
+import { interpreter, refresh } from '../utils';
 
 const active: { [key: string]: OutputChannel } = {};
 
@@ -51,7 +51,8 @@ export async function show(node: TargetItem) {
     lockdownSyslog(node.device.id, bundleOrPid);
   } else if (type === 'linux' || type === 'macos') {
     const args = [driverScript(), 'syslog', '--device', node.device.id, ...bundleOrPid];
-    cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3Path(), args).show();
+    const python3 = await interpreter();
+    cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3, args).show();
   } else if (type === 'android') {
     if (node.data.pid > 0) {
       const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];

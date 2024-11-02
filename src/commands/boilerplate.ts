@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 
 import { AppItem, ProcessItem } from '../providers/devices';
 import { run } from '../term';
-import { cmd, expandDevParam, python3Path, resource } from '../utils';
+import { cmd, expandDevParam, interpreter, resource } from '../utils';
 
 
 async function create(template: string) {
@@ -29,11 +29,11 @@ async function create(template: string) {
   }
 
   const args = ['-m', 'frida_tools.creator', '-t', template];
-
+  const shellPath = await interpreter();
   await run({
     cwd: dest,
     name: 'Create Project',
-    shellPath: python3Path(),
+    shellPath,
     shellArgs: args
   });
 

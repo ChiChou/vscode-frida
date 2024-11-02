@@ -1,11 +1,10 @@
 import { join } from "path";
 import { execFile } from 'child_process';
-import { window } from 'vscode';
 
 import { asParam } from './remote';
 import { logger } from '../logger';
 import { run } from '../term';
-import { python3Path } from '../utils';
+import { interpreter } from '../utils';
 import { App, Device, Process } from '../types';
 import { AppItem, ProcessItem, TargetItem } from '../providers/devices';
 
@@ -14,28 +13,12 @@ const py = join(base, 'driver.py');
 
 export const driverScript = () => py;
 
-function askInstallFrida() {
-  window.showErrorMessage(`Frida python module not detected. Please check your Python interpreter setting,
-or pip install frida-tools. Do you want to install now?`, 'Install', 'Cancel')
-    .then(selected => {
-      if (selected === 'Install') {
-        run({
-          env: { PIP_BREAK_SYSTEM_PACKAGES: '1' },  // Externally Managed Environments
-          shellPath: python3Path(),
-          shellArgs: ['-m', 'pip', 'install', 'frida-tools']
-        });
-      }
-    });
-}
-
 export function exec(...args: string[]): Promise<any> {
   const remoteDevices = asParam();
-  return new Promise((resolve, reject) => {
-    execFile(python3Path(), [py, ...remoteDevices, ...args], { maxBuffer: 1024 * 1024 * 20 }, (err, stdout, stderr) => {
+
+  return interpreter().then(path => new Promise((resolve, reject) => {
+    execFile(path, [py, ...remoteDevices, ...args], { maxBuffer: 1024 * 1024 * 20 }, (err, stdout, stderr) => {
       if (err) {
-        if (stderr.includes('Unable to import frida')) {
-          askInstallFrida();
-        }
         logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
         logger.appendLine(stderr);
         logger.appendLine(`Exited with ${err.code}`);
@@ -44,7 +27,7 @@ export function exec(...args: string[]): Promise<any> {
         resolve(JSON.parse(stdout));
       }
     });
-  });
+  }));
 }
 
 export function devices() {
@@ -89,10 +72,11 @@ export function rpc(target: TargetItem, method: string, ...args: string[]) {
   return exec('rpc', '--device', target.device.id, ...bundleOrPid, method, ...args);
 }
 
-export function lockdownSyslog(id: string, bundleOrPid: string[]) {
+export async function lockdownSyslog(id: string, bundleOrPid: string[]) {
+  const shellPath = await interpreter();
   return run({
     name: `Syslog: ${bundleOrPid}`,
-    shellPath: python3Path(),
+    shellPath,
     shellArgs: [py, 'syslog2', '--device', id, ...bundleOrPid]
   });
 }

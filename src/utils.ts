@@ -1,8 +1,11 @@
+import which from 'which';
 import * as vscode from 'vscode';
 import { join } from 'path';
 import { platform } from 'os';
 import { DeviceType } from './types';
 import { AppItem, ProcessItem } from './providers/devices';
+
+import shebang from './shebang';
 
 export function resource(...paths: string[]): vscode.Uri {
   const file = join(__dirname, '..', 'resources', ...paths);
@@ -26,29 +29,20 @@ export function executable(name: string) {
   return name + (platform() === 'win32' ? '.exe' : '');
 }
 
-export function python3Path(): string {
-  interface Api {
-    settings: {
-      getExecutionDetails() : { execCommand: string[] }
-    };
+const cache = new Map<string, string>();
+
+export async function interpreter(cli='frida'): Promise<string> {
+  if (cache.has(cli))
+    return Promise.resolve(cache.get(cli) as string);
+
+  const where = await which(cli, { all: false, nothrow: true });
+  if (!where) {
+    throw new Error(`Could not find command ${cli} in $PATH, have you installed it or activated the correct venv?`);
   }
 
-  let interpreter = 'python3';
-  try {
-    const pyext = vscode.extensions.getExtension('ms-python.python');
-    if (pyext) {
-      const api = pyext.exports as Api;
-      interpreter = api.settings.getExecutionDetails().execCommand[0];
-    }
-  } catch (_) {
-
-  }
-
-  if (platform() === 'win32' && !interpreter.endsWith('.exe')) {
-    interpreter += '.exe';
-  }
-
-  return interpreter;
+  const path = await shebang(where);
+  cache.set(cli, path);
+  return path;
 }
 
 export function expandDevParam(node: AppItem | ProcessItem) {

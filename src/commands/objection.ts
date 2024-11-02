@@ -4,7 +4,7 @@ import { launch } from '../driver/frida';
 import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { run } from '../term';
 import { DeviceType } from '../types';
-import { python3Path } from '../utils';
+import { interpreter } from '../utils';
 
 export async function explore(target: TargetItem) : Promise<void> {
   if (!target) {
@@ -47,7 +47,7 @@ export async function explore(target: TargetItem) : Promise<void> {
   }
 
   const shellArgs = ['-m', 'objection.console.cli', '-g', gadget, ...device, 'explore'];
-  const shellPath = python3Path();
+  const shellPath = await interpreter('objection');
   run({
     name,
     shellArgs,

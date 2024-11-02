@@ -1,5 +1,5 @@
 import { execFile } from 'child_process';
-import { python3Path } from '../utils';
+import { interpreter } from '../utils';
 
 
 function deviceParam(device: string) {
@@ -11,9 +11,11 @@ function deviceParam(device: string) {
 
 export async function launch(device: string, bundle: string): Promise<Number> {
   const params = ['-f', bundle, ...deviceParam(device), bundle, '-q', '-e', 'Process.id'];
+  const py3 = await interpreter();
   const args = ['-m', 'frida_tools.repl', ...params];
+
   return new Promise((resolve, reject) => {
-    execFile(python3Path(), args, {}, (err, stdout) => {
+    execFile(py3, args, {}, (err, stdout) => {
       if (err) {
         reject(err);
       } else {
@@ -27,10 +29,11 @@ export async function launch(device: string, bundle: string): Promise<Number> {
   });
 }
 
-export function terminate(device: string, target: string) {
+export async function terminate(device: string, target: string) {
+  const py3 = await interpreter('frida-kill');
   const args = ['-m', 'frida_tools.kill', ...deviceParam(device), target];
   return new Promise((resolve, reject) => {
-    execFile(python3Path(), args, {}, (err, stdout) => {
+    execFile(py3, args, {}, (err, stdout) => {
       if (err) {
         reject(err);
       } else {

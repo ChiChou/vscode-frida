@@ -5,13 +5,13 @@ import { terminate } from '../driver/frida';
 import { all, connect, disconnect } from '../driver/remote';
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
 import { DeviceType } from '../types';
-import { expandDevParam, python3Path, refresh, sleep } from '../utils';
+import { expandDevParam, interpreter, refresh } from '../utils';
 
 const terminals = new Set<vscode.Terminal>();
 
-function repl(args: string[], id: string) {
+async function repl(args: string[], id: string) {
   const name = `Frida - ${id}`;
-  const shellPath = python3Path();
+  const shellPath = await interpreter();
   const py = path.join(__dirname, '..', '..', 'backend', 'pause.py');
   const shellArgs = [py, shellPath, '-m', 'frida_tools.repl', ...args];
   const term = vscode.window.createTerminal({
