@@ -18,19 +18,19 @@ const ZIP_SIGNATURE = Buffer.from([0x50, 0x4B, 0x05, 0x06]);
 
 function parseWindowsLauncher(buffer: Buffer) {
   const end = buffer.lastIndexOf(ZIP_SIGNATURE);
-  if (end === -1) throw new Error('Invalid archive');
+  if (end === -1) { throw new Error('Invalid archive'); }
 
   const cdsize = buffer.readUInt16LE(end + 12);
   const cdoffset = buffer.readUInt32LE(end + 16);
   const endOfShebang = end - cdsize - cdoffset;
-  
+
   const shebang = buffer.lastIndexOf(BUF_SHEBANG_UNIX, endOfShebang);
   const line = buffer.subarray(shebang, endOfShebang).toString().trim();
   return interpreter(line);
 }
 
 function interpreter(line: string) {
-  if (!line.startsWith(SHEBANG_UNIX)) throw new Error('Invalid shebang');
+  if (!line.startsWith(SHEBANG_UNIX)) { throw new Error('Invalid shebang'); }
   return line.substring(SHEBANG_UNIX.length);
 }
 
@@ -44,7 +44,7 @@ export default async function shebang(path: string) {
   } else if (magic.compare(PE_MAGIC) === 0) {
     return parseWindowsLauncher(buffer);
   }
-  
+
   throw new Error('Invalid file format');
 }
 
