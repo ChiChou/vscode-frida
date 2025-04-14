@@ -4,9 +4,7 @@ const SHEBANG_UNIX = '#!';
 const BUF_SHEBANG_UNIX = Buffer.from(SHEBANG_UNIX);
 const PE_MAGIC = Buffer.from('MZ');
 
-const ZIP_SIGNATURE = Buffer.from([0x50, 0x4B, 0x05, 0x06]);
-
-// https://bitbucket.org/vinay.sajip/simple_launcher/src/2e1c7592574c4f42062fd3a5b1051ec02da4b543/launcher.c#lines-177
+// const ZIP_SIGNATURE = Buffer.from([0x50, 0x4B, 0x05, 0x06]);
 
 // typedef struct {
 //   DWORD sig;
@@ -16,17 +14,27 @@ const ZIP_SIGNATURE = Buffer.from([0x50, 0x4B, 0x05, 0x06]);
 //   DWORD cdoffset;
 // } ENDCDR;
 
+// https://github.com/pypa/distlib/blob/32301789a7815de0e74f57fe013ae52af717a3da/PC/launcher.c#L177
+//
+// the implementation is so cursed that we might as well simply search for #!
+
 function parseWindowsLauncher(buffer: Buffer) {
-  const end = buffer.lastIndexOf(ZIP_SIGNATURE);
-  if (end === -1) { throw new Error('Invalid archive'); }
+  let subarray = buffer;
 
-  const cdsize = buffer.readUInt16LE(end + 12);
-  const cdoffset = buffer.readUInt32LE(end + 16);
-  const endOfShebang = end - cdsize - cdoffset;
+  while (true) {
+    let p = subarray.lastIndexOf(BUF_SHEBANG_UNIX);
+    if (p === -1) { throw new Error('Invalid shebang'); }
 
-  const shebang = buffer.lastIndexOf(BUF_SHEBANG_UNIX, endOfShebang);
-  const line = buffer.subarray(shebang, endOfShebang).toString().trim();
-  return interpreter(line);
+    const end = subarray.indexOf('\n', p);
+    if (end === -1) { throw new Error('Invalid shebang'); }
+
+    const line = subarray.subarray(p, end).toString().trim();
+    if (line.endsWith('.exe')) {
+      return interpreter(line);
+    }
+
+    subarray = subarray.subarray(end + 1);
+  }
 }
 
 function interpreter(line: string) {
