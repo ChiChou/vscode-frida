@@ -7,7 +7,7 @@
         "url": "https://github.com/ChiChou/vscode-frida"
     },
     "displayName": "frida Workbench",
-    "description": "Unofficial frida workbench for VSCode",
+    "description": "%extension.description%",
     "version": "0.9.1",
     "engines": {
         "vscode": "^1.94.0"
@@ -19,6 +19,7 @@
         "onLanguage:javascript"
     ],
     "main": "./out/extension.js",
+    "l10n": "./l10n",
     "contributes": {
         "configuration": {
             "title": "Frida",
@@ -29,7 +30,7 @@
                         "null"
                     ],
                     "default": null,
-                    "description": "Preferred directory to save ipa or apk"
+                    "description": "%frida.decryptOutput%"
                 },
                 "frida.androidServerPath": {
                     "type": [
@@ -37,14 +38,14 @@
                         "null"
                     ],
                     "default": "/data/local/tmp/frida-server",
-                    "description": "Path to frida-server on Android"
+                    "description": "%frida.androidServerPath%"
                 }
             }
         },
         "commands": [
             {
                 "command": "frida.ps.refresh",
-                "title": "Refresh Processes",
+                "title": "%frida.ps.refresh%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -53,7 +54,7 @@
             },
             {
                 "command": "frida.apps.refresh",
-                "title": "Refresh Apps",
+                "title": "%frida.apps.refresh%",
                 "icon": {
                     "light": "resources/light/refresh.svg",
                     "dark": "resources/dark/refresh.svg"
@@ -62,7 +63,7 @@
             },
             {
                 "command": "frida.remote.add",
-                "title": "Connect Remote Device...",
+                "title": "%frida.remote.add%",
                 "icon": {
                     "light": "resources/light/add.svg",
                     "dark": "resources/dark/add.svg"
@@ -71,7 +72,7 @@
             },
             {
                 "command": "frida.remote.remove",
-                "title": "Disconnect Remote Device...",
+                "title": "%frida.remote.remove%",
                 "icon": {
                     "light": "resources/light/del.svg",
                     "dark": "resources/dark/del.svg"
@@ -80,7 +81,7 @@
             },
             {
                 "command": "frida.attach",
-                "title": "Attach to",
+                "title": "%frida.attach%",
                 "icon": {
                     "light": "resources/light/attach.svg",
                     "dark": "resources/dark/attach.svg"
@@ -89,19 +90,19 @@
             },
             {
                 "command": "frida.device.copy",
-                "title": "Copy Device ID"
+                "title": "%frida.device.copy%"
             },
             {
                 "command": "frida.bundle.copy",
-                "title": "Copy Bundle ID"
+                "title": "%frida.bundle.copy%"
             },
             {
                 "command": "frida.name.copy",
-                "title": "Copy Process Name"
+                "title": "%frida.name.copy%"
             },
             {
                 "command": "frida.spawn",
-                "title": "Spawn",
+                "title": "%frida.spawn%",
                 "icon": {
                     "light": "resources/light/statusRun.svg",
                     "dark": "resources/dark/statusRun.svg"
@@ -110,77 +111,77 @@
             },
             {
                 "command": "frida.spawn.suspended",
-                "title": "Spawn Suspended",
+                "title": "%frida.spawn.suspended%",
                 "category": "Frida"
             },
             {
                 "command": "frida.kill",
-                "title": "End Process",
+                "title": "%frida.kill%",
                 "category": "Frida"
             },
             {
                 "command": "frida.debug.setup",
-                "title": "Create Debugger Configuration",
+                "title": "%frida.debug.setup%",
                 "category": "Frida"
             },
             {
                 "command": "frida.syslog",
-                "title": "View Debug Logs",
+                "title": "%frida.syslog%",
                 "category": "Frida"
             },
             {
                 "command": "frida.syslog.vacuum",
-                "title": "Close All Console",
+                "title": "%frida.syslog.vacuum%",
                 "category": "Frida"
             },
             {
                 "command": "frida.print.modules",
-                "title": "Export All Modules To Editor",
+                "title": "%frida.print.modules%",
                 "category": "Frida"
             },
             {
                 "command": "frida.print.classes",
-                "title": "Export All Classes To Editor",
+                "title": "%frida.print.classes%",
                 "category": "Frida"
             },
             {
                 "command": "frida.external.objection",
-                "title": "Objection",
+                "title": "%frida.external.objection%",
                 "category": "Frida"
             },
             {
                 "command": "frida.external.apk",
-                "title": "Pull APK from Device",
+                "title": "%frida.external.apk%",
                 "category": "Frida"
             },
             {
                 "command": "frida.external.dump",
-                "title": "Dump App Package",
+                "title": "%frida.external.dump%",
                 "category": "Frida"
             },
             {
                 "command": "frida.device.androidserver",
-                "title": "Start frida-server",
+                "title": "%frida.device.androidserver%",
                 "category": "Android"
             },
             {
                 "command": "frida.external.shell",
-                "title": "Open Shell",
+                "title": "%frida.external.shell%",
                 "category": "SSH over USB"
             },
             {
                 "command": "frida.boilerplate.agent",
-                "title": "Create Frida Agent",
+                "title": "%frida.boilerplate.agent%",
                 "category": "Frida Boilerplate"
             },
             {
                 "command": "frida.boilerplate.module",
-                "title": "Create Frida CModule",
+                "title": "%frida.boilerplate.module%",
                 "category": "Frida Boilerplate"
             },
             {
                 "command": "frida.typing.init",
-                "title": "Get type hint for frida",
+                "title": "%frida.typing.init%",
                 "category": "Frida"
             }
         ],
@@ -188,7 +189,7 @@
             "activitybar": [
                 {
                     "id": "frida-sidebar",
-                    "title": "Frida Utilities",
+                    "title": "%panel.title%",
                     "icon": "resources/icon.svg"
                 }
             ]
@@ -197,11 +198,11 @@
             "frida-sidebar": [
                 {
                     "id": "fridaApps",
-                    "name": "Apps"
+                    "name": "%frida.apps%"
                 },
                 {
                     "id": "fridaPs",
-                    "name": "Processes"
+                    "name": "%frida.ps%"
                 }
             ]
         },
