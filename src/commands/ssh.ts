@@ -1,5 +1,5 @@
 import { spawn } from 'child_process';
-import { commands, window } from 'vscode';
+import { commands, window, l10n } from 'vscode';
 
 import { os } from '../driver/backend';
 import { DeviceItem, TargetItem } from '../providers/devices';
@@ -22,14 +22,14 @@ async function findSSHPort(device: DeviceItem) {
       inetcat
         .on('error', (err) => {
           if ((err as NodeJS.ErrnoException).code === 'ENOENT') {
-            reject(new ToolNotFoundError('inetcat not found'));
+            reject(new ToolNotFoundError(l10n.t('inetcat not found')));
           } else {
             reject(err);
           }
         })
         .on('close', (code) => {
           if (code !== 0) {
-            reject(new InvalidProtocolError(`inetcat exited with code ${code}`));
+            reject(new InvalidProtocolError(l10n.t('inetcat exited with code {0}', `${code}`)));
           }
         });
 
@@ -37,7 +37,7 @@ async function findSSHPort(device: DeviceItem) {
         if (data.slice(0, magic.length).equals(magic)) {
           resolve(true);
         } else {
-          reject(new InvalidProtocolError(`port ${port} did not return SSH banner`));
+          reject(new InvalidProtocolError(l10n.t('Invalid protocol')));
         }
         inetcat.stdin.end();
       });
@@ -61,12 +61,13 @@ async function findSSHPort(device: DeviceItem) {
     }
   }
 
-  throw new PortNotFoundError('No valid SSH port found');
+  throw new PortNotFoundError(l10n.t('No valid SSH port found'));
 }
 
 export async function shell(node: TargetItem) {
   if (!(node instanceof DeviceItem)) {
-    window.showErrorMessage('This command is only avaliable on context menu');
+    window.showErrorMessage(
+      l10n.t('This command is only expected to be used in the context menu'));
     return;
   }
 
@@ -77,12 +78,13 @@ export async function shell(node: TargetItem) {
   }
 
   const system = await os(node.data.id);
-  const name = `SSH: ${node.data.name}`;
+  const name = l10n.t('SSH: {0}', node.data.name);
   let shellPath, shellArgs;
 
   if (system === 'ios') {
     if (process.platform === 'win32') {
-      window.showErrorMessage('This feature is not enabled on Windows due to lack of inetcat');
+      window.showErrorMessage(
+        l10n.t('This feature is not enabled on Windows due to lack of inetcat'));
       return
     }
 
@@ -98,10 +100,10 @@ export async function shell(node: TargetItem) {
       ];
     } catch (err) {
       if (err instanceof ToolNotFoundError) {
-        window.showErrorMessage('inetcat command not present in $PATH');
+        window.showErrorMessage(l10n.t('inetcat command not present in $PATH'));
         return;
       } else if (err instanceof PortNotFoundError) {
-        window.showErrorMessage(`No valid SSH port found for device ${node.data.name}`);
+        window.showErrorMessage(l10n.t('No valid SSH port found for device {0}', node.data.name));
         return;
       }
     }
@@ -110,7 +112,7 @@ export async function shell(node: TargetItem) {
     shellPath = executable('adb');
     shellArgs = ['-s', node.data.id, 'shell'];
   } else {
-    window.showErrorMessage(`OS type "${system}" is not supported`);
+    window.showErrorMessage(l10n.t("OS type {0} is not supported", system));
     return;
   }
 

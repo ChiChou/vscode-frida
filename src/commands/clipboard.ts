@@ -1,4 +1,4 @@
-import { env } from 'vscode';
+import { env, l10n } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from "../providers/devices";
 
 export function copy(item: TargetItem) {
@@ -10,7 +10,7 @@ export function copy(item: TargetItem) {
   } else if (item instanceof DeviceItem) {
     text = item.data.id;
   } else {
-    throw new Error('Unsupported item type');
+    throw new Error(l10n.t('Unsupported item type'));
   }
 
   env.clipboard.writeText(text);

@@ -16,17 +16,17 @@ function getServerPath() {
 
 export async function startServer(target: TargetItem) {
   if (!(target instanceof DeviceItem)) {
-    vscode.window.showErrorMessage('This command is only expected to be used in the context menu');
+    vscode.window.showErrorMessage(vscode.l10n.t('This command is only expected to be used in the context menu'));
     return;
   }
 
   const server = getServerPath();
   const adb = new ADB(target.data.id);
   const installed = await adb.shell(server, '--version').then((ver: string) => {
-    logger.appendLine(`sanity check: frida-server version on device ${ver}`);
+    logger.appendLine(vscode.l10n.t('sanity check: frida-server version on device {0}', ver));
     return true;
   }).catch(() => {
-    logger.appendLine('frida-server not found on device, downloading...');
+    logger.appendLine(vscode.l10n.t('frida-server not found on device, downloading...'));
     return false;
   });
 
@@ -38,7 +38,7 @@ export async function startServer(target: TargetItem) {
     const shellPath = await interpreter();
     await vscode.window.withProgress({
       location: vscode.ProgressLocation.Notification,
-      title: 'Downloading frida-server',
+      title: vscode.l10n.t('Downloading frida-server'),
       cancellable: false
     }, async (progress) => {
       await run({
@@ -46,13 +46,13 @@ export async function startServer(target: TargetItem) {
         shellPath,
         shellArgs: [py, abi, tmp]
       });
-      progress.report({ message: 'Done' });
+      progress.report({ message: vscode.l10n.t('Done') });
     });
 
     const uri = vscode.Uri.file(tmp);
     await adb.push(uri, server);
 
-    vscode.window.showInformationMessage(`frida-server deployed to ${server} successfully`);
+    vscode.window.showInformationMessage(vscode.l10n.t('frida-server deployed to {0} successfully', server));
     await adb.shell('chmod', '755', server);
   }
 

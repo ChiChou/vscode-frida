@@ -1,11 +1,11 @@
 import { createWriteStream, promises as fsp } from 'fs';
 import { get as httpGet } from 'https';
 import { join } from 'path';
-import { Position, ProgressLocation, window, workspace } from 'vscode';
+import { Position, ProgressLocation, window, workspace, l10n } from 'vscode';
 import { cmd } from '../utils';
 
 function npmInstall() {
-  const name = 'Install typescript typings';
+  const name = l10n.t('Install typescript typings');
   const shellPath = cmd('npm');
   const shellArgs = ['install', '@types/frida-gum', '--save'];
   const term = window.createTerminal({
@@ -15,7 +15,8 @@ function npmInstall() {
   });
   window.onDidCloseTerminal(t => {
     if (t === term && t.exitStatus?.code === 0) {
-      window.showInformationMessage('@types/frida-gum has been successfully installed');
+      window.showInformationMessage(
+        l10n.t('@types/frida-gum has been successfully installed'));
     }
   })
   term.show();
@@ -31,7 +32,7 @@ async function downloadTypeHint(cwd: string) {
 
   await window.withProgress({
     location: ProgressLocation.Notification,
-    title: `Downloading typing info for frida-gum`,
+    title: l10n.t("Downloading typing info for frida-gum"),
     cancellable: false,
   }, (progress, token) => {
     return new Promise<string>(resolve => {
@@ -55,7 +56,8 @@ async function downloadTypeHint(cwd: string) {
         })
         .on('error', (err) => {
           stream.close();
-          window.showErrorMessage(`Failed to download typing info: ${err}`);
+          window.showErrorMessage(
+            l10n.t('Failed to download typing info for frida-gum: {0}', err.message));
           fsp.unlink(dest);
         });
     });
@@ -73,19 +75,19 @@ export async function init() {
 
   const editor = window.activeTextEditor;
   if (!editor) {
-    window.showErrorMessage('The command requires a workspace or an active document');
+    window.showErrorMessage(l10n.t('The command requires a workspace or an active document'));
     return;
   }
 
   const doc = editor.document;
   if (!['javascript', 'typescript'].includes(doc.languageId)) {
-    window.showErrorMessage('This document is not Javascript or TypeScript');
+    window.showErrorMessage(l10n.t('This document is not Javascript or TypeScript'));
     return;
   }
 
   const fileUri = doc.uri;
   if (!fileUri) {
-    window.showErrorMessage('The current document is unsaved');
+    window.showErrorMessage(l10n.t('The current document is unsaved'));
     return;
   }
 

@@ -10,7 +10,7 @@ import { expandDevParam, interpreter, refresh } from '../utils';
 const terminals = new Set<vscode.Terminal>();
 
 async function repl(args: string[], id: string) {
-  const name = `Frida - ${id}`;
+  const name = vscode.l10n.t('Frida - {0}', id);
   const shellPath = await interpreter();
   const py = path.join(__dirname, '..', '..', 'backend', 'pause.py');
   const shellArgs = [py, shellPath, '-m', 'frida_tools.repl', ...args];
@@ -47,7 +47,7 @@ export function kill(node?: TargetItem) {
     terminate(node.device.id, node.data.pid.toString());
     refresh();
   } else {
-    vscode.window.showWarningMessage(`Target is not running`);
+    vscode.window.showWarningMessage(vscode.l10n.t('Target is not running'));
   }
 }
 
@@ -56,7 +56,8 @@ export function attach(node?: TargetItem) {
 
   if (node instanceof AppItem || node instanceof ProcessItem) {
     if (!node.data.pid) {
-      vscode.window.showErrorMessage(`App "${node.data.name}" must be running before attaching to it`);
+      vscode.window.showErrorMessage(
+        vscode.l10n.t('App "{0}" must be running before attaching to it', node.data.name));
     }
 
     repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString());
@@ -65,8 +66,8 @@ export function attach(node?: TargetItem) {
 
 export async function addRemote() {
   const host = await vscode.window.showInputBox({
-    placeHolder: "192.168.1.2:27042",
-    prompt: "Host or IP of the remote device",
+    placeHolder: '192.168.1.2:27042',
+    prompt: vscode.l10n.t('Host or IP of the remote device'),
     value: ''
   });
 

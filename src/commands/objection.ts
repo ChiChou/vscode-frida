@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 
 import { launch } from '../driver/frida';
 import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
@@ -8,12 +9,12 @@ import { interpreter } from '../utils';
 
 export async function explore(target: TargetItem) : Promise<void> {
   if (!target) {
-    vscode.window.showErrorMessage('This command is only expected to be used in the context menu');
+    vscode.window.showErrorMessage(l10n.t('This command is only expected to be used in the context menu'));
     return;
   }
 
   if (!(target instanceof AppItem || target instanceof ProcessItem)) {
-    vscode.window.showErrorMessage('This command is not applicable to the selected item');
+    vscode.window.showErrorMessage(l10n.t('This command is not applicable to the selected item'));
     return;
   }
 
@@ -28,7 +29,7 @@ export async function explore(target: TargetItem) : Promise<void> {
       break;
     case DeviceType.Local:
       device = [];
-      vscode.window.showErrorMessage('This command is not applicable to the local device');
+      vscode.window.showErrorMessage(l10n.t('This command is not applicable to the local device'));
       return;
     case DeviceType.USB:
     default:
@@ -41,7 +42,8 @@ export async function explore(target: TargetItem) : Promise<void> {
     try {
       gadget = (await launch(target.device.id, target.data.identifier)).toString();
     } catch (e) {
-      vscode.window.showWarningMessage(`Warning: failed to launch App ${target.data.identifier}\n${e}`);
+      vscode.window.showWarningMessage(
+        l10n.t('Warning: failed to launch App {0}\n{1}', target.data.identifier, `${e}`));
       gadget = target.data.name;
     }
   }

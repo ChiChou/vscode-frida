@@ -23,7 +23,8 @@ async function create(template: string) {
     if (fileUri?.length) {
       dest = fileUri[0];
     } else {
-      vscode.window.showInformationMessage('You just cancelled the operation.');
+      vscode.window.showInformationMessage(
+        vscode.l10n.t('You must select a folder to create the project'));
       return;
     }
   }
@@ -81,7 +82,8 @@ export async function debug(node?: AppItem | ProcessItem) {
   const { workspaceFolders } = vscode.workspace;
 
   if (!workspaceFolders?.length) {
-    showInformationMessage('You must open a workspace first.');
+    showInformationMessage(
+      vscode.l10n.t('This command only works in a workspace. Please open a workspace first'));
     return;
   }
 
@@ -104,10 +106,12 @@ export async function debug(node?: AppItem | ProcessItem) {
     // check if launch.json exists    
     for (const file of [launchJSON, tasksJSON]) {
       if (await isFile(file)) {
-        const msg = `${file} already exists. Do you want to overwrite it?`;
-        const answer = await showInformationMessage(msg, 'Yes', 'No');
-        if (answer === 'No') { return; }
-        if (answer === 'Yes') { break; } // only have to answer yes once
+        const msg = vscode.l10n.t('{0} already exists. Do you want to overwrite it?', file);
+        const y = vscode.l10n.t('Yes');
+        const n = vscode.l10n.t('No');
+        const answer = await showInformationMessage(msg, y, n);
+        if (answer === n) { return; }
+        if (answer === y) { break; } // only have to answer yes once
       }
     }
   } else {
@@ -141,7 +145,7 @@ export async function debug(node?: AppItem | ProcessItem) {
   const placeHolder = cmd.join(' ');
   const userInput = await showInputBox({
     placeHolder,
-    prompt: "Debug Command",
+    prompt: vscode.l10n.t('Debug Command'),
     value: placeHolder,
   });
 
@@ -162,5 +166,7 @@ export async function debug(node?: AppItem | ProcessItem) {
   content.tasks[0].args = [...tokenize(userInput)];
   await fsp.writeFile(tasksJSON, JSON.stringify(content, null, 2));
 
-  showInformationMessage('Debug config added to workspace. Press F5 to start debugging.');
+  showInformationMessage(
+    vscode.l10n.t('Debug configuration created. You can now start debugging by pressing F5')
+  );
 }

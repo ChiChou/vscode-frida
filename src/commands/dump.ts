@@ -8,12 +8,12 @@ import { cmd } from '../utils';
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {
-    vscode.window.showErrorMessage('This command is only expected to be used in the context menu');
+    vscode.window.showErrorMessage(vscode.l10n.t('This command is only expected to be used in the context menu'));
     return;
   }
 
   if (target.device.os !== 'ios' && target.device.os !== 'android') {
-    vscode.window.showErrorMessage('This command only supports iOS or Android');
+    vscode.window.showErrorMessage(vscode.l10n.t('This command only supports iOS or Android'));
     return;
   }
 
@@ -25,7 +25,7 @@ export default async function dump(target: TargetItem) {
     canSelectFolders: true,
     canSelectMany: false,
     openLabel: 'Select',
-    title: 'Select destination folder'
+    title: vscode.l10n.t('Select destination folder')
   });
 
   if (!destinations?.length) { return; }
@@ -46,17 +46,22 @@ export default async function dump(target: TargetItem) {
       artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.apk`);
       await pull(target, artifact);
     } else {
-      vscode.window.showErrorMessage('This command only supports iOS or Android');
+      vscode.window.showErrorMessage(vscode.l10n.t('This command only supports iOS or Android'));
       return;
     }
   } catch (e) {
-    vscode.window.showInformationMessage(`failed to dump application:\n${(e as Error).message}`);
+    vscode.window.showInformationMessage(
+      vscode.l10n.t('failed to dump application:\n{0}', (e as Error).message));
     return;
   }
 
+  const actionOpen = vscode.l10n.t('Open');
   const option = await vscode.window.showInformationMessage(
-    `Successfully pulled package ${target.data.identifier}`, 'Open', 'Dismiss');
-  if (option === 'Open') {
+    vscode.l10n.t('Successfully pulled package {0}', target.data.identifier),
+    actionOpen,
+    vscode.l10n.t('Dismiss'));
+
+  if (option === actionOpen) {
     vscode.commands.executeCommand('revealFileInOS', artifact);
   }
 }
@@ -68,7 +73,7 @@ async function pull(target: AppItem, output: vscode.Uri) {
   if (path.startsWith('package:')) {
     await adb.pull(path.substring(8).trimEnd(), output);
   } else {
-    vscode.window.showErrorMessage(`Failed to get package path: ${path}`);
+    vscode.window.showErrorMessage(vscode.l10n.t('Failed to get package path: {0}', path));
   }
 }
 
@@ -82,7 +87,7 @@ async function bagbak(target: AppItem, output: vscode.Uri) {
       if (target.device.id !== 'usb') { shellArgs.push.apply(shellArgs, ['-D', target.device.id]); }
       break;
     default:
-      vscode.window.showErrorMessage('Unsupported device type');
+      vscode.window.showErrorMessage(vscode.l10n.t('Unsupported device type'));
       return;
   }
 
