@@ -37,7 +37,7 @@ export abstract class TargetItem extends vscode.TreeItem {
   abstract children(): Thenable<TargetItem[]>;
   abstract tooltip?: string;
   abstract description?: string;
-  abstract iconPath?: string | vscode.Uri | { light: string | vscode.Uri; dark: string | vscode.Uri } | vscode.ThemeIcon | undefined;
+  abstract iconPath?: string | vscode.IconPath | undefined;
   abstract contextValue?: string | undefined;
 }
 
