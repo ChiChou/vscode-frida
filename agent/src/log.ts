@@ -10,12 +10,22 @@ const fildes: NativePointer = Memory.alloc(SIZEOF_INT * 2);
 
 let stream: UnixInputStream;
 
-const pipe = new NativeFunction(Module.findExportByName(null, 'pipe')!, 'int', ['pointer']);
-const dup2 = new NativeFunction(Module.findExportByName(null, 'dup2')!, 'int', ['int', 'int']);
-const close = new NativeFunction(Module.findExportByName(null, 'close')!, 'int', ['int']);
-const fcntl = new NativeFunction(Module.findExportByName(null, 'fcntl')!, 'int', ['int', 'int', 'int']);
-
 export function start() {
+  stop();
+
+  const resolve = (name: string): NativePointer => {
+    const p = Module.findExportByName(null, name);
+    if (!p) {
+      throw new Error(`Platform not supported. Is your target on ${name}?`);
+    }
+    return p;
+  }
+
+  const pipe = new NativeFunction(resolve('pipe'), 'int', ['pointer']);
+  const dup2 = new NativeFunction(resolve('dup2'), 'int', ['int', 'int']);
+  const close = new NativeFunction(resolve('close'), 'int', ['int']);
+  const fcntl = new NativeFunction(resolve('fcntl'), 'int', ['int', 'int', 'int']);
+
   pipe(fildes);
 
   const input = fildes.readInt();
