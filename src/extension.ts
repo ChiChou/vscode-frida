@@ -41,6 +41,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	push(register('frida.bundle.copy', clipboard.copy));
 	push(register('frida.name.copy', clipboard.copy));
+	push(register('frida.pid.copy', clipboard.copyPid));
 	push(register('frida.device.copy', clipboard.copy));
 	
 	push(register('frida.device.androidserver', android.startServer));

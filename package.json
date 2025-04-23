@@ -101,6 +101,10 @@
                 "title": "%frida.name.copy%"
             },
             {
+                "command": "frida.pid.copy",
+                "title": "%frida.pid.copy%"
+            },
+            {
                 "command": "frida.spawn",
                 "title": "%frida.spawn%",
                 "icon": {
@@ -359,6 +363,11 @@
                 },
                 {
                     "command": "frida.name.copy",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
+                    "group": "1_frida_info@1"
+                },
+                {
+                    "command": "frida.pid.copy",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
                     "group": "1_frida_info@1"
                 },

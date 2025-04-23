@@ -11,6 +11,7 @@
     "frida.device.copy": "Copy Device ID",
     "frida.bundle.copy": "Copy Bundle ID",
     "frida.name.copy": "Copy Process Name",
+    "frida.pid.copy": "Copy Process ID",
     "frida.spawn": "Spawn",
     "frida.spawn.suspended": "Spawn Suspended",
     "frida.kill": "End Process",

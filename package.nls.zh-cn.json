@@ -11,6 +11,7 @@
     "frida.device.copy": "复制设备 ID",
     "frida.bundle.copy": "复制包 ID",
     "frida.name.copy": "复制进程名称",
+    "frida.pid.copy": "复制进程 ID",
     "frida.spawn": "启动",
     "frida.spawn.suspended": "启动并暂停",
     "frida.kill": "结束进程",

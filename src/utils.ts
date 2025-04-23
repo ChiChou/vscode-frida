@@ -53,7 +53,7 @@ async function virtualenv(): Promise<string> {
     cache.clear();
   });
 
-  const cmd = [...execCommand, '-c', 'import sys;print(sys.executable)'];
+  const cmd = [...execCommand, '-c', 'import frida_tools;import sys;print(sys.executable)'];
 
   return new Promise((resolve, reject) => {
     cp.execFile(cmd[0], cmd.slice(1), {}, (err, stdout) => {
@@ -72,7 +72,7 @@ export async function interpreter(cli = 'frida'): Promise<string> {
   if (cache.has(cli)) { return Promise.resolve(cache.get(cli) as string); }
 
   try {
-    return virtualenv();
+    return await virtualenv();
   } catch (_) {
     // fallback to global package
   }
