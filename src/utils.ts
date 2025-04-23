@@ -54,7 +54,8 @@ export async function interpreter(cli = 'frida'): Promise<string> {
 
   const where = await which(cli, { all: false, nothrow: true });
   if (!where) {
-    throw new Error(`Could not find command ${cli} in $PATH, have you installed it or activated the correct venv?`);
+    const msg = vscode.l10n.t('Could not find command {0} in $PATH, have you installed it or activated the correct venv?', cli);
+    throw new Error(msg);
   }
 
   const path = await shebang(where);

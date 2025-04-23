@@ -1,3 +1,3 @@
-import { window } from 'vscode';
+import { window, l10n } from 'vscode';
 
-export const logger = window.createOutputChannel('Frida Extension');
+export const logger = window.createOutputChannel(l10n.t('Frida Extension'));
