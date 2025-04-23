@@ -1,5 +1,6 @@
 import which from 'which';
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 import { join } from 'path';
 import { platform } from 'os';
 import { DeviceType } from './types';
@@ -31,26 +32,45 @@ export function executable(name: string) {
 
 interface PythonExtensionApi {
   settings: {
-    getExecutionDetails(): { execCommand: string[] }
+    getExecutionDetails(): { execCommand: string[] };
   };
 }
 
-// todo: load interpreter from local virtualenv
-function virtualenv(): string {
+async function virtualenv(): Promise<string> {
   const pyext = vscode.extensions.getExtension('ms-python.python');
   if (!pyext) {
-    throw new Error('Python extension not found');
+    throw new Error(vscode.l10n.t('Python extension not found'));
   }
 
   const api = pyext.exports as PythonExtensionApi;
-  return api.settings.getExecutionDetails().execCommand[0];
+  const { execCommand } = api.settings.getExecutionDetails();
+  if (!execCommand) {
+    throw new Error(vscode.l10n.t('Python extension not activated'));
+  }
+
+  const cmd = [...execCommand, '-c', 'import sys;print(sys.executable)'];
+
+  return new Promise((resolve, reject) => {
+    cp.execFile(cmd[0], cmd.slice(1), {}, (err, stdout) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(stdout.trim());
+      }
+    });
+  });
 }
 
 const cache = new Map<string, string>();
 
 export async function interpreter(cli = 'frida'): Promise<string> {
-  if (cache.has(cli))
-    return Promise.resolve(cache.get(cli) as string);
+  if (cache.has(cli)) { return Promise.resolve(cache.get(cli) as string); }
+
+  try {
+    return virtualenv();
+  } catch (_) {
+    // fallback to global package
+  }
 
   const where = await which(cli, { all: false, nothrow: true });
   if (!where) {

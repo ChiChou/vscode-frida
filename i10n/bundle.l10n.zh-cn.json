@@ -44,5 +44,7 @@
     "inetcat command not present in $PATH": "inetcat 命令不在 $PATH 中",
     "OS type {0} is not supported": "操作系统类型 {0} 不受支持",
     "Could not find command {0} in $PATH, have you installed it or activated the correct venv?": "在 $PATH 中找不到命令 {0}，您是否安装了它或激活了正确的虚拟环境？",
-    "Frida Extension": "Frida 扩展"
+    "Frida Extension": "Frida 扩展",
+    "Python extension not activated": "Python 扩展未激活",
+    "Python extension not found": "未找到 Python 扩展"
 }
