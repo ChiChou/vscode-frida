@@ -6,10 +6,18 @@
 
 * libimobiledevices (for `inetcat` command)
 * Python >= 3.7
-* `pip3 install -U frida-tools` If you have more than one python3 in your path, you need to config the python path in settings
+* frida-tools python package
 * iTunes on Windows
 
 If you are on Windows, you need to keep iTunes open in order to interact with iOS devices via USB.
+
+### Install frida-tools
+
+Because of [PEP0668](https://peps.python.org/pep-0668/), you might encounter error when `pip3 install frida-tools` globally.
+
+The recommended way is to open a folder (workspace) in VSCode, then create and activate a virtual environment using python extension. In this case, the extension will pick your current active python venv to load frida commands.
+
+Or you can use package manager like [pipx](https://github.com/pypa/pipx) or [UV](https://docs.astral.sh/uv/guides/tools/) to install it to $PATH, meanwhile keeping it isolated.
 
 ## Features
 
