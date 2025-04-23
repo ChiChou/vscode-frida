@@ -10,8 +10,9 @@ export default class ADB {
     this.path = executable('adb');
 
     if (!this.path) {
-      vscode.window.showErrorMessage('adb not found');
-      throw new Error('adb not found in $PATH');
+      const msg = vscode.l10n.t('Could not find command adb in $PATH');
+      vscode.window.showErrorMessage(msg);
+      throw new Error(msg);
     }
   }
 

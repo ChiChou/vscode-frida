@@ -33,6 +33,7 @@ export function executable(name: string) {
 interface PythonExtensionApi {
   settings: {
     getExecutionDetails(): { execCommand: string[] };
+    get onDidChangeExecutionDetails(): vscode.Event<vscode.Uri | undefined>;
   };
 }
 
@@ -47,6 +48,10 @@ async function virtualenv(): Promise<string> {
   if (!execCommand) {
     throw new Error(vscode.l10n.t('Python extension not activated'));
   }
+
+  api.settings.onDidChangeExecutionDetails(() => {
+    cache.clear();
+  });
 
   const cmd = [...execCommand, '-c', 'import sys;print(sys.executable)'];
 
