@@ -1,5 +1,5 @@
 import * as cp from 'child_process';
-import { OutputChannel, window } from 'vscode';
+import { l10n, OutputChannel, window } from 'vscode';
 
 import { driverScript, lockdownSyslog, os } from '../driver/backend';
 import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
@@ -25,10 +25,15 @@ export async function show(node: TargetItem) {
     const write = (data: Buffer) => channel.append(data.toString());
     child.stdout.on('data', write);
     child.stderr.on('data', write);
+
+    const actionClose = l10n.t('Close Console');
+    const actionIgnore = l10n.t('Dismiss');
+    const question = l10n.t('Console {0} is already open, do you want to close it?', name);
+
     child.on('close', () =>
       window.showWarningMessage(
-        `Console ${name} lost connection, close now?`, 'Close', 'Dismiss').then(option => {
-          if (option === 'Close') {
+        question, actionClose, actionIgnore).then(option => {
+          if (option === actionClose) {
             channel.dispose();
           }
           refresh();
@@ -42,7 +47,7 @@ export async function show(node: TargetItem) {
   } else if (node instanceof ProcessItem) {
     bundleOrPid = ['--pid', node.data.pid.toString()];
   } else {
-    window.showErrorMessage(`Invalid target "${node.label}"`);
+    window.showErrorMessage(l10n.t('Invalid target {0}', `${node.label}`));
     return;
   }
 
@@ -52,18 +57,20 @@ export async function show(node: TargetItem) {
   } else if (type === 'linux' || type === 'macos') {
     const args = [driverScript(), 'syslog', '--device', node.device.id, ...bundleOrPid];
     const python3 = await interpreter();
-    cmdChannel(`Output: ${node.data.name} (${node.device.name})`, python3, args).show();
+    const title = l10n.t('Output: {0} ({1})', node.data.name, node.device.name);
+    cmdChannel(title, python3, args).show();
   } else if (type === 'android') {
     if (node.data.pid > 0) {
       const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
-      cmdChannel(`Output: ${node.data.name} (${node.device.name})`, 'adb', args).show();
+      const title = l10n.t('Output: {0} ({1})', node.data.name, node.device.name);
+      cmdChannel(title, 'adb', args).show();
     } else {
       // todo: 
       // adb shell monkey -p BUNDLE 1
       // adb shell pidof BUNDLE
-      window.showErrorMessage(`${node.data.name} (${node.device.name}) is not running`);
+      window.showErrorMessage(l10n.t('{0} ({1}) is not running', node.data.name, node.device.name));
     }
   } else {
-    window.showErrorMessage(`Unimplemented type of device ${node.device.name}`);
+    window.showErrorMessage(l10n.t('Unsupported device type {0}', node.device.type));
   }
 }

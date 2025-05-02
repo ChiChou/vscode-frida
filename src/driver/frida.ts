@@ -1,3 +1,4 @@
+import { l10n } from 'vscode';
 import { execFile } from 'child_process';
 import { interpreter } from '../utils';
 
@@ -21,7 +22,7 @@ export async function launch(device: string, bundle: string): Promise<Number> {
       } else {
         const lines = stdout.split('\n');
         if (lines.length <= 2) {
-          reject(new Error(`Unknown output: ${stdout}`));
+            reject(new Error(l10n.t('Unknown output: {0}', stdout)));
         }
         resolve(parseInt(lines[1], 10));
       }

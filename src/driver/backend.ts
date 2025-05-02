@@ -1,4 +1,5 @@
-import { join } from "path";
+import { l10n } from 'vscode';
+import { join } from 'path';
 import { execFile } from 'child_process';
 
 import { asParam } from './remote';
@@ -66,7 +67,7 @@ export function rpc(target: TargetItem, method: string, ...args: string[]) {
   } else if (target instanceof ProcessItem) {
     bundleOrPid = ['--pid', target.data.pid.toString()];
   } else {
-    throw new Error(`Invalid target "${target}"`);
+    throw new Error(l10n.t('Invalid target {0}', target));
   }
 
   return exec('rpc', '--device', target.device.id, ...bundleOrPid, method, ...args);

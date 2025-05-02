@@ -47,5 +47,14 @@
     "Frida Extension": "Frida 扩展",
     "Python extension not activated": "Python 扩展未激活",
     "Python extension not found": "未找到 Python 扩展",
-    "Could not find command adb in $PATH": "在 $PATH 中找不到命令 adb"
+    "Could not find command adb in $PATH": "在 $PATH 中找不到命令 adb",
+    "Create Here": "在此处创建",
+    "Create Project": "创建项目",
+    "Close Console": "关闭控制台",
+    "Ignore": "忽略",
+    "Console {0} is already open, do you want to close it?": "控制台 {0} 已经打开，您要关闭它吗？",
+    "Invalid target {0}": "无效的目标 {0}",
+    "Output: {0} ({1})": "输出：{0} ({1})",
+    "{0} ({1}) is not running": "{0} ({1}) 未运行",
+    "Not Running": "未运行"
 }

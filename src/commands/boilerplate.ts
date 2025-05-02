@@ -17,7 +17,7 @@ async function create(template: string) {
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectMany: false,
-      openLabel: 'Create Here'
+      openLabel: vscode.l10n.t('Create Here')
     });
 
     if (fileUri?.length) {
@@ -33,7 +33,7 @@ async function create(template: string) {
   const shellPath = await interpreter();
   await run({
     cwd: dest,
-    name: 'Create Project',
+    name: vscode.l10n.t('Create Project'),
     shellPath,
     shellArgs: args
   });

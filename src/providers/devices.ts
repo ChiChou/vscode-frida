@@ -85,6 +85,11 @@ export class DeviceItem extends TargetItem {
 
 }
 
+enum AppState {
+  Running = 'running',
+  Dead = 'dead',
+};
+
 export class NotFound extends TargetItem {
   constructor(
     public readonly reason: Error,
@@ -118,7 +123,7 @@ export class AppItem extends TargetItem {
   }
 
   get tooltip(): string {
-    return `${this.label} (${this.data.pid || 'Not Running'})`;
+    return `${this.label} (${this.data.pid || vscode.l10n.t('Not Running')})`;
   }
 
   get description(): string {
@@ -134,7 +139,7 @@ export class AppItem extends TargetItem {
   }
 
   get contextValue() {
-    return `app|${this.data.pid ? 'running' : 'dead'}|${this.device.os}`;
+    return `app|${this.data.pid ? AppState.Running : AppState.Dead}|${this.device.os}`;
   }
 }
 
@@ -163,6 +168,6 @@ export class ProcessItem extends TargetItem {
   }
 
   get contextValue() {
-    return `process|${this.data.pid ? 'running' : 'dead'}|${this.device.os}`;
+    return `process|${this.data.pid ? AppState.Running : AppState.Dead}|${this.device.os}`;
   }
 }
