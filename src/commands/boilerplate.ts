@@ -120,7 +120,7 @@ export async function debug(node?: AppItem | ProcessItem) {
 
   const quote = (s: string) => s.includes(' ') ? `"${s}"` : s;
 
-  let cmd: string[] = [];
+  const cmd: string[] = [];
   // create debug command line
   cmd.push(...expandDevParam(node));
 
