@@ -19,7 +19,7 @@ def devices() -> list:
         obj = {prop: getattr(dev, prop) for prop in props}
         try:
             obj['os'] = dev.query_system_parameters()['os']['id']
-        except (frida.ServerNotRunningError, KeyError, frida.TransportError):
+        except (frida.ServerNotRunningError, KeyError, frida.TransportError, frida.NotSupportedError):
             obj['os'] = 'unknown'
         return obj
 
