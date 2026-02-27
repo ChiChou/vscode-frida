@@ -97,66 +97,58 @@ function getArgExpression(type: string, index: number): string {
 }
 
 function* generateNativeHookBasic(fn: string): Generator<string> {
-  const varName = sanitize(fn);
   yield `// ${fn}`;
-  yield `const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`;
-  yield `if (${varName}) {`;
-  yield `  Interceptor.attach(${varName}, {`;
-  yield `    onEnter(args) {`;
-  yield `      console.log('[${fn}] called');`;
-  yield `    },`;
-  yield `    onLeave(retval) {`;
-  yield `      console.log('[${fn}] returned:', retval);`;
-  yield `    }`;
-  yield `  });`;
-  yield `}`;
-  yield '';
+  yield `Interceptor.attach(mod.getExportByName(${JSON.stringify(fn)}), {`;
+  yield `  onEnter(args) {`;
+  yield `    console.log('[${fn}] called');`;
+  yield `  },`;
+  yield `  onLeave(retval) {`;
+  yield `    console.log('[${fn}] returned:', retval);`;
+  yield `  }`;
+  yield `});`;
+  yield ``;
 }
 
 function* generateNativeHook(fn: string, proto: FunctionPrototype | undefined): Generator<string> {
-  const varName = sanitize(fn);
   yield `// ${fn}`;
-  yield `const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`;
-  yield `if (${varName}) {`;
-  yield `  Interceptor.attach(${varName}, {`;
-  yield `    onEnter(args) {`;
+  yield `Interceptor.attach(mod.getExportByName(${JSON.stringify(fn)}), {`;
+  yield `  onEnter(args) {`;
 
   if (proto && !proto.error && proto.args.length > 0) {
     const argExprs = proto.args.map((type, i) => getArgExpression(type, i));
-    yield `      console.log('[${fn}] called', ${argExprs.join(', ')});`;
+    yield `    console.log('[${fn}] called', ${argExprs.join(', ')});`;
   } else {
-    yield `      console.log('[${fn}] called');`;
+    yield `    console.log('[${fn}] called');`;
   }
 
-  yield `    },`;
-  yield `    onLeave(retval) {`;
+  yield `  },`;
+  yield `  onLeave(retval) {`;
 
   if (proto && !proto.error) {
     switch (proto.returns) {
       case 'void':
-        yield `      console.log('[${fn}] returned');`;
+        yield `    console.log('[${fn}] returned');`;
         break;
       case 'char *':
-        yield `      console.log('[${fn}] returned:', retval.readUtf8String());`;
+        yield `    console.log('[${fn}] returned:', retval.readUtf8String());`;
         break;
       case 'id':
-        yield `      if (!retval.isNull()) {`;
-        yield `        console.log('[${fn}] returned:', new ObjC.Object(retval).toString());`;
-        yield `      } else {`;
-        yield `        console.log('[${fn}] returned: null');`;
-        yield `      }`;
+        yield `    if (!retval.isNull()) {`;
+        yield `      console.log('[${fn}] returned:', new ObjC.Object(retval).toString());`;
+        yield `    } else {`;
+        yield `      console.log('[${fn}] returned: null');`;
+        yield `    }`;
         break;
       default:
-        yield `      console.log('[${fn}] returned:', retval);`;
+        yield `    console.log('[${fn}] returned:', retval);`;
     }
   } else {
-    yield `      console.log('[${fn}] returned:', retval);`;
+    yield `    console.log('[${fn}] returned:', retval);`;
   }
 
-  yield `    }`;
-  yield `  });`;
-  yield `}`;
-  yield '';
+  yield `  }`;
+  yield `});`;
+  yield ``;
 }
 
 export function generateNativeHooksBasic(req: NativeHookRequest): string {

@@ -284,18 +284,6 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 			};
 		}
 
-		// Module.getExportByName('moduleName', '  or Module.findExportByName('moduleName', '
-		const exportMatch = text.match(/Module\.(?:get|find)ExportByName\((['"`])([^'"`]*)\1\s*,\s*['"`]([^'"`]*)$/);
-		if (exportMatch) {
-			return {
-				cacheKey: `exports:${exportMatch[2]}`,
-				method: 'exports',
-				params: { module: exportMatch[2] },
-				kind: vscode.CompletionItemKind.Function,
-				replaceStart: position.character - exportMatch[3].length,
-			};
-		}
-
 		return null;
 	}
 
