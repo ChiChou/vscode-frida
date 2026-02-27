@@ -7,7 +7,6 @@ export interface NativeHookRequest {
 
 export interface ArgInfo {
   type: string;
-  isObject: boolean;
 }
 
 export interface MethodSelection {
@@ -16,7 +15,6 @@ export interface MethodSelection {
   display: string;
   args: ArgInfo[];
   returnType: string;
-  isReturnObject: boolean;
   isStatic: boolean;
 }
 
@@ -191,7 +189,7 @@ export function generateObjCHooks(selections: MethodSelection[]): string {
 
         const argExprs = m.args.map((arg, i) => {
           const argIdx = i + 2;
-          return arg.isObject ? `new ObjC.Object(args[${argIdx}]).toString()` : `args[${argIdx}]`;
+          return arg.type[0] === '@' ? `new ObjC.Object(args[${argIdx}]).toString()` : `args[${argIdx}]`;
         });
 
         yield `  // ${m.name}`;
@@ -205,7 +203,7 @@ export function generateObjCHooks(selections: MethodSelection[]): string {
         }
         yield `    },`;
         yield `    onLeave(retval) {`;
-        if (m.isReturnObject) {
+        if (m.returnType[0] === '@') {
           yield `      if (!retval.isNull()) {`;
           yield `        console.log('[${className} ${cleanSel}] returned:', new ObjC.Object(retval).toString());`;
           yield `      } else {`;

@@ -7,9 +7,8 @@ import { generateObjCHooks, generateJavaHooks, MethodSelection } from './hooks';
 interface MethodInfo {
   name: string;
   display: string;
-  args: Array<{ type: string; isObject: boolean }>;
+  args: Array<{ type: string }>;
   returnType: string;
-  isReturnObject: boolean;
   isStatic: boolean;
 }
 

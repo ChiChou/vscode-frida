@@ -49,3 +49,5 @@ export function stop() {
     stream.close();
   }
 }
+
+Script.bindWeak(globalThis, stop.bind(null));

@@ -14,7 +14,6 @@ enum Runtime {
 
 interface ArgInfo {
   type: string;
-  isObject: boolean;
 }
 
 interface MethodInfo {
@@ -22,7 +21,6 @@ interface MethodInfo {
   display: string;
   args: ArgInfo[];
   returnType: string;
-  isReturnObject: boolean;
   isStatic: boolean;
 }
 
@@ -89,10 +87,6 @@ if (Java.available) {
     });
   };
 
-  const javaPrimitives = new Set([
-    'int', 'long', 'boolean', 'byte', 'short', 'char', 'float', 'double', 'void',
-  ]);
-
   function shortenType(t: string): string {
     const last = t.lastIndexOf('.');
     return last >= 0 ? t.substring(last + 1) : t;
@@ -108,7 +102,7 @@ if (Java.available) {
     const shortArgs: string[] = [];
     for (let j = 0; j < paramTypes.length; j++) {
       const typeName = paramTypes[j].getName() as string;
-      args.push({ type: typeName, isObject: !javaPrimitives.has(typeName) });
+      args.push({ type: typeName });
       shortArgs.push(shortenType(typeName));
     }
     const prefix = isStatic ? 'static ' : '';
@@ -117,7 +111,6 @@ if (Java.available) {
       display: `${prefix}${shortenType(retTypeName)} ${mName}(${shortArgs.join(', ')})`,
       args,
       returnType: retTypeName,
-      isReturnObject: !javaPrimitives.has(retTypeName),
       isStatic,
     };
   }
@@ -166,32 +159,27 @@ if (Java.available) {
     methodReturnType(): string;
   }
 
-  function inspectObjCMethod(cls: any, sel: string): MethodInfo {
+  function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
     const isInstance = sel.startsWith('- ');
     const cleanSel = sel.substring(2);
     let sig: NSMethodSignature | null = null;
     try {
-      if (isInstance) {
-        sig = cls.instanceMethodSignatureForSelector_(ObjC.selector(cleanSel)) as NSMethodSignature | null;
-      } else {
-        // class method: instance method of the metaclass
-        sig = cls.$metaClass?.instanceMethodSignatureForSelector_(ObjC.selector(cleanSel)) as NSMethodSignature | null;
-      }
+      const s = ObjC.selector(cleanSel);
+      sig = isInstance
+        ? cls.instanceMethodSignatureForSelector_(s) as NSMethodSignature | null
+        : cls.methodSignatureForSelector_(s) as NSMethodSignature | null;
     } catch (_) { /* signature unavailable */ }
 
     const args: ArgInfo[] = [];
     let retType = 'v';
-    let isReturnObject = false;
 
     if (sig) {
       const argCount = sig.numberOfArguments();
       // skip index 0 (self) and 1 (_cmd)
       for (let i = 2; i < argCount; i++) {
-        const t = sig.getArgumentTypeAtIndex_(i);
-        args.push({ type: t, isObject: t[0] === '@' });
+        args.push({ type: sig.getArgumentTypeAtIndex_(i) });
       }
       retType = sig.methodReturnType();
-      isReturnObject = retType[0] === '@';
     }
 
     return {
@@ -199,18 +187,17 @@ if (Java.available) {
       display: sel,
       args,
       returnType: retType,
-      isReturnObject,
       isStatic: !isInstance,
     };
   }
 
   methods.ownMethodsOf = async (name: string) => {
     const cls = getClass(name);
-    return (cls.$ownMethods as string[]).map(sel => inspectObjCMethod(cls, sel));
+    return cls.$ownMethods.map(sel => inspectObjCMethod(cls, sel));
   };
   methods.methodsOf = async (name: string) => {
     const cls = getClass(name);
-    return (cls.$methods as string[]).map(sel => inspectObjCMethod(cls, sel));
+    return cls.$methods.map(sel => inspectObjCMethod(cls, sel));
   };
   methods.superClasses = async (name: string) => {
     const chain: string[] = [];
