@@ -16,7 +16,8 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:javascript"
+        "onLanguage:javascript",
+        "onLanguage:typescript"
     ],
     "main": "./out/extension.js",
     "l10n": "./l10n",
@@ -197,6 +198,11 @@
                 "command": "frida.typing.init",
                 "title": "%frida.typing.init%",
                 "category": "Frida"
+            },
+            {
+                "command": "frida.lsp.target",
+                "title": "%frida.lsp.target%",
+                "category": "Frida"
             }
         ],
         "viewsContainers": {
@@ -313,6 +319,10 @@
                 },
                 {
                     "command": "frida.device.copy",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.lsp.target",
                     "when": "false"
                 }
             ],
@@ -478,6 +488,16 @@
                     "command": "frida.device.androidserver",
                     "when": "viewItem =~ /^device\\|\\w+\\|android$/",
                     "group": "2_frida_dev_setup@2"
+                },
+                {
+                    "command": "frida.lsp.target",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/",
+                    "group": "1_frida_info@2"
+                },
+                {
+                    "command": "frida.lsp.target",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
+                    "group": "1_frida_info@2"
                 }
             ]
         }

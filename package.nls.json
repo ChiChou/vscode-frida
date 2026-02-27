@@ -29,7 +29,8 @@
     "frida.external.shell": "Open Shell",
     "frida.boilerplate.agent": "Create Frida Agent",
     "frida.boilerplate.module": "Create Frida CModule",
-    "frida.typing.init": "Get type hint for frida",
+    "frida.typing.init": "Get Type Hint for Frida",
+    "frida.lsp.target": "Use This Target for Frida Autocomplete",
     "frida.apps": "Application List",
     "frida.ps": "Process List"
 }

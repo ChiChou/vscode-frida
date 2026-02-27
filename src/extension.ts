@@ -16,6 +16,9 @@ import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
 import * as views from './commands/views';
 
+import { FridaCompletionProvider } from './providers/completion';
+import * as target from './commands/target';
+
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
 	const push = (item: vscode.Disposable) => context.subscriptions.push(item);
@@ -62,6 +65,16 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.view.modules', views.modules));
 	push(register('frida.view.hierarchy', views.hierarchy));
 	push(register('frida.view.packages', views.packages));
+
+	const completionProvider = new FridaCompletionProvider();
+	push(vscode.languages.registerCompletionItemProvider(
+		[{ language: 'javascript' }, { language: 'typescript' }],
+		completionProvider,
+		'.', "'", '"', '`'
+	));
+	push(completionProvider);
+
+	push(register('frida.lsp.target', target.setTarget));
 }
 
 // this method is called when your extension is deactivated
