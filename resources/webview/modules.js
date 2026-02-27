@@ -8,7 +8,7 @@
   let allExports = [];
   let selectedModuleName = null;
   let selectedModuleInfo = null;
-  let checkedFunctions = new Set(); // only function names (not variables)
+  let checkedFunctions = new Set();
   let filterDebounce = null;
 
   const $moduleList = document.getElementById('module-list');
@@ -18,12 +18,12 @@
   const $detailTitle = document.getElementById('detail-title');
   const $moduleInfo = document.getElementById('module-info');
   const $modPath = document.getElementById('mod-path');
-  const $modBase = document.getElementById('mod-base');
-  const $modSize = document.getElementById('mod-size');
+  const $modRange = document.getElementById('mod-range');
   const $exportToolbar = document.getElementById('export-toolbar');
   const $selectAll = document.getElementById('select-all');
   const $exportCount = document.getElementById('export-count');
-  const $btnHook = document.getElementById('btn-hook');
+  const $btnHookBasic = document.getElementById('btn-hook-basic');
+  const $btnHookSmart = document.getElementById('btn-hook-smart');
   const $selectionCount = document.getElementById('selection-count');
   const $actions = document.getElementById('actions');
 
@@ -53,6 +53,9 @@
       case 'error':
         showError(msg.message);
         break;
+      case 'hookGenerated':
+        setGenerating(false);
+        break;
     }
   });
 
@@ -81,8 +84,18 @@
     updateSelectionCount();
   });
 
-  $btnHook.addEventListener('click', () => {
+  $btnHookBasic.addEventListener('click', () => {
     if (checkedFunctions.size === 0) return;
+    vscode.postMessage({
+      type: 'generateHookBasic',
+      module: selectedModuleName,
+      functions: Array.from(checkedFunctions),
+    });
+  });
+
+  $btnHookSmart.addEventListener('click', () => {
+    if (checkedFunctions.size === 0) return;
+    setGenerating(true);
     vscode.postMessage({
       type: 'generateHook',
       module: selectedModuleName,
@@ -114,9 +127,10 @@
   function renderModuleRow(m) {
     const row = document.createElement('div');
     row.className = 'list-row' + (m.name === selectedModuleName ? ' selected' : '');
+    const range = formatRange(m.base, m.size);
     row.innerHTML =
       '<span class="name" title="' + escapeAttr(m.path) + '">' + escapeHtml(m.name) + '</span>' +
-      '<span class="address">' + escapeHtml(m.base) + '</span>';
+      '<span class="address" title="' + escapeAttr(range) + '">' + escapeHtml(m.base) + '</span>';
 
     row.addEventListener('click', () => {
       selectedModuleName = m.name;
@@ -124,8 +138,7 @@
       $detailTitle.textContent = m.name;
       $moduleInfo.style.display = '';
       $modPath.textContent = m.path;
-      $modBase.textContent = m.base;
-      $modSize.textContent = formatSize(m.size);
+      $modRange.textContent = range;
 
       $moduleList.querySelectorAll('.list-row').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');
@@ -168,9 +181,24 @@
 
     const hookBtn = document.createElement('button');
     hookBtn.className = 'hook-btn';
-    hookBtn.textContent = 'Hook';
+    hookBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m17.586 11.414-5.93 5.93a1 1 0 0 1-8-8l3.137-3.137a.707.707 0 0 1 1.207.5V10"/><path d="M20.414 8.586 22 7"/><circle cx="19" cy="10" r="2"/></svg>';
+    hookBtn.title = window.I18N.hook;
     hookBtn.addEventListener('click', (ev) => {
       ev.stopPropagation();
+      vscode.postMessage({
+        type: 'generateHookBasic',
+        module: selectedModuleName,
+        functions: [e.name],
+      });
+    });
+
+    const hookAIBtn = document.createElement('button');
+    hookAIBtn.className = 'hook-btn hook-btn-ai';
+    hookAIBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>';
+    hookAIBtn.title = window.I18N.hookAI;
+    hookAIBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      setGenerating(true);
       vscode.postMessage({
         type: 'generateHook',
         module: selectedModuleName,
@@ -181,6 +209,7 @@
     row.appendChild(cb);
     row.appendChild(nameSpan);
     row.appendChild(hookBtn);
+    row.appendChild(hookAIBtn);
     return row;
   }
 
@@ -200,13 +229,23 @@
   function updateSelectionCount() {
     const count = checkedFunctions.size;
     $selectionCount.textContent = count + ' selected';
-    $btnHook.disabled = count === 0;
+    $btnHookBasic.disabled = count === 0;
+    $btnHookSmart.disabled = count === 0;
   }
 
-  function formatSize(bytes) {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  function setGenerating(generating) {
+    $btnHookBasic.disabled = generating;
+    $btnHookSmart.disabled = generating;
+    $btnHookSmart.innerText = generating ? window.I18N.generating : window.I18N.generateHookSmart;
+    document.querySelectorAll('.hook-btn').forEach(btn => {
+      btn.disabled = generating;
+    });
+  }
+
+  function formatRange(base, size) {
+    const baseNum = parseInt(base, 16);
+    const endNum = baseNum + size;
+    return '0x' + baseNum.toString(16) + '-0x' + endNum.toString(16);
   }
 
   function showError(message) {

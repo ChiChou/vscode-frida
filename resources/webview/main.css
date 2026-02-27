@@ -246,6 +246,13 @@ button {
   cursor: pointer;
   font-size: var(--vscode-font-size);
   font-family: var(--vscode-font-family);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+button svg {
+  flex-shrink: 0;
 }
 
 button:hover {

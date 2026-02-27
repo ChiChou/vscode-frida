@@ -1,3 +1,5 @@
+import * as vscode from 'vscode';
+
 export interface NativeHookRequest {
   module: string;
   functions: string[];
@@ -18,7 +20,138 @@ export interface MethodSelection {
   isStatic: boolean;
 }
 
-export function generateNativeHooks(req: NativeHookRequest): string {
+export interface FunctionPrototype {
+  args: string[];
+  returns: string;
+  error?: string;
+}
+
+const SYSTEM_PROMPT = `Give me the argument types and return type for each function name. Return a JSON object where keys are function names and values are objects with "args" (array of types) and "returns" (type).
+
+Example input: malloc, free, strcpy
+Example output:
+{"malloc": {"args": ["uint"], "returns": "void *"}, "free": {"args": ["void *"], "returns": "void"}, "strcpy": {"args": ["char *", "char *"], "returns": "char *"}}
+
+Do not include qualifiers. My program can only handle these native types:
+"void *", "int", "uint", "long", "float", "double", "bool", "char *", "id", "void"
+
+Please normalize types to those. If a type is an Objective-C class or instance, use "id".
+
+If a function is not in your knowledge, set its value to {"error": "unknown function"}.
+
+Only output the JSON object, no explanations.`;
+
+async function queryFunctionPrototypes(functionNames: string[]): Promise<Map<string, FunctionPrototype>> {
+  const result = new Map<string, FunctionPrototype>();
+  
+  if (functionNames.length === 0) {
+    return result;
+  }
+
+  try {
+    const models = await vscode.lm.selectChatModels({ vendor: 'copilot' });
+    if (models.length === 0) {
+      return result;
+    }
+
+    const model = models[0];
+    const messages = [
+      vscode.LanguageModelChatMessage.User(SYSTEM_PROMPT),
+      vscode.LanguageModelChatMessage.User(functionNames.join(', '))
+    ];
+
+    const response = await model.sendRequest(messages, {}, new vscode.CancellationTokenSource().token);
+    
+    let jsonStr = '';
+    for await (const chunk of response.text) {
+      jsonStr += chunk;
+    }
+
+    jsonStr = jsonStr.trim();
+    const jsonMatch = jsonStr.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      const parsed = JSON.parse(jsonMatch[0]);
+      for (const fn of functionNames) {
+        if (parsed[fn]) {
+          result.set(fn, parsed[fn] as FunctionPrototype);
+        }
+      }
+    }
+  } catch {
+    // ignore errors
+  }
+
+  return result;
+}
+
+function generateArgPrintCode(args: string[], fn: string): { onEnter: string[]; argCount: number } {
+  const onEnter: string[] = [];
+  const argCount = args.length;
+
+  if (argCount === 0) {
+    onEnter.push(`      console.log('[${fn}] called');`);
+  } else {
+    const argExprs: string[] = [];
+    for (let i = 0; i < args.length; i++) {
+      const type = args[i];
+      switch (type) {
+        case 'char *':
+          argExprs.push(`args[${i}].readUtf8String()`);
+          break;
+        case 'void *':
+        case 'int':
+        case 'uint':
+        case 'long':
+        case 'float':
+        case 'double':
+        case 'bool':
+          argExprs.push(`args[${i}]`);
+          break;
+        case 'id':
+          argExprs.push(`new ObjC.Object(args[${i}]).toString()`);
+          break;
+        default:
+          argExprs.push(`args[${i}]`);
+      }
+    }
+    onEnter.push(`      console.log(\`[${fn}](\${[${argExprs.join(', ')}].join(', ')})\`);`);
+  }
+
+  return { onEnter, argCount };
+}
+
+function generateReturnPrintCode(returnType: string, fn: string): string[] {
+  const onLeave: string[] = [];
+  
+  switch (returnType) {
+    case 'void':
+      onLeave.push(`      console.log('[${fn}] returned');`);
+      break;
+    case 'char *':
+      onLeave.push(`      console.log('[${fn}] returned:', retval.readUtf8String());`);
+      break;
+    case 'id':
+      onLeave.push(`      if (!retval.isNull()) {`);
+      onLeave.push(`        console.log('[${fn}] returned:', new ObjC.Object(retval).toString());`);
+      onLeave.push(`      } else {`);
+      onLeave.push(`        console.log('[${fn}] returned: null');`);
+      onLeave.push(`      }`);
+      break;
+    case 'void *':
+    case 'int':
+    case 'uint':
+    case 'long':
+    case 'float':
+    case 'double':
+    case 'bool':
+    default:
+      onLeave.push(`      console.log('[${fn}] returned:', retval);`);
+  }
+
+  return onLeave;
+}
+
+export function generateNativeHooksBasic(req: NativeHookRequest): string {
   const lines: string[] = [];
   lines.push(`const mod = Process.findModuleByName(${JSON.stringify(req.module)});`);
   lines.push('');
@@ -34,6 +167,48 @@ export function generateNativeHooks(req: NativeHookRequest): string {
     lines.push(`    },`);
     lines.push(`    onLeave(retval) {`);
     lines.push(`      console.log('[${fn}] returned:', retval);`);
+    lines.push(`    }`);
+    lines.push(`  });`);
+    lines.push(`}`);
+    lines.push('');
+  }
+
+  return lines.join('\n');
+}
+
+export async function generateNativeHooks(req: NativeHookRequest): Promise<string> {
+  const lines: string[] = [];
+  lines.push(`const mod = Process.findModuleByName(${JSON.stringify(req.module)});`);
+  lines.push('');
+
+  const prototypes = await queryFunctionPrototypes(req.functions);
+
+  for (const fn of req.functions) {
+    const varName = sanitize(fn);
+    lines.push(`// ${fn}`);
+    lines.push(`const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`);
+    lines.push(`if (${varName}) {`);
+    lines.push(`  Interceptor.attach(${varName}, {`);
+    lines.push(`    onEnter(args) {`);
+
+    const proto = prototypes.get(fn);
+    if (proto && !proto.error) {
+      const { onEnter } = generateArgPrintCode(proto.args, fn);
+      lines.push(...onEnter.map(l => '  ' + l));
+    } else {
+      lines.push(`      console.log('[${fn}] called');`);
+    }
+
+    lines.push(`    },`);
+    lines.push(`    onLeave(retval) {`);
+
+    if (proto && !proto.error) {
+      const onLeave = generateReturnPrintCode(proto.returns, fn);
+      lines.push(...onLeave.map(l => '  ' + l));
+    } else {
+      lines.push(`      console.log('[${fn}] returned:', retval);`);
+    }
+
     lines.push(`    }`);
     lines.push(`  });`);
     lines.push(`}`);

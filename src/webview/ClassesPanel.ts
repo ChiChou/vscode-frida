@@ -154,6 +154,10 @@ export class ClassesPanel {
     const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'resources', 'webview', 'classes.js'));
     const nonce = getNonce();
 
+    const i18n = {
+      hook: l10n.t('Hook'),
+    };
+
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -195,11 +199,12 @@ export class ClassesPanel {
         <div class="placeholder">${l10n.t('Click a class to view its methods')}</div>
       </div>
       <div class="actions" id="actions" style="display:none">
-        <button id="btn-hook" disabled>${l10n.t('Generate Hook Script')}</button>
+        <button id="btn-hook" disabled>${l10n.t('Batch Hook')}</button>
         <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>
       </div>
     </div>
   </div>
+  <script nonce="${nonce}">window.I18N = ${JSON.stringify(i18n)};</script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;

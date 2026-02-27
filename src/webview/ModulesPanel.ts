@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
-import { generateNativeHooks, NativeHookRequest } from './hooks';
+import { generateNativeHooks, generateNativeHooksBasic, NativeHookRequest } from './hooks';
 
 interface ModuleInfo {
   name: string;
@@ -73,7 +73,10 @@ export class ModulesPanel {
         await this.loadExports(msg.moduleName);
         break;
       case 'generateHook':
-        this.generateHook(msg as NativeHookRequest);
+        await this.generateHook(msg as NativeHookRequest, true);
+        break;
+      case 'generateHookBasic':
+        await this.generateHook(msg as NativeHookRequest, false);
         break;
     }
   }
@@ -109,11 +112,17 @@ export class ModulesPanel {
     }
   }
 
-  private generateHook(req: NativeHookRequest) {
-    const code = generateNativeHooks(req);
-    if (code) {
-      vscode.workspace.openTextDocument({ content: code, language: 'javascript' })
-        .then(doc => vscode.window.showTextDocument(doc));
+  private async generateHook(req: NativeHookRequest, useLLM: boolean) {
+    try {
+      const code = useLLM
+        ? await generateNativeHooks(req)
+        : generateNativeHooksBasic(req);
+      if (code) {
+        vscode.workspace.openTextDocument({ content: code, language: 'javascript' })
+          .then(doc => vscode.window.showTextDocument(doc));
+      }
+    } finally {
+      this.post({ type: 'hookGenerated' });
     }
   }
 
@@ -121,6 +130,14 @@ export class ModulesPanel {
     const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'resources', 'webview', 'main.css'));
     const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(this.extensionUri, 'resources', 'webview', 'modules.js'));
     const nonce = getNonce();
+
+    const i18n = {
+      generating: l10n.t('Generating...'),
+      generateHookBasic: l10n.t('Batch Hook'),
+      generateHookSmart: l10n.t('With AI'),
+      hook: l10n.t('Hook'),
+      hookAI: l10n.t('Hook (AI)'),
+    };
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -148,8 +165,7 @@ export class ModulesPanel {
       </div>
       <div id="module-info" class="info-section" style="display:none">
         <div class="info-row"><span class="label">${l10n.t('Path')}</span><span class="value" id="mod-path"></span></div>
-        <div class="info-row"><span class="label">${l10n.t('Base')}</span><span class="value" id="mod-base"></span></div>
-        <div class="info-row"><span class="label">${l10n.t('Size')}</span><span class="value" id="mod-size"></span></div>
+        <div class="info-row"><span class="label">${l10n.t('Range')}</span><span class="value" id="mod-range"></span></div>
       </div>
       <div id="export-toolbar" style="display:none">
         <div class="pane-header" style="border-bottom:none;padding-bottom:0">
@@ -164,11 +180,13 @@ export class ModulesPanel {
         <div class="placeholder">${l10n.t('Click a module to view its exports')}</div>
       </div>
       <div class="actions" id="actions" style="display:none">
-        <button id="btn-hook" disabled>${l10n.t('Generate Hook Script')}</button>
+        <button id="btn-hook-basic" disabled>${l10n.t('Batch Hook')}</button>
+        <button id="btn-hook-smart" disabled>${l10n.t('With AI')}</button>
         <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>
       </div>
     </div>
   </div>
+  <script nonce="${nonce}">window.I18N = ${JSON.stringify(i18n)};</script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;
