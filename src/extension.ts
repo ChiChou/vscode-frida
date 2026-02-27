@@ -57,8 +57,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	push(register('frida.typing.init', typing.init));
 
-	push(register('frida.print.classes', print.classes));
-	push(register('frida.print.modules', print.modules));
+	print.init(context);
+	push(register('frida.view.classes', print.classes));
+	push(register('frida.view.modules', print.modules));
 }
 
 // this method is called when your extension is deactivated

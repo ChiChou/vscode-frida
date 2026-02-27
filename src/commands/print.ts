@@ -1,39 +1,20 @@
-import { Uri, window } from "vscode";
-import { rpc } from "../driver/backend";
-import { TargetItem } from "../providers/devices";
+import * as vscode from 'vscode';
+import { TargetItem } from '../providers/devices';
+import { ModulesPanel } from '../webview/ModulesPanel';
+import { ClassesPanel } from '../webview/ClassesPanel';
 
-interface Module {
-  name: string;
-  base: string;
-  size: number;
-  path: string;
-};
+let extensionUri: vscode.Uri;
 
-type ClassesResult = string[];
-type ModulesResult = Module[];
-
-function create(name: string, content: string) {
-  window.showTextDocument(Uri.parse(`untitled:${encodeURIComponent(name)}`)).then((editor) => {
-    editor.edit((editBuilder) => {
-      editBuilder.insert(editor.selection.active, content);
-    });
-  });
-}
-
-export function classes(target: TargetItem) {
-  rpc(target, 'classes')
-    .then((result: ClassesResult) => {
-      const text = result.join('\n');
-      create(`classes - ${target.label}.txt`, text);
-    })
-    .catch(err => window.showErrorMessage(err.message));
+export function init(context: vscode.ExtensionContext) {
+  extensionUri = context.extensionUri;
 }
 
 export function modules(target: TargetItem) {
-  rpc(target, 'modules')
-    .then((modules: ModulesResult) => {
-      const text = modules.map(m => `${m.base} ${m.name} ${m.size} ${m.path}`).join('\n');
-      create(`modules - ${target.label}.txt`, text);
-    })
-    .catch(err => window.showErrorMessage(err.message));
+  const panel = new ModulesPanel(extensionUri, target);
+  panel.show();
+}
+
+export function classes(target: TargetItem) {
+  const panel = new ClassesPanel(extensionUri, target);
+  panel.show();
 }

@@ -139,13 +139,13 @@
                 "category": "Frida"
             },
             {
-                "command": "frida.print.modules",
-                "title": "%frida.print.modules%",
+                "command": "frida.view.modules",
+                "title": "%frida.view.modules%",
                 "category": "Frida"
             },
             {
-                "command": "frida.print.classes",
-                "title": "%frida.print.classes%",
+                "command": "frida.view.classes",
+                "title": "%frida.view.classes%",
                 "category": "Frida"
             },
             {
@@ -258,11 +258,11 @@
                     "when": "false"
                 },
                 {
-                    "command": "frida.print.modules",
+                    "command": "frida.view.modules",
                     "when": "false"
                 },
                 {
-                    "command": "frida.print.classes",
+                    "command": "frida.view.classes",
                     "when": "false"
                 },
                 {
@@ -392,22 +392,22 @@
                     "group": "3_frida_logger@1"
                 },
                 {
-                    "command": "frida.print.modules",
+                    "command": "frida.view.modules",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
                     "group": "3_frida_logger@2"
                 },
                 {
-                    "command": "frida.print.modules",
+                    "command": "frida.view.modules",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
                     "group": "3_frida_logger@2"
                 },
                 {
-                    "command": "frida.print.classes",
+                    "command": "frida.view.classes",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
                     "group": "3_frida_logger@3"
                 },
                 {
-                    "command": "frida.print.classes",
+                    "command": "frida.view.classes",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
                     "group": "3_frida_logger@3"
                 },
