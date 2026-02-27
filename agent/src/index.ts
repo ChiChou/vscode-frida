@@ -12,7 +12,7 @@ enum Runtime {
   Generic = 'Generic',
 };
 
-rpc.exports = {
+const methods = {
   start,
   stop,
 
@@ -29,7 +29,8 @@ rpc.exports = {
 
   methodsOf: async (_name: string) => [] as string[],
   ownMethodsOf: async (_name: string) => [] as string[],
-  superClass: async (_name: string) => { throw new Error('Not implemented'); },
+  // fieldsOf: async (_name: string) => [] as string[],
+  superClass: async (_name: string): Promise<string> => { throw new Error('Not implemented'); },
 
   modules: () => Process.enumerateModules(),
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
@@ -46,24 +47,26 @@ if (Java.available) {
     });
   };
 
-  rpc.exports.classes = async () => perform(() => Java.enumerateLoadedClassesSync());
-  rpc.exports.ownMethodsOf =
-    rpc.exports.methodsOf =
+  methods.classes = async () => perform(() => Java.enumerateLoadedClassesSync());
+  methods.ownMethodsOf =
+    methods.methodsOf =
     async (name: string) => perform(() => Java.use(name).class.getMethods());
-  rpc.exports.fieldsOf = async (name: string) => perform(() => Java.use(name).class.getDeclaredFields());
-  rpc.exports.superClass = async (name: string) => perform(() => Java.use(name).class.getSuperclass()?.getName());
+  // methods.fieldsOf = async (name: string) => perform(() => Java.use(name).class.getDeclaredFields());
+  methods.superClass = async (name: string) => perform(() => Java.use(name).class.getSuperclass()?.getName());
 
 } else if (ObjC.available) {
-  rpc.exports.classes = async () => Object.keys(ObjC.classes);
-  rpc.exports.protocols = async () => Object.keys(ObjC.protocols);
+  methods.classes = async () => Object.keys(ObjC.classes);
+  methods.protocols = async () => Object.keys(ObjC.protocols);
 
   function getClass(name: string) {
     if (ObjC.classes.hasOwnProperty(name)) return ObjC.classes[name];
     throw new Error(`Class ${name} not found`);
   }
 
-  rpc.exports.ownMethodsOf = async (name: string) => getClass(name).$ownMethods;
-  rpc.exports.methodsOf = async (name: string) => getClass(name).$methods;
-  rpc.exports.fieldsOf = async (name: string) => getClass(name).$ivars;
-  rpc.exports.superClass = async (name: string) => getClass(name).$superClass?.name;
+  methods.ownMethodsOf = async (name: string) => getClass(name).$ownMethods;
+  methods.methodsOf = async (name: string) => getClass(name).$methods;
+  // methods.fieldsOf = async (name: string) => getClass(name).$ivars;
+  methods.superClass = async (name: string) => getClass(name).$superClass?.name;
 }
+
+rpc.exports = methods;
