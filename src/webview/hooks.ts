@@ -26,7 +26,8 @@ export interface FunctionPrototype {
   error?: string;
 }
 
-const SYSTEM_PROMPT = `Give me the argument types and return type for each function name. Return a JSON object where keys are function names and values are objects with "args" (array of types) and "returns" (type).
+const SYSTEM_PROMPT = `Give me the argument types and return type for each function name. 
+Return a JSON object where keys are function names and values are objects with "args" (array of types) and "returns" (type).
 
 Example input: malloc, free, strcpy
 Example output:
@@ -43,7 +44,7 @@ Only output the JSON object, no explanations.`;
 
 async function queryFunctionPrototypes(functionNames: string[]): Promise<Map<string, FunctionPrototype>> {
   const result = new Map<string, FunctionPrototype>();
-  
+
   if (functionNames.length === 0) {
     return result;
   }
@@ -61,7 +62,7 @@ async function queryFunctionPrototypes(functionNames: string[]): Promise<Map<str
     ];
 
     const response = await model.sendRequest(messages, {}, new vscode.CancellationTokenSource().token);
-    
+
     let jsonStr = '';
     for await (const chunk of response.text) {
       jsonStr += chunk;
@@ -84,192 +85,166 @@ async function queryFunctionPrototypes(functionNames: string[]): Promise<Map<str
   return result;
 }
 
-function generateArgPrintCode(args: string[], fn: string): { onEnter: string[]; argCount: number } {
-  const onEnter: string[] = [];
-  const argCount = args.length;
-
-  if (argCount === 0) {
-    onEnter.push(`      console.log('[${fn}] called');`);
-  } else {
-    const argExprs: string[] = [];
-    for (let i = 0; i < args.length; i++) {
-      const type = args[i];
-      switch (type) {
-        case 'char *':
-          argExprs.push(`args[${i}].readUtf8String()`);
-          break;
-        case 'void *':
-        case 'int':
-        case 'uint':
-        case 'long':
-        case 'float':
-        case 'double':
-        case 'bool':
-          argExprs.push(`args[${i}]`);
-          break;
-        case 'id':
-          argExprs.push(`new ObjC.Object(args[${i}]).toString()`);
-          break;
-        default:
-          argExprs.push(`args[${i}]`);
-      }
-    }
-    onEnter.push(`      console.log(\`[${fn}](\${[${argExprs.join(', ')}].join(', ')})\`);`);
+function getArgExpression(type: string, index: number): string {
+  switch (type) {
+    case 'char *':
+      return `args[${index}].readUtf8String()`;
+    case 'id':
+      return `new ObjC.Object(args[${index}]).toString()`;
+    default:
+      return `args[${index}]`;
   }
-
-  return { onEnter, argCount };
 }
 
-function generateReturnPrintCode(returnType: string, fn: string): string[] {
-  const onLeave: string[] = [];
-  
-  switch (returnType) {
-    case 'void':
-      onLeave.push(`      console.log('[${fn}] returned');`);
-      break;
-    case 'char *':
-      onLeave.push(`      console.log('[${fn}] returned:', retval.readUtf8String());`);
-      break;
-    case 'id':
-      onLeave.push(`      if (!retval.isNull()) {`);
-      onLeave.push(`        console.log('[${fn}] returned:', new ObjC.Object(retval).toString());`);
-      onLeave.push(`      } else {`);
-      onLeave.push(`        console.log('[${fn}] returned: null');`);
-      onLeave.push(`      }`);
-      break;
-    case 'void *':
-    case 'int':
-    case 'uint':
-    case 'long':
-    case 'float':
-    case 'double':
-    case 'bool':
-    default:
-      onLeave.push(`      console.log('[${fn}] returned:', retval);`);
+function* generateNativeHookBasic(fn: string): Generator<string> {
+  const varName = sanitize(fn);
+  yield `// ${fn}`;
+  yield `const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`;
+  yield `if (${varName}) {`;
+  yield `  Interceptor.attach(${varName}, {`;
+  yield `    onEnter(args) {`;
+  yield `      console.log('[${fn}] called');`;
+  yield `    },`;
+  yield `    onLeave(retval) {`;
+  yield `      console.log('[${fn}] returned:', retval);`;
+  yield `    }`;
+  yield `  });`;
+  yield `}`;
+  yield '';
+}
+
+function* generateNativeHook(fn: string, proto: FunctionPrototype | undefined): Generator<string> {
+  const varName = sanitize(fn);
+  yield `// ${fn}`;
+  yield `const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`;
+  yield `if (${varName}) {`;
+  yield `  Interceptor.attach(${varName}, {`;
+  yield `    onEnter(args) {`;
+
+  if (proto && !proto.error && proto.args.length > 0) {
+    const argExprs = proto.args.map((type, i) => getArgExpression(type, i));
+    yield `      console.log('[${fn}] called', ${argExprs.join(', ')});`;
+  } else {
+    yield `      console.log('[${fn}] called');`;
   }
 
-  return onLeave;
+  yield `    },`;
+  yield `    onLeave(retval) {`;
+
+  if (proto && !proto.error) {
+    switch (proto.returns) {
+      case 'void':
+        yield `      console.log('[${fn}] returned');`;
+        break;
+      case 'char *':
+        yield `      console.log('[${fn}] returned:', retval.readUtf8String());`;
+        break;
+      case 'id':
+        yield `      if (!retval.isNull()) {`;
+        yield `        console.log('[${fn}] returned:', new ObjC.Object(retval).toString());`;
+        yield `      } else {`;
+        yield `        console.log('[${fn}] returned: null');`;
+        yield `      }`;
+        break;
+      default:
+        yield `      console.log('[${fn}] returned:', retval);`;
+    }
+  } else {
+    yield `      console.log('[${fn}] returned:', retval);`;
+  }
+
+  yield `    }`;
+  yield `  });`;
+  yield `}`;
+  yield '';
 }
 
 export function generateNativeHooksBasic(req: NativeHookRequest): string {
-  const lines: string[] = [];
-  lines.push(`const mod = Process.findModuleByName(${JSON.stringify(req.module)});`);
-  lines.push('');
-
-  for (const fn of req.functions) {
-    const varName = sanitize(fn);
-    lines.push(`// ${fn}`);
-    lines.push(`const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`);
-    lines.push(`if (${varName}) {`);
-    lines.push(`  Interceptor.attach(${varName}, {`);
-    lines.push(`    onEnter(args) {`);
-    lines.push(`      console.log('[${fn}] called');`);
-    lines.push(`    },`);
-    lines.push(`    onLeave(retval) {`);
-    lines.push(`      console.log('[${fn}] returned:', retval);`);
-    lines.push(`    }`);
-    lines.push(`  });`);
-    lines.push(`}`);
-    lines.push('');
+  function* generate(): Generator<string> {
+    yield `const mod = Process.findModuleByName(${JSON.stringify(req.module)});`;
+    yield '';
+    for (const fn of req.functions) {
+      yield* generateNativeHookBasic(fn);
+    }
   }
-
-  return lines.join('\n');
+  return [...generate()].join('\n');
 }
 
 export async function generateNativeHooks(req: NativeHookRequest): Promise<string> {
-  const lines: string[] = [];
-  lines.push(`const mod = Process.findModuleByName(${JSON.stringify(req.module)});`);
-  lines.push('');
-
   const prototypes = await queryFunctionPrototypes(req.functions);
 
-  for (const fn of req.functions) {
-    const varName = sanitize(fn);
-    lines.push(`// ${fn}`);
-    lines.push(`const ${varName} = mod.findExportByName(${JSON.stringify(fn)});`);
-    lines.push(`if (${varName}) {`);
-    lines.push(`  Interceptor.attach(${varName}, {`);
-    lines.push(`    onEnter(args) {`);
-
-    const proto = prototypes.get(fn);
-    if (proto && !proto.error) {
-      const { onEnter } = generateArgPrintCode(proto.args, fn);
-      lines.push(...onEnter.map(l => '  ' + l));
-    } else {
-      lines.push(`      console.log('[${fn}] called');`);
+  function* generate(): Generator<string> {
+    yield `const mod = Process.findModuleByName(${JSON.stringify(req.module)});`;
+    yield '';
+    for (const fn of req.functions) {
+      yield* generateNativeHook(fn, prototypes.get(fn));
     }
-
-    lines.push(`    },`);
-    lines.push(`    onLeave(retval) {`);
-
-    if (proto && !proto.error) {
-      const onLeave = generateReturnPrintCode(proto.returns, fn);
-      lines.push(...onLeave.map(l => '  ' + l));
-    } else {
-      lines.push(`      console.log('[${fn}] returned:', retval);`);
-    }
-
-    lines.push(`    }`);
-    lines.push(`  });`);
-    lines.push(`}`);
-    lines.push('');
   }
-
-  return lines.join('\n');
+  return [...generate()].join('\n');
 }
 
 export function generateObjCHooks(selections: MethodSelection[]): string {
   const grouped = groupBy(selections, s => s.className);
-  const blocks: string[] = [];
 
-  for (const [className, methods] of grouped) {
-    const lines: string[] = [];
-    lines.push(`// Class: ${className}`);
-    lines.push(`if (ObjC.available) {`);
-    lines.push(`  const cls = ObjC.classes[${JSON.stringify(className)}];`);
-    lines.push('');
+  function* generate(): Generator<string> {
+    for (const [className, methods] of grouped) {
+      yield `// Class: ${className}`;
+      yield `if (ObjC.available) {`;
+      yield `  const cls = ObjC.classes[${JSON.stringify(className)}];`;
+      yield '';
 
-    for (const m of methods) {
-      const varName = sanitize(m.name);
-      const cleanSel = m.name.substring(2); // remove "- " or "+ "
+      for (const m of methods) {
+        const varName = sanitize(m.name);
+        const cleanSel = m.name.substring(2);
 
-      lines.push(`  // ${m.name}`);
+        const argExprs = m.args.map((arg, i) => {
+          const argIdx = i + 2;
+          return arg.isObject ? `new ObjC.Object(args[${argIdx}]).toString()` : `args[${argIdx}]`;
+        });
 
-      // argument formatting
-      const argParts: string[] = [];
-      for (let i = 0; i < m.args.length; i++) {
-        const argIdx = i + 2; // skip self and _cmd
-        if (m.args[i].isObject) {
-          argParts.push(`new ObjC.Object(args[${argIdx}]).toString()`);
+        yield `  // ${m.name}`;
+        yield `  const ${varName} = cls[${JSON.stringify(m.name)}];`;
+        yield `  Interceptor.attach(${varName}.implementation, {`;
+        yield `    onEnter(args) {`;
+        if (argExprs.length > 0) {
+          yield `      console.log('[${className} ${cleanSel}] called', ${argExprs.join(', ')});`;
         } else {
-          argParts.push(`args[${argIdx}]`);
+          yield `      console.log('[${className} ${cleanSel}] called');`;
         }
+        yield `    },`;
+        yield `    onLeave(retval) {`;
+        if (m.isReturnObject) {
+          yield `      if (!retval.isNull()) {`;
+          yield `        console.log('[${className} ${cleanSel}] returned:', new ObjC.Object(retval).toString());`;
+          yield `      } else {`;
+          yield `        console.log('[${className} ${cleanSel}] returned: null');`;
+          yield `      }`;
+        } else {
+          yield `      console.log('[${className} ${cleanSel}] returned:', retval);`;
+        }
+        yield `    }`;
+        yield `  });`;
+        yield '';
       }
 
-      // return value formatting
-      const retExpr = m.isReturnObject
-        ? 'new ObjC.Object(retval).toString()'
-        : 'retval';
-
-      lines.push(`  const ${varName} = cls[${JSON.stringify(m.name)}];`);
-      lines.push(`  Interceptor.attach(${varName}.implementation, {`);
-      lines.push(`    onEnter(args) {`);
-      if (argParts.length > 0) {
-        lines.push(`      const formatted = [${argParts.join(', ')}];`);
-        lines.push(`      console.log(\`[${className} ${cleanSel}](\${formatted.join(', ')})\`);`);
-      } else {
-        lines.push(`      console.log('[${className} ${cleanSel}] called');`);
-      }
-      lines.push(`    },`);
-      lines.push(`    onLeave(retval) {`);
-      lines.push(`      console.log(\`[${className} ${cleanSel}] returned: \${${retExpr}}\`);`);
-      lines.push(`    }`);
-      lines.push(`  });`);
-      lines.push('');
+      yield `}`;
     }
+  }
 
-    lines.push(`}`);
-    blocks.push(lines.join('\n'));
+  const blocks: string[] = [];
+  let currentBlock: string[] = [];
+
+  for (const line of generate()) {
+    if (line.startsWith('// Class:')) {
+      if (currentBlock.length > 0) {
+        blocks.push(currentBlock.join('\n'));
+        currentBlock = [];
+      }
+    }
+    currentBlock.push(line);
+  }
+  if (currentBlock.length > 0) {
+    blocks.push(currentBlock.join('\n'));
   }
 
   return blocks.join('\n\n');
@@ -277,38 +252,52 @@ export function generateObjCHooks(selections: MethodSelection[]): string {
 
 export function generateJavaHooks(selections: MethodSelection[]): string {
   const grouped = groupBy(selections, s => s.className);
-  const blocks: string[] = [];
 
-  for (const [className, methods] of grouped) {
-    const lines: string[] = [];
-    lines.push(`// Class: ${className}`);
-    lines.push(`Java.perform(() => {`);
-    lines.push(`  const cls = Java.use(${JSON.stringify(className)});`);
-    lines.push('');
+  function* generate(): Generator<string> {
+    for (const [className, methods] of grouped) {
+      yield `// Class: ${className}`;
+      yield `Java.perform(() => {`;
+      yield `  const cls = Java.use(${JSON.stringify(className)});`;
+      yield '';
 
-    for (const m of methods) {
-      const argTypes = m.args.map(a => JSON.stringify(a.type)).join(', ');
-      const argNames = m.args.map((_, i) => `arg${i}`).join(', ');
-      const callArgs = argNames;
+      for (const m of methods) {
+        const argTypes = m.args.map(a => JSON.stringify(a.type)).join(', ');
+        const argNames = m.args.map((_, i) => `arg${i}`).join(', ');
 
-      lines.push(`  // ${m.display}`);
-      lines.push(`  cls[${JSON.stringify(m.name)}].overload(${argTypes}).implementation = function(${argNames}) {`);
-      lines.push(`    console.log('[${className}.${m.name}] called');`);
+        yield `  // ${m.display}`;
+        yield `  cls[${JSON.stringify(m.name)}].overload(${argTypes}).implementation = function(${argNames}) {`;
+        yield `    console.log('[${className}.${m.name}] called');`;
 
-      if (m.returnType === 'void') {
-        lines.push(`    this[${JSON.stringify(m.name)}](${callArgs});`);
-      } else {
-        lines.push(`    const ret = this[${JSON.stringify(m.name)}](${callArgs});`);
-        lines.push(`    console.log('[${className}.${m.name}] returned:', ret);`);
-        lines.push(`    return ret;`);
+        if (m.returnType === 'void') {
+          yield `    this[${JSON.stringify(m.name)}](${argNames});`;
+        } else {
+          yield `    const ret = this[${JSON.stringify(m.name)}](${argNames});`;
+          yield `    console.log('[${className}.${m.name}] returned:', ret);`;
+          yield `    return ret;`;
+        }
+
+        yield `  };`;
+        yield '';
       }
 
-      lines.push(`  };`);
-      lines.push('');
+      yield `});`;
     }
+  }
 
-    lines.push(`});`);
-    blocks.push(lines.join('\n'));
+  const blocks: string[] = [];
+  let currentBlock: string[] = [];
+
+  for (const line of generate()) {
+    if (line.startsWith('// Class:')) {
+      if (currentBlock.length > 0) {
+        blocks.push(currentBlock.join('\n'));
+        currentBlock = [];
+      }
+    }
+    currentBlock.push(line);
+  }
+  if (currentBlock.length > 0) {
+    blocks.push(currentBlock.join('\n'));
   }
 
   return blocks.join('\n\n');
