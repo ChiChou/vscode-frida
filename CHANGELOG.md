@@ -1,5 +1,12 @@
 # Change Log
 
+### v0.11.0 - 27 Feb, 2026
+
+* Frida 17 support
+* Objective-C Hierarchy View and Java Packages View
+* Modules & Classes panels with hook code generation
+* Use AI to generate inform function signatures
+
 ### v0.9.0 - 10 Sep, 2024
 
 * Support frida-tools installed from virtualenv, pipx, etc.
