@@ -10,8 +10,12 @@
     "watch": "npm run build -- -w"
   },
   "devDependencies": {
-    "@types/frida-gum": "^18.1.0",
+    "@types/frida-gum": "^19.0.2",
     "@types/node": "^18.6.4",
-    "frida-compile": "^15.1.0"
+    "frida-compile": "^19.0.4"
+  },
+  "dependencies": {
+    "frida-java-bridge": "^7.0.12",
+    "frida-objc-bridge": "^8.0.5"
   }
 }

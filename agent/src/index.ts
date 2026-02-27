@@ -1,3 +1,6 @@
+import Java from 'frida-java-bridge';
+import ObjC from 'frida-objc-bridge';
+
 /* eslint-disable curly */
 /* eslint-disable @typescript-eslint/naming-convention */
 

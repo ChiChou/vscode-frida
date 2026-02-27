@@ -1,3 +1,5 @@
+import { getGlobalExport } from "./polyfill";
+
 // sys/fcntl.h
 const F_SETFL = 4;
 const O_NONBLOCK = 0x0004;
@@ -13,18 +15,10 @@ let stream: UnixInputStream;
 export function start() {
   stop();
 
-  const resolve = (name: string): NativePointer => {
-    const p = Module.findExportByName(null, name);
-    if (!p) {
-      throw new Error(`Platform not supported. Is your target on ${name}?`);
-    }
-    return p;
-  }
-
-  const pipe = new NativeFunction(resolve('pipe'), 'int', ['pointer']);
-  const dup2 = new NativeFunction(resolve('dup2'), 'int', ['int', 'int']);
-  const close = new NativeFunction(resolve('close'), 'int', ['int']);
-  const fcntl = new NativeFunction(resolve('fcntl'), 'int', ['int', 'int', 'int']);
+  const pipe = new NativeFunction(getGlobalExport('pipe'), 'int', ['pointer']);
+  const dup2 = new NativeFunction(getGlobalExport('dup2'), 'int', ['int', 'int']);
+  const close = new NativeFunction(getGlobalExport('close'), 'int', ['int']);
+  const fcntl = new NativeFunction(getGlobalExport('fcntl'), 'int', ['int', 'int', 'int']);
 
   pipe(fildes);
 
