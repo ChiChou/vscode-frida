@@ -15,6 +15,7 @@ const py = join(base, 'driver.py');
 export const driverScript = () => py;
 
 export function exec(...args: string[]): Promise<any> {
+  logger.appendLine(`Execute driver command: ${args.join(' ')}`);
   const remoteDevices = asParam();
 
   return interpreter().then(path => new Promise((resolve, reject) => {

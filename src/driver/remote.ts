@@ -1,4 +1,5 @@
 import { workspace } from "vscode";
+import { logger } from "../logger";
 
 const remoteHosts = new Set<string>();
 function loadRemoteHosts() {
@@ -19,11 +20,13 @@ function saveRemoteHosts() {
 }
 
 export function connect(remote: string) {
+  logger.appendLine(`Remote host added: ${remote}`);
   remoteHosts.add(remote);
   saveRemoteHosts();
 }
 
 export function disconnect(remote: string) {
+  logger.appendLine(`Remote host removed: ${remote}`);
   remoteHosts.delete(remote);
   saveRemoteHosts();
 }

@@ -6,6 +6,7 @@ import { DeviceItem, TargetItem } from '../providers/devices';
 import { run } from '../term';
 import { DeviceType } from '../types';
 import { executable } from '../utils';
+import { logger } from '../logger';
 
 
 class PortNotFoundError extends Error { }
@@ -57,7 +58,7 @@ async function findSSHPort(device: DeviceItem) {
       }
     } catch (err) {
       if (err instanceof ToolNotFoundError) { throw err; }
-      console.error((err as Error).message);
+      logger.appendLine(`Error: SSH port ${port} check failed - ${(err as Error).message}`);
     }
   }
 
@@ -72,7 +73,7 @@ export async function shell(node: TargetItem) {
   }
 
   if (node.data.id === 'local') {
-    // execute command to open a new terminal
+    logger.appendLine('Shell: opening local terminal');
     commands.executeCommand('workbench.action.terminal.new');
     return;
   }
@@ -90,6 +91,7 @@ export async function shell(node: TargetItem) {
 
     try {
       const port = await findSSHPort(node);
+      logger.appendLine(`SSH port found: ${port} for device ${node.data.name}`);
       shellPath = executable('ssh');
       shellArgs = [
         '-o', 'StrictHostKeyChecking=no',
@@ -108,6 +110,7 @@ export async function shell(node: TargetItem) {
       }
     }
   } else if (system === 'android') {
+    logger.appendLine(`Shell: ADB shell for device ${node.data.name}`);
     // todo: use adb.ts
     shellPath = executable('adb');
     shellArgs = ['-s', node.data.id, 'shell'];

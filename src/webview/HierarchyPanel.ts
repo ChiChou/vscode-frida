@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
+import { logger } from '../logger';
 
 export class HierarchyPanel {
   private panel: vscode.WebviewPanel | undefined;
@@ -58,10 +59,13 @@ export class HierarchyPanel {
 
   private async loadHierarchy() {
     try {
+      logger.appendLine(`Loading class hierarchy for ${this.target.label}`);
       this.post({ type: 'setLoading', loading: true });
       const [names, parents] = await rpc(this.target, 'objc_class_hierarchy') as [string[], number[]];
+      logger.appendLine(`Loaded hierarchy: ${names.length} classes`);
       this.post({ type: 'setData', names, parents });
     } catch (err: any) {
+      logger.appendLine(`Error: failed to load class hierarchy - ${err.message}`);
       this.post({ type: 'error', message: err.message });
     } finally {
       this.post({ type: 'setLoading', loading: false });

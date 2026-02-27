@@ -2,6 +2,7 @@ import * as cp from 'child_process';
 import * as vscode from 'vscode';
 import { run } from '../term';
 import { executable } from "../utils";
+import { logger } from '../logger';
 
 export default class ADB {
   path: string;
@@ -11,12 +12,14 @@ export default class ADB {
 
     if (!this.path) {
       const msg = vscode.l10n.t('Could not find command adb in $PATH');
+      logger.appendLine(`Error: ${msg}`);
       vscode.window.showErrorMessage(msg);
       throw new Error(msg);
     }
   }
 
   async cmd(action: string, ...args: string[]) {
+    logger.appendLine(`ADB ${action} ${args.join(' ')} on device ${this.device}`);
     const shellPath = this.path;
     const shellArgs = ['-s', this.device, action, ...args];
     return run({

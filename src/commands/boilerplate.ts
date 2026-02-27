@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import { AppItem, ProcessItem } from '../providers/devices';
 import { run } from '../term';
 import { cmd, expandDevParam, interpreter, resource } from '../utils';
+import { logger } from '../logger';
 
 
 async function create(template: string) {
@@ -29,6 +30,7 @@ async function create(template: string) {
     }
   }
 
+  logger.appendLine(`Create boilerplate project: ${template} in ${dest.fsPath}`);
   const args = ['-m', 'frida_tools.creator', '-t', template];
   const shellPath = await interpreter();
   await run({

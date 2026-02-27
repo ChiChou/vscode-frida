@@ -3,8 +3,10 @@ import { get as httpGet } from 'https';
 import { join } from 'path';
 import { Position, ProgressLocation, window, workspace, l10n } from 'vscode';
 import { cmd } from '../utils';
+import { logger } from '../logger';
 
 function npmInstall() {
+  logger.appendLine('Installing @types/frida-gum via npm');
   const name = l10n.t('Install typescript typings');
   const shellPath = cmd('npm');
   const shellArgs = ['install', '@types/frida-gum', '--save'];
@@ -26,6 +28,7 @@ async function downloadTypeHint(cwd: string) {
   const URL = 'https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/frida-gum/index.d.ts';
   const NAME = 'frida-gum.d.ts';
 
+  logger.appendLine(`Downloading typing info to ${cwd}`);
   // will override existing one
   const dest = join(cwd, NAME);
   const stream = createWriteStream(dest);
@@ -52,9 +55,11 @@ async function downloadTypeHint(cwd: string) {
 
       req
         .on('finish', async () => {
+          logger.appendLine('Typing download completed');
           resolve(NAME);
         })
         .on('error', (err) => {
+          logger.appendLine(`Error: typing download failed - ${err.message}`);
           stream.close();
           window.showErrorMessage(
             l10n.t('Failed to download typing info for frida-gum: {0}', err.message));

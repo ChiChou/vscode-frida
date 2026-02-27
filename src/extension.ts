@@ -18,8 +18,10 @@ import * as views from './commands/views';
 
 import { FridaCompletionProvider } from './providers/completion';
 import * as target from './commands/target';
+import { logger } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
+	logger.appendLine('Frida extension activated');
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
 	const push = (item: vscode.Disposable) => context.subscriptions.push(item);
 

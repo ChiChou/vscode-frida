@@ -5,6 +5,7 @@ import { join } from 'path';
 import { mkdir, writeFile } from 'fs/promises';
 
 import { AppItem, ProcessItem } from '../providers/devices';
+import { logger } from '../logger';
 
 type TargetConfig = { device: string } & ({ app: string } | { pid: number } | { process: string });
 
@@ -55,6 +56,7 @@ export async function setTarget(node: AppItem | ProcessItem): Promise<void> {
 		await writeTargetConfig(configPath, config);
 
 		const targetName = node instanceof AppItem ? node.data.identifier : node.data.name;
+		logger.appendLine(`Target config created: ${configPath} for ${targetName}`);
 		const actionOpen = l10n.t('Open');
 		vscode.window.showInformationMessage(
 			l10n.t('Created .vscode/frida.json for {0}', targetName),

@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
+import { logger } from '../logger';
 
 export class PackageTreePanel {
   private panel: vscode.WebviewPanel | undefined;
@@ -58,10 +59,13 @@ export class PackageTreePanel {
 
   private async loadClasses() {
     try {
+      logger.appendLine(`Loading Java classes for ${this.target.label}`);
       this.post({ type: 'setLoading', loading: true });
       const classes = await rpc(this.target, 'classes') as string[];
+      logger.appendLine(`Loaded ${classes.length} Java classes`);
       this.post({ type: 'setClasses', classes });
     } catch (err: any) {
+      logger.appendLine(`Error: failed to load Java classes - ${err.message}`);
       this.post({ type: 'error', message: err.message });
     } finally {
       this.post({ type: 'setLoading', loading: false });

@@ -6,6 +6,7 @@ import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { run } from '../term';
 import { DeviceType } from '../types';
 import { interpreter } from '../utils';
+import { logger } from '../logger';
 
 export async function explore(target: TargetItem) : Promise<void> {
   if (!target) {
@@ -44,10 +45,12 @@ export async function explore(target: TargetItem) : Promise<void> {
     } catch (e) {
       vscode.window.showWarningMessage(
         l10n.t('Warning: failed to launch App {0}\n{1}', target.data.identifier, `${e}`));
+      logger.appendLine(`Objection: falling back to app name ${target.data.name} after launch failure`);
       gadget = target.data.name;
     }
   }
 
+  logger.appendLine(`Objection explore ${gadget} on device ${target.device.id}`);
   const shellArgs = ['-m', 'objection.console.cli', '-g', gadget, ...device, 'explore'];
   const shellPath = await interpreter('objection');
   run({

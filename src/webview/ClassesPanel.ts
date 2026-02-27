@@ -3,6 +3,7 @@ import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 import { generateObjCHooks, generateJavaHooks, MethodSelection } from './hooks';
+import { logger } from '../logger';
 
 interface MethodInfo {
   name: string;
@@ -82,6 +83,7 @@ export class ClassesPanel {
 
   private async loadClasses() {
     try {
+      logger.appendLine(`Loading classes for ${this.target.label}`);
       this.post({ type: 'setLoading', loading: true, area: 'master' });
 
       const [classes, runtime] = await Promise.all([
@@ -90,9 +92,11 @@ export class ClassesPanel {
       ]);
 
       this.runtime = runtime;
+      logger.appendLine(`Loaded ${classes.length} classes (runtime: ${runtime})`);
       this.post({ type: 'setRuntime', runtime });
       this.post({ type: 'setClasses', classes });
     } catch (err: any) {
+      logger.appendLine(`Error: failed to load classes - ${err.message}`);
       this.post({ type: 'error', message: err.message });
     } finally {
       this.post({ type: 'setLoading', loading: false, area: 'master' });
@@ -107,6 +111,7 @@ export class ClassesPanel {
     }
 
     try {
+      logger.appendLine(`Loading methods for class ${className} (${ownOnly ? 'own' : 'all'})`);
       this.post({ type: 'setLoading', loading: true, area: 'detail' });
       // note: frida python has a implicit name convention to map js names,
       // own_methods_of -> ownMethodsOf, methods_of -> methodsOf
@@ -116,6 +121,7 @@ export class ClassesPanel {
       this.methodsCache.set(cacheKey, result);
       this.post({ type: 'setMethods', className, methods: result });
     } catch (err: any) {
+      logger.appendLine(`Error: failed to load methods for ${className} - ${err.message}`);
       this.post({ type: 'error', message: err.message });
     } finally {
       this.post({ type: 'setLoading', loading: false, area: 'detail' });

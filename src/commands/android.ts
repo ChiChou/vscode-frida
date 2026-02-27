@@ -32,6 +32,7 @@ export async function startServer(target: TargetItem) {
 
   if (!installed) {
     const abi = (await adb.shell('getprop', 'ro.product.cpu.abi')).trimEnd();
+    logger.appendLine(`Detected ABI: ${abi} for device ${target.data.id}`);
     const py = join(__dirname, '..', '..', 'backend', 'android', 'get-frida.py');
     const tmp = join(tmpdir(), `frida-server-${abi}`);
 
@@ -50,9 +51,11 @@ export async function startServer(target: TargetItem) {
     });
 
     const uri = vscode.Uri.file(tmp);
+    logger.appendLine(`Push frida-server to ${server}`);
     await adb.push(uri, server);
 
     vscode.window.showInformationMessage(vscode.l10n.t('frida-server deployed to {0} successfully', server));
+    logger.appendLine(`chmod 755 ${server}`);
     await adb.shell('chmod', '755', server);
   }
 

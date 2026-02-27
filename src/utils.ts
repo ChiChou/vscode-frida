@@ -7,6 +7,7 @@ import { DeviceType } from './types';
 import { AppItem, ProcessItem } from './providers/devices';
 
 import shebang from './shebang';
+import { logger } from './logger';
 
 export function resource(...paths: string[]): vscode.Uri {
   const file = join(__dirname, '..', 'resources', ...paths);
@@ -72,7 +73,9 @@ export async function interpreter(cli = 'frida'): Promise<string> {
   if (cache.has(cli)) { return Promise.resolve(cache.get(cli) as string); }
 
   try {
-    return await virtualenv();
+    const path = await virtualenv();
+    logger.appendLine(`Resolved Python interpreter (virtualenv): ${path}`);
+    return path;
   } catch (_) {
     // fallback to global package
   }
@@ -84,6 +87,7 @@ export async function interpreter(cli = 'frida'): Promise<string> {
   }
 
   const path = await shebang(where);
+  logger.appendLine(`Resolved Python interpreter (PATH): ${path}`);
   cache.set(cli, path);
   return path;
 }

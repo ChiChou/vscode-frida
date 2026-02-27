@@ -3,6 +3,7 @@ import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 import { generateNativeHooks, generateNativeHooksBasic, NativeHookRequest } from './hooks';
+import { logger } from '../logger';
 
 interface ModuleInfo {
   name: string;
@@ -83,10 +84,13 @@ export class ModulesPanel {
 
   private async loadModules() {
     try {
+      logger.appendLine(`Loading modules for ${this.target.label}`);
       this.post({ type: 'setLoading', loading: true, area: 'master' });
       const modules = await rpc(this.target, 'modules') as ModuleInfo[];
+      logger.appendLine(`Loaded ${modules.length} modules`);
       this.post({ type: 'setModules', modules });
     } catch (err: any) {
+      logger.appendLine(`Error: failed to load modules - ${err.message}`);
       this.post({ type: 'error', message: err.message });
     } finally {
       this.post({ type: 'setLoading', loading: false, area: 'master' });
@@ -100,12 +104,14 @@ export class ModulesPanel {
     }
 
     try {
+      logger.appendLine(`Loading exports for module ${moduleName}`);
       this.post({ type: 'setLoading', loading: true, area: 'detail' });
       const exports = await rpc(this.target, 'exports', moduleName) as ExportInfo[];
       const result = exports ?? [];
       this.exportsCache.set(moduleName, result);
       this.post({ type: 'setExports', moduleName, exports: result });
     } catch (err: any) {
+      logger.appendLine(`Error: failed to load exports for ${moduleName} - ${err.message}`);
       this.post({ type: 'error', message: err.message });
     } finally {
       this.post({ type: 'setLoading', loading: false, area: 'detail' });

@@ -5,6 +5,7 @@ import ADB from '../driver/adb';
 import { AppItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
 import { cmd } from '../utils';
+import { logger } from '../logger';
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {
@@ -40,9 +41,11 @@ export default async function dump(target: TargetItem) {
 
   try {
     if (target.device.os === 'ios') {
+      logger.appendLine(`Dump iOS app ${target.data.identifier} via bagbak to ${output}`);
       artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.ipa`);
       await bagbak(target, artifact);
     } else if (target.device.os === 'android') {
+      logger.appendLine(`Dump Android app ${target.data.identifier} via APK pull to ${output}`);
       artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.apk`);
       await pull(target, artifact);
     } else {
@@ -50,11 +53,13 @@ export default async function dump(target: TargetItem) {
       return;
     }
   } catch (e) {
+    logger.appendLine(`Error: failed to dump ${target.data.identifier} - ${(e as Error).message}`);
     vscode.window.showInformationMessage(
       vscode.l10n.t('failed to dump application:\n{0}', (e as Error).message));
     return;
   }
 
+  logger.appendLine(`Dump completed: ${target.data.identifier}`);
   const actionOpen = vscode.l10n.t('Open');
   const option = await vscode.window.showInformationMessage(
     vscode.l10n.t('Successfully pulled package {0}', target.data.identifier),

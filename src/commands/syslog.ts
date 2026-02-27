@@ -5,6 +5,7 @@ import { driverScript, lockdownSyslog, os } from '../driver/backend';
 import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
 import { DeviceType } from '../types';
 import { interpreter, refresh } from '../utils';
+import { logger } from '../logger';
 
 const active: { [key: string]: OutputChannel } = {};
 
@@ -53,14 +54,17 @@ export async function show(node: TargetItem) {
 
   const type = await os(node.device.id);
   if (type === 'ios' && node.device.type === DeviceType.USB) {
+    logger.appendLine(`Syslog via lockdown for ${node.data.name} on device ${node.device.id}`);
     lockdownSyslog(node.device.id, bundleOrPid);
   } else if (type === 'linux' || type === 'macos') {
     const args = [driverScript(), 'syslog', '--device', node.device.id, ...bundleOrPid];
     const python3 = await interpreter();
+    logger.appendLine(`Syslog via python for ${node.data.name} on device ${node.device.id}`);
     const title = l10n.t('Output: {0} ({1})', node.data.name, node.device.name);
     cmdChannel(title, python3, args).show();
   } else if (type === 'android') {
     if (node.data.pid > 0) {
+      logger.appendLine(`Syslog via logcat for ${node.data.name} (PID ${node.data.pid}) on device ${node.device.id}`);
       const args = ['-s', node.device.id, 'logcat', `--pid=${node.data.pid}`];
       const title = l10n.t('Output: {0} ({1})', node.data.name, node.device.name);
       cmdChannel(title, 'adb', args).show();

@@ -4,6 +4,7 @@ import * as ipc from '../driver/backend';
 
 import { resource } from '../utils';
 import { ProviderType, App, Process, Device, DeviceType } from '../types';
+import { logger } from '../logger';
 
 export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
 
@@ -28,7 +29,11 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
     if (element) {
       return element.children();
     } else {
-      return ipc.devices().then(devices => devices.map(device => new DeviceItem(device, this.type)));
+      logger.appendLine('Enumerating devices');
+      return ipc.devices().then(devices => {
+        logger.appendLine(`Found ${devices.length} device(s)`);
+        return devices.map(device => new DeviceItem(device, this.type));
+      });
     }
   }
 }
@@ -69,11 +74,17 @@ export class DeviceItem extends TargetItem {
     if (this.type === ProviderType.Apps) {
       return ipc.apps(device.id)
         .then(apps => apps.map(app => new AppItem(app, device)))
-        .catch(e => [new NotFound(e, device)]);
+        .catch(e => {
+          logger.appendLine(`Error: failed to list apps on device ${device.id} - ${e.message}`);
+          return [new NotFound(e, device)];
+        });
     } else if (this.type === ProviderType.Processes) {
       return ipc.ps(device.id)
         .then(ps => ps.map(p => new ProcessItem(p, device)))
-        .catch(e => [new NotFound(e, device)]);
+        .catch(e => {
+          logger.appendLine(`Error: failed to list processes on device ${device.id} - ${e.message}`);
+          return [new NotFound(e, device)];
+        });
     }
     return Promise.resolve([]);
   }

@@ -6,6 +6,7 @@ import { all, connect, disconnect } from '../driver/remote';
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
 import { DeviceType } from '../types';
 import { expandDevParam, interpreter, refresh } from '../utils';
+import { logger } from '../logger';
 
 const terminals = new Set<vscode.Terminal>();
 
@@ -29,6 +30,7 @@ vscode.window.onDidCloseTerminal(t => terminals.delete(t));
 export function spawn(node?: AppItem) {
   if (!node) { return; }
 
+  logger.appendLine(`Spawn ${node.data.identifier} on device ${node.device.id}`);
   repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
   refresh();
 }
@@ -36,6 +38,7 @@ export function spawn(node?: AppItem) {
 export function spawnSuspended(node?: AppItem) {
   if (!node) { return; }
 
+  logger.appendLine(`Spawn suspended ${node.data.identifier} on device ${node.device.id}`);
   repl(['-f', node.data.identifier, ...expandDevParam(node), '--pause'], node.data.name);
   refresh();
 }
@@ -44,6 +47,7 @@ export function kill(node?: TargetItem) {
   if (!node) { return; }
 
   if ((node instanceof AppItem && node.data.pid) || node instanceof ProcessItem) {
+    logger.appendLine(`Kill PID ${node.data.pid} on device ${node.device.id}`);
     terminate(node.device.id, node.data.pid.toString());
     refresh();
   } else {
@@ -60,6 +64,7 @@ export function attach(node?: TargetItem) {
         vscode.l10n.t('App "{0}" must be running before attaching to it', node.data.name));
     }
 
+    logger.appendLine(`Attach to PID ${node.data.pid} on device ${node.device.id}`);
     repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString());
   }
 }
