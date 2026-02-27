@@ -20,6 +20,8 @@
     "frida.syslog.vacuum": "Close All Console",
     "frida.view.modules": "View Process Modules",
     "frida.view.classes": "View Classes",
+    "frida.view.hierarchy": "Objective-C Class Hierarchy",
+    "frida.view.packages": "Java Package Tree",
     "frida.external.objection": "Objection",
     "frida.external.apk": "Pull APK from Device",
     "frida.external.dump": "Dump App Package",

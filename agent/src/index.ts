@@ -45,6 +45,35 @@ const methods = {
   ownMethodsOf: async (_name: string): Promise<MethodInfo[]> => [],
   superClasses: async (_name: string): Promise<string[]> => [],
 
+  // Returns [names, parents] where parents[i] is the index of the
+  // superclass of names[i], or -1 for roots. Compact: each class name
+  // appears once, parent relationships are integers instead of strings.
+  objcClassHierarchy: (): [string[], number[]] => {
+    if (!ObjC.available) throw new Error("Objective-C not available");
+
+    const names = Object.keys(ObjC.classes);
+    const indexMap: Record<string, number> = {};
+    for (let i = 0; i < names.length; i++)
+      indexMap[names[i]] = i;
+
+    const parents = new Array<number>(names.length);
+    for (let i = 0; i < names.length; i++) {
+      try {
+        const sup = ObjC.classes[names[i]].$superClass;
+        if (sup) {
+          const pn = sup.$className;
+          parents[i] = pn in indexMap ? indexMap[pn] : -1;
+        } else {
+          parents[i] = -1;
+        }
+      } catch (_) {
+        parents[i] = -1;
+      }
+    }
+
+    return [names, parents];
+  },
+
   modules: () => Process.enumerateModules(),
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
   imports: (name: string) => Process.findModuleByName(name)?.enumerateImports(),

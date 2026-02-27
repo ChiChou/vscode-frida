@@ -14,7 +14,7 @@ import * as repl from './commands/repl';
 import * as ssh from './commands/ssh';
 import * as syslog from './commands/syslog';
 import * as typing from './commands/typing';
-import * as print from './commands/print';
+import * as views from './commands/views';
 
 export function activate(context: vscode.ExtensionContext) {
 	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
@@ -57,9 +57,11 @@ export function activate(context: vscode.ExtensionContext) {
 
 	push(register('frida.typing.init', typing.init));
 
-	print.init(context);
-	push(register('frida.view.classes', print.classes));
-	push(register('frida.view.modules', print.modules));
+	views.init(context);
+	push(register('frida.view.classes', views.classes));
+	push(register('frida.view.modules', views.modules));
+	push(register('frida.view.hierarchy', views.hierarchy));
+	push(register('frida.view.packages', views.packages));
 }
 
 // this method is called when your extension is deactivated

@@ -149,6 +149,16 @@
                 "category": "Frida"
             },
             {
+                "command": "frida.view.hierarchy",
+                "title": "%frida.view.hierarchy%",
+                "category": "Frida"
+            },
+            {
+                "command": "frida.view.packages",
+                "title": "%frida.view.packages%",
+                "category": "Frida"
+            },
+            {
                 "command": "frida.external.objection",
                 "title": "%frida.external.objection%",
                 "category": "Frida"
@@ -263,6 +273,14 @@
                 },
                 {
                     "command": "frida.view.classes",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.hierarchy",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.packages",
                     "when": "false"
                 },
                 {
@@ -382,49 +400,69 @@
                     "group": "2_frida_process@1"
                 },
                 {
-                    "command": "frida.syslog",
-                    "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "3_frida_logger@1"
-                },
-                {
-                    "command": "frida.syslog",
-                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
-                    "group": "3_frida_logger@1"
-                },
-                {
                     "command": "frida.view.modules",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "3_frida_logger@2"
+                    "group": "3_frida_views@1"
                 },
                 {
                     "command": "frida.view.modules",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
-                    "group": "3_frida_logger@2"
+                    "group": "3_frida_views@1"
                 },
                 {
                     "command": "frida.view.classes",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "3_frida_logger@3"
+                    "group": "3_frida_views@2"
                 },
                 {
                     "command": "frida.view.classes",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
-                    "group": "3_frida_logger@3"
+                    "group": "3_frida_views@2"
+                },
+                {
+                    "command": "frida.view.hierarchy",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "3_frida_views@3"
+                },
+                {
+                    "command": "frida.view.hierarchy",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "3_frida_views@3"
+                },
+                {
+                    "command": "frida.view.packages",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
+                    "group": "3_frida_views@3"
+                },
+                {
+                    "command": "frida.view.packages",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|android$/",
+                    "group": "3_frida_views@3"
+                },
+                {
+                    "command": "frida.syslog",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/",
+                    "group": "4_frida_logger@1"
+                },
+                {
+                    "command": "frida.syslog",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
+                    "group": "4_frida_logger@1"
                 },
                 {
                     "command": "frida.external.objection",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "4_frida_external@2"
+                    "group": "5_frida_external@2"
                 },
                 {
                     "command": "frida.external.dump",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "4_frida_external@3"
+                    "group": "5_frida_external@3"
                 },
                 {
                     "command": "frida.external.apk",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
-                    "group": "4_frida_external@3"
+                    "group": "5_frida_external@3"
                 },
                 {
                     "command": "frida.external.shell",

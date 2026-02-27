@@ -20,6 +20,8 @@
     "frida.syslog.vacuum": "关闭所有控制台",
     "frida.view.modules": "查看进程模块",
     "frida.view.classes": "查看类",
+    "frida.view.hierarchy": "Objective-C 类继承树",
+    "frida.view.packages": "Java 包结构树",
     "frida.external.objection": "Objection",
     "frida.external.apk": "从设备提取 APK",
     "frida.external.dump": "导出应用包",
