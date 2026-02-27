@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 import { generateObjCHooks, generateJavaHooks, MethodSelection } from './hooks';
@@ -32,7 +33,7 @@ export class ClassesPanel {
 
     this.panel = vscode.window.createWebviewPanel(
       'fridaClasses',
-      `Classes - ${this.target.label}`,
+      l10n.t('Classes - {0}', String(this.target.label)),
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -166,36 +167,36 @@ export class ClassesPanel {
   <div class="container">
     <div class="master-pane">
       <div class="pane-header">
-        <h2>Classes</h2>
-        <input type="text" id="class-filter" placeholder="Filter classes..." />
+        <h2>${l10n.t('Classes')}</h2>
+        <input type="text" id="class-filter" placeholder="${l10n.t('Filter classes...')}" />
       </div>
       <div class="list-container" id="class-list">
-        <div class="loading">Loading classes...</div>
+        <div class="loading">${l10n.t('Loading classes...')}</div>
       </div>
     </div>
     <div class="detail-pane">
       <div class="pane-header">
-        <h2 id="detail-title">Select a class</h2>
+        <h2 id="detail-title">${l10n.t('Select a class')}</h2>
         <div id="breadcrumb" class="breadcrumb" style="display:none"></div>
       </div>
       <div id="method-toolbar" style="display:none">
         <div class="pane-header" style="border-bottom:none;padding-bottom:0">
           <div class="method-controls">
-            <input type="text" id="method-filter" placeholder="Filter methods..." />
-            <label><input type="checkbox" id="own-methods-toggle" checked /> Own methods only</label>
+            <input type="text" id="method-filter" placeholder="${l10n.t('Filter methods...')}" />
+            <label><input type="checkbox" id="own-methods-toggle" checked /> ${l10n.t('Own methods only')}</label>
           </div>
         </div>
         <div class="select-all-row">
-          <input type="checkbox" id="select-all" /><label for="select-all">Select All</label>
+          <input type="checkbox" id="select-all" /><label for="select-all">${l10n.t('Select All')}</label>
           <span class="count" id="method-count"></span>
         </div>
       </div>
       <div class="list-container" id="method-list">
-        <div class="placeholder">Click a class to view its methods</div>
+        <div class="placeholder">${l10n.t('Click a class to view its methods')}</div>
       </div>
       <div class="actions" id="actions" style="display:none">
-        <button id="btn-hook" disabled>Generate Hook Script</button>
-        <span class="selection-count" id="selection-count">0 selected</span>
+        <button id="btn-hook" disabled>${l10n.t('Generate Hook Script')}</button>
+        <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>
       </div>
     </div>
   </div>

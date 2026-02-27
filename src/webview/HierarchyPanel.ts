@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 
@@ -19,7 +20,7 @@ export class HierarchyPanel {
 
     this.panel = vscode.window.createWebviewPanel(
       'fridaHierarchy',
-      `Objective-C Hierarchy - ${this.target.label}`,
+      l10n.t('Objective-C Hierarchy - {0}', String(this.target.label)),
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -84,15 +85,15 @@ export class HierarchyPanel {
 <body>
   <div class="tree-container">
     <div class="tree-header">
-      <h2>Objective-C Class Hierarchy</h2>
+      <h2>${l10n.t('Objective-C Class Hierarchy')}</h2>
       <div class="tree-toolbar">
-        <input type="text" id="tree-filter" placeholder="Filter classes..." />
-        <button id="btn-expand-all">Expand All</button>
-        <button id="btn-collapse-all">Collapse All</button>
+        <input type="text" id="tree-filter" placeholder="${l10n.t('Filter classes...')}" />
+        <button id="btn-expand-all">${l10n.t('Expand All')}</button>
+        <button id="btn-collapse-all">${l10n.t('Collapse All')}</button>
       </div>
     </div>
     <div class="tree-body" id="tree-body">
-      <div class="loading">Loading class hierarchy...</div>
+      <div class="loading">${l10n.t('Loading class hierarchy...')}</div>
     </div>
   </div>
   <script nonce="${nonce}" src="${jsUri}"></script>

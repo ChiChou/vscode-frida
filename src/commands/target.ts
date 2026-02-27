@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 
 import { join } from 'path';
 import { mkdir, writeFile } from 'fs/promises';
@@ -39,7 +40,7 @@ async function writeTargetConfig(configPath: string, config: TargetConfig): Prom
 export async function setTarget(node: AppItem | ProcessItem): Promise<void> {
 	const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!root) {
-		vscode.window.showErrorMessage('Frida: No workspace folder open');
+		vscode.window.showErrorMessage(l10n.t('No workspace folder open'));
 		return;
 	}
 
@@ -53,16 +54,18 @@ export async function setTarget(node: AppItem | ProcessItem): Promise<void> {
 		const configPath = join(vscodePath, 'frida.json');
 		await writeTargetConfig(configPath, config);
 
+		const targetName = node instanceof AppItem ? node.data.identifier : node.data.name;
+		const actionOpen = l10n.t('Open');
 		vscode.window.showInformationMessage(
-			`Frida: Created .vscode/frida.json for ${node instanceof AppItem ? node.data.identifier : node.data.name}`,
-			'Open'
+			l10n.t('Created .vscode/frida.json for {0}', targetName),
+			actionOpen
 		).then(choice => {
-			if (choice === 'Open') {
+			if (choice === actionOpen) {
 				vscode.window.showTextDocument(vscode.Uri.file(configPath));
 			}
 		});
 	} catch (error) {
 		const message = error instanceof Error ? error.message : String(error);
-		vscode.window.showErrorMessage(`Frida: Failed to write .vscode/frida.json (${message})`);
+		vscode.window.showErrorMessage(l10n.t('Failed to write .vscode/frida.json: {0}', message));
 	}
 }

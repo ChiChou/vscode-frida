@@ -3,6 +3,7 @@ import * as cp from 'child_process';
 import { join } from 'path';
 import { interpreter } from '../utils';
 import { logger } from '../logger';
+import { l10n } from 'vscode';
 
 const lspScript = join(__dirname, '..', '..', 'backend', 'lsp.py');
 
@@ -157,12 +158,13 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 
 	private showStartupError(): void {
 		const stderr = this.stderrChunks.join('\n').trim();
-		const detail = stderr || 'Unknown error';
+		const detail = stderr || l10n.t('Unknown error');
+		const actionOpen = l10n.t('Open frida.json');
 		vscode.window.showErrorMessage(
-			`Frida LSP: ${detail}`,
-			'Open frida.json'
+			l10n.t('Frida LSP: {0}', detail),
+			actionOpen
 		).then(choice => {
-			if (choice === 'Open frida.json' && this.workspaceRoot) {
+			if (choice === actionOpen && this.workspaceRoot) {
 				const configPath = join(this.workspaceRoot, '.vscode', 'frida.json');
 				vscode.window.showTextDocument(vscode.Uri.file(configPath));
 			}

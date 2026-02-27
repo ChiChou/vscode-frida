@@ -24,7 +24,7 @@ export default async function dump(target: TargetItem) {
     canSelectFiles: false,
     canSelectFolders: true,
     canSelectMany: false,
-    openLabel: 'Select',
+    openLabel: vscode.l10n.t('Select'),
     title: vscode.l10n.t('Select destination folder')
   });
 

@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 import { generateNativeHooks, NativeHookRequest } from './hooks';
@@ -34,7 +35,7 @@ export class ModulesPanel {
 
     this.panel = vscode.window.createWebviewPanel(
       'fridaModules',
-      `Modules - ${this.target.label}`,
+      l10n.t('Modules - {0}', String(this.target.label)),
       vscode.ViewColumn.One,
       {
         enableScripts: true,
@@ -134,37 +135,37 @@ export class ModulesPanel {
   <div class="container">
     <div class="master-pane">
       <div class="pane-header">
-        <h2>Modules</h2>
-        <input type="text" id="module-filter" placeholder="Filter modules..." />
+        <h2>${l10n.t('Modules')}</h2>
+        <input type="text" id="module-filter" placeholder="${l10n.t('Filter modules...')}" />
       </div>
       <div class="list-container" id="module-list">
-        <div class="loading">Loading modules...</div>
+        <div class="loading">${l10n.t('Loading modules...')}</div>
       </div>
     </div>
     <div class="detail-pane">
       <div class="pane-header">
-        <h2 id="detail-title">Select a module</h2>
+        <h2 id="detail-title">${l10n.t('Select a module')}</h2>
       </div>
       <div id="module-info" class="info-section" style="display:none">
-        <div class="info-row"><span class="label">Path</span><span class="value" id="mod-path"></span></div>
-        <div class="info-row"><span class="label">Base</span><span class="value" id="mod-base"></span></div>
-        <div class="info-row"><span class="label">Size</span><span class="value" id="mod-size"></span></div>
+        <div class="info-row"><span class="label">${l10n.t('Path')}</span><span class="value" id="mod-path"></span></div>
+        <div class="info-row"><span class="label">${l10n.t('Base')}</span><span class="value" id="mod-base"></span></div>
+        <div class="info-row"><span class="label">${l10n.t('Size')}</span><span class="value" id="mod-size"></span></div>
       </div>
       <div id="export-toolbar" style="display:none">
         <div class="pane-header" style="border-bottom:none;padding-bottom:0">
-          <input type="text" id="export-filter" placeholder="Filter exports..." />
+          <input type="text" id="export-filter" placeholder="${l10n.t('Filter exports...')}" />
         </div>
         <div class="select-all-row">
-          <input type="checkbox" id="select-all" /><label for="select-all">Select All</label>
+          <input type="checkbox" id="select-all" /><label for="select-all">${l10n.t('Select All')}</label>
           <span class="count" id="export-count"></span>
         </div>
       </div>
       <div class="list-container" id="export-list">
-        <div class="placeholder">Click a module to view its exports</div>
+        <div class="placeholder">${l10n.t('Click a module to view its exports')}</div>
       </div>
       <div class="actions" id="actions" style="display:none">
-        <button id="btn-hook" disabled>Generate Hook Script</button>
-        <span class="selection-count" id="selection-count">0 selected</span>
+        <button id="btn-hook" disabled>${l10n.t('Generate Hook Script')}</button>
+        <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>
       </div>
     </div>
   </div>
