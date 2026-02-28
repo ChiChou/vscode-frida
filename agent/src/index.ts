@@ -24,6 +24,18 @@ interface MethodInfo {
   isStatic: boolean;
 }
 
+interface FieldInfo {
+  name: string;
+  display: string;
+  type: string;
+  isStatic: boolean;
+}
+
+interface ClassMemberInfo {
+  methods: MethodInfo[];
+  fields: FieldInfo[];
+}
+
 const methods = {
   start,
   stop,
@@ -41,6 +53,9 @@ const methods = {
 
   methodsOf: async (_name: string): Promise<MethodInfo[]> => [],
   ownMethodsOf: async (_name: string): Promise<MethodInfo[]> => [],
+  fieldsOf: async (_name: string): Promise<FieldInfo[]> => [],
+  ownFieldsOf: async (_name: string): Promise<FieldInfo[]> => [],
+  classMembers: async (_name: string): Promise<ClassMemberInfo> => ({ methods: [], fields: [] }),
   superClasses: async (_name: string): Promise<string[]> => [],
 
   // Returns [names, parents] where parents[i] is the index of the
@@ -137,6 +152,61 @@ if (Java.available) {
       result.push(inspectJavaMethod(declared[i], Modifier));
     }
     return result;
+  });
+
+  function inspectJavaField(f: any, Modifier: any): FieldInfo {
+    const mods = f.getModifiers();
+    const isStatic = Modifier.isStatic(mods);
+    const typeName = f.getType().getName() as string;
+    const fName = f.getName() as string;
+    const prefix = isStatic ? 'static ' : '';
+    return {
+      name: fName,
+      display: `${prefix}${shortenType(typeName)} ${fName}`,
+      type: typeName,
+      isStatic,
+    };
+  }
+
+  methods.fieldsOf = async (name: string) => perform(() => {
+    const Modifier = Java.use('java.lang.reflect.Modifier');
+    const jClass = Java.use(name).class;
+    const allFields = jClass.getFields();
+    const result: FieldInfo[] = [];
+    for (let i = 0; i < allFields.length; i++) {
+      result.push(inspectJavaField(allFields[i], Modifier));
+    }
+    return result;
+  });
+
+  methods.ownFieldsOf = async (name: string) => perform(() => {
+    const Modifier = Java.use('java.lang.reflect.Modifier');
+    const jClass = Java.use(name).class;
+    const declared = jClass.getDeclaredFields();
+    const result: FieldInfo[] = [];
+    for (let i = 0; i < declared.length; i++) {
+      result.push(inspectJavaField(declared[i], Modifier));
+    }
+    return result;
+  });
+
+  methods.classMembers = async (name: string) => perform(() => {
+    const Modifier = Java.use('java.lang.reflect.Modifier');
+    const jClass = Java.use(name).class;
+    
+    const declaredMethods = jClass.getDeclaredMethods();
+    const methods: MethodInfo[] = [];
+    for (let i = 0; i < declaredMethods.length; i++) {
+      methods.push(inspectJavaMethod(declaredMethods[i], Modifier));
+    }
+    
+    const declaredFields = jClass.getDeclaredFields();
+    const fields: FieldInfo[] = [];
+    for (let i = 0; i < declaredFields.length; i++) {
+      fields.push(inspectJavaField(declaredFields[i], Modifier));
+    }
+    
+    return { methods, fields };
   });
 
   methods.superClasses = async (name: string) => perform(() => {

@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
+import ts from 'typescript';
+
 import { join } from 'path';
 import { interpreter } from '../utils';
 import { logger } from '../logger';
@@ -17,7 +19,7 @@ interface LspResponse {
 	runtime?: Runtime;
 }
 
-type CacheKey = 'classes' | 'modules' | `exports:${string}` | `methods:${string}`;
+type CacheKey = 'classes' | 'modules' | `exports:${string}` | `methods:${string}` | `members:${string}`;
 
 interface TriggerMatch {
 	cacheKey: CacheKey;
@@ -223,17 +225,178 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 		});
 	}
 
-	private fetchAndCache(key: CacheKey, method: string, params?: Record<string, string>): void {
-		this.sendRequest(method, params).then(result => {
+	private async fetchAndCache(key: CacheKey, method: string, params?: Record<string, string>): Promise<string[] | { methods: string[]; fields: string[] } | null> {
+		try {
+			const result = await this.sendRequest(method, params);
 			if (Array.isArray(result)) {
 				this.cache.set(key, result);
+				return result;
+			} else if (result && typeof result === 'object') {
+				this.cache.set(key, result as any);
+				return result as { methods: string[]; fields: string[] };
 			}
-		}).catch((e: Error) => {
+			return null;
+		} catch (e: any) {
 			logger.appendLine(`[frida-lsp] Fetch failed for ${key}: ${e.message}`);
+			return null;
+		}
+	}
+
+	private createCompletionItems(
+		result: string[] | { methods: string[]; fields: string[] },
+		trigger: TriggerMatch,
+		position: vscode.Position
+	): vscode.CompletionItem[] {
+		const range = new vscode.Range(position.line, trigger.replaceStart, position.line, position.character);
+		const isMemberCache = trigger.cacheKey.startsWith('members:');
+
+		if (isMemberCache && typeof result === 'object' && !Array.isArray(result)) {
+			const memberCache = result as { methods: string[]; fields: string[] };
+			const items: vscode.CompletionItem[] = [];
+			for (const name of memberCache.methods) {
+				const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Method);
+				item.range = range;
+				item.filterText = name;
+				items.push(item);
+			}
+			for (const name of memberCache.fields) {
+				const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Field);
+				item.range = range;
+				item.filterText = name;
+				items.push(item);
+			}
+			return items;
+		}
+
+		return (result as string[]).map(name => {
+			const item = new vscode.CompletionItem(name, trigger.kind);
+			item.range = range;
+			item.filterText = name;
+			return item;
 		});
 	}
 
-	private matchTrigger(lineText: string, position: vscode.Position): TriggerMatch | null {
+	private findJavaClassForVariable(document: vscode.TextDocument, position: vscode.Position, varName: string): string | null {
+		const sourceFile = ts.createSourceFile(
+			document.fileName,
+			document.getText(),
+			ts.ScriptTarget.Latest,
+			true
+		);
+
+		const offset = document.offsetAt(position);
+
+		const node = this.findNodeAtPosition(sourceFile, offset);
+		if (!node) return null;
+
+		const scope = this.findEnclosingScope(node);
+		if (!scope) return null;
+
+		return this.findVariableAssignmentInScope(scope, varName, offset);
+	}
+
+	private findNodeAtPosition(sourceFile: ts.SourceFile, position: number): ts.Node | null {
+		let result: ts.Node | null = null;
+
+		const visit = (node: ts.Node) => {
+			const start = node.getStart(sourceFile);
+			const end = node.getEnd();
+
+			if (position >= start && position <= end) {
+				result = node;
+				ts.forEachChild(node, visit);
+			}
+		};
+
+		ts.forEachChild(sourceFile, visit);
+		return result;
+	}
+
+	private findEnclosingScope(node: ts.Node): ts.Node | null {
+		let current: ts.Node = node;
+		while (current) {
+			if (
+				ts.isFunctionDeclaration(current) ||
+				ts.isFunctionExpression(current) ||
+				ts.isArrowFunction(current) ||
+				ts.isMethodDeclaration(current) ||
+				ts.isConstructorDeclaration(current) ||
+				ts.isBlock(current) ||
+				ts.isSourceFile(current)
+			) {
+				return current;
+			}
+			current = current.parent;
+		}
+		return null;
+	}
+
+	private findVariableAssignmentInScope(scope: ts.Node, varName: string, cursorOffset: number): string | null {
+		const checkNode = (node: ts.Node): string | null => {
+			if (ts.isVariableDeclaration(node)) {
+				if (ts.isIdentifier(node.name) && node.name.text === varName) {
+					const init = node.initializer;
+					if (init && ts.isCallExpression(init) && this.isJavaUseCall(init)) {
+						return this.extractClassNameFromJavaUse(init);
+					}
+				}
+			}
+			return null;
+		};
+
+		const visit = (node: ts.Node): string | null => {
+			if (ts.isVariableStatement(node)) {
+				for (const decl of node.declarationList.declarations) {
+					const result = checkNode(decl);
+					if (result) return result;
+				}
+			}
+
+			if (ts.isVariableDeclaration(node)) {
+				const result = checkNode(node);
+				if (result) return result;
+			}
+
+			return ts.forEachChild(node, visit) ?? null;
+		};
+
+		const result = visit(scope);
+		if (result) return result;
+
+		if (scope.parent && !ts.isSourceFile(scope)) {
+			const parentScope = this.findEnclosingScope(scope.parent);
+			if (parentScope) {
+				return this.findVariableAssignmentInScope(parentScope, varName, cursorOffset);
+			}
+		}
+
+		return null;
+	}
+
+	private isJavaUseCall(node: ts.Node): boolean {
+		if (!ts.isCallExpression(node)) return false;
+
+		const expr = node.expression;
+		if (!ts.isPropertyAccessExpression(expr)) return false;
+
+		const obj = expr.expression;
+		const prop = expr.name.text;
+
+		return ts.isIdentifier(obj) && obj.text === 'Java' && (prop === 'use' || prop === 'choose');
+	}
+
+	private extractClassNameFromJavaUse(node: ts.CallExpression): string | null {
+		const arg = node.arguments[0];
+		if (!arg) return null;
+
+		if (ts.isStringLiteral(arg)) {
+			return arg.text;
+		}
+
+		return null;
+	}
+
+	private matchTrigger(lineText: string, position: vscode.Position, document?: vscode.TextDocument): TriggerMatch | null {
 		const text = lineText.substring(0, position.character);
 
 		// ObjC.classes.SomeClass['  →  method names
@@ -273,6 +436,39 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 			};
 		}
 
+		// Java.use("SomeClass"). or Java.choose("SomeClass").  →  methods and fields
+		const javaMemberMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]+)['"`]\)\.\w*$/);
+		if (javaMemberMatch) {
+			const className = javaMemberMatch[1];
+			const afterDot = text.split('.').pop() || '';
+			return {
+				cacheKey: `members:${className}`,
+				method: 'classMembers',
+				params: { className },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'Java',
+				replaceStart: position.character - afterDot.length,
+			};
+		}
+
+		// variableName.  →  methods and fields (if variable was assigned from Java.use/choose)
+		const varMemberMatch = text.match(/(\w+)\.\w*$/);
+		if (varMemberMatch && document) {
+			const varName = varMemberMatch[1];
+			const className = this.findJavaClassForVariable(document, position, varName);
+			if (className) {
+				const afterDot = text.split('.').pop() || '';
+				return {
+					cacheKey: `members:${className}`,
+					method: 'classMembers',
+					params: { className },
+					kind: vscode.CompletionItemKind.Method,
+					requires: 'Java',
+					replaceStart: position.character - afterDot.length,
+				};
+			}
+		}
+
 		// Process.getModuleByName(' or Process.findModuleByName('
 		const moduleMatch = text.match(/Process\.(?:get|find)ModuleByName\(['"`]([^'"`]*)$/);
 		if (moduleMatch) {
@@ -295,7 +491,7 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 	): Promise<vscode.CompletionItem[] | undefined> {
 
 		const lineText = document.lineAt(position.line).text;
-		const trigger = this.matchTrigger(lineText, position);
+		const trigger = this.matchTrigger(lineText, position, document);
 		if (!trigger) {
 			return undefined;
 		}
@@ -312,17 +508,11 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 
 		const cached = this.cache.get(trigger.cacheKey);
 		if (cached) {
-			logger.appendLine(`[frida-lsp] Cache hit: ${trigger.cacheKey} (${cached.length} items)`);
-			const range = new vscode.Range(position.line, trigger.replaceStart, position.line, position.character);
-			return cached.map(name => {
-				const item = new vscode.CompletionItem(name, trigger.kind);
-				item.range = range;
-				item.filterText = name;
-				return item;
-			});
+			logger.appendLine(`[frida-lsp] Cache hit: ${trigger.cacheKey}`);
+			return this.createCompletionItems(cached, trigger, position);
 		}
 
-		// Not cached — start process if needed and fire async fetch
+		// Not cached — start process if needed and fetch
 		const processReady = await this.ensureProcess();
 		if (!processReady) {
 			logger.appendLine(`[frida-lsp] Process not ready for ${trigger.cacheKey}`);
@@ -336,7 +526,12 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 		}
 
 		logger.appendLine(`[frida-lsp] Fetching ${trigger.cacheKey}`);
-		this.fetchAndCache(trigger.cacheKey, trigger.method, trigger.params);
-		return undefined;
+		const result = await this.fetchAndCache(trigger.cacheKey, trigger.method, trigger.params);
+
+		if (!result) {
+			return undefined;
+		}
+
+		return this.createCompletionItems(result, trigger, position);
 	}
 }
