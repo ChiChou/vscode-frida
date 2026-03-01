@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.11.2 - 02 Mar, 2026
+
+* Fix "frida.ProtocolError: connection closed" error
+
 ### v0.11.1 - 02 Mar, 2026
 
 * ObjC class method completion

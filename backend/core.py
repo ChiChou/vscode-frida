@@ -17,10 +17,16 @@ def devices() -> list:
 
     def wrap(dev: frida.core.Device):
         obj = {prop: getattr(dev, prop) for prop in props}
+        os = 'unknown'
         try:
-            obj['os'] = dev.query_system_parameters()['os']['id']
-        except (frida.ServerNotRunningError, KeyError, frida.TransportError, frida.NotSupportedError):
-            obj['os'] = 'unknown'
+            os = dev.query_system_parameters()['os']['id']
+        except:
+            # frida.ServerNotRunningError, KeyError, 
+            # frida.TransportError, frida.NotSupportedError, 
+            # frida.ProtocolError
+            pass
+
+        obj['os'] = os
         return obj
 
     # workaround
