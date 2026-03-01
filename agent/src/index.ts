@@ -6,6 +6,9 @@ import ObjC from 'frida-objc-bridge';
 
 import { start, stop } from './log.js';
 
+import { api as objcApi } from './fruity/runtime.js';
+import { parse as parseTypeEncoding } from './fruity/signature.js';
+
 enum Runtime {
   Java = 'Java',
   ObjectiveC = 'ObjectiveC',
@@ -223,34 +226,31 @@ if (Java.available) {
     throw new Error(`Class ${name} not found`);
   }
 
-  interface NSMethodSignature {
-    numberOfArguments(): number;
-    getArgumentTypeAtIndex_(index: number): string;
-    methodReturnType(): string;
-  }
-
   function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
     const isInstance = sel.startsWith('- ');
     const cleanSel = sel.substring(2);
-    let sig: NSMethodSignature | null = null;
-    try {
-      const s = ObjC.selector(cleanSel);
-      sig = isInstance
-        ? cls.instanceMethodSignatureForSelector_(s) as NSMethodSignature | null
-        : cls.methodSignatureForSelector_(s) as NSMethodSignature | null;
-    } catch (_) { /* signature unavailable */ }
 
     const args: ArgInfo[] = [];
     let retType = 'v';
 
-    if (sig) {
-      const argCount = sig.numberOfArguments();
-      // skip index 0 (self) and 1 (_cmd)
-      for (let i = 2; i < argCount; i++) {
-        args.push({ type: sig.getArgumentTypeAtIndex_(i) });
+    try {
+      const selPtr = objcApi.sel_registerName(Memory.allocUtf8String(cleanSel));
+      const target = isInstance ? cls.handle : objcApi.object_getClass(cls.handle);
+      const methodHandle = objcApi.class_getInstanceMethod(target, selPtr);
+      if (!methodHandle.isNull()) {
+        const typesPtr = objcApi.method_getTypeEncoding(methodHandle);
+        if (!typesPtr.isNull()) {
+          const enc = typesPtr.readUtf8String() as string;
+          // parseTypeEncoding returns [retType, selfType, cmdType, arg0Type, …]
+          const types = parseTypeEncoding(enc);
+          if (types.length > 0)
+            retType = types[0];
+          // skip types[1] (self) and types[2] (_cmd), actual args start at index 3
+          for (let i = 3; i < types.length; i++)
+            args.push({ type: types[i] });
+        }
       }
-      retType = sig.methodReturnType();
-    }
+    } catch (_) { /* type encoding unavailable */ }
 
     return {
       name: sel,

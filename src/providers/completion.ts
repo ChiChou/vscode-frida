@@ -2,10 +2,11 @@ import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import ts from 'typescript';
 
+import { l10n } from 'vscode';
 import { join } from 'path';
+
 import { interpreter } from '../utils';
 import { logger } from '../logger';
-import { l10n } from 'vscode';
 
 const lspScript = join(__dirname, '..', '..', 'backend', 'lsp.py');
 
@@ -29,6 +30,8 @@ interface TriggerMatch {
 	requires?: 'Java' | 'ObjectiveC';
 	/** Column where the completable text starts (e.g. after opening quote) */
 	replaceStart: number;
+	/** Optional filter+transform applied to raw results before creating items */
+	mapNames?: (names: string[]) => string[];
 }
 
 export class FridaCompletionProvider implements vscode.CompletionItemProvider, vscode.Disposable {
@@ -268,7 +271,11 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 			return items;
 		}
 
-		return (result as string[]).map(name => {
+		let names = result as string[];
+		if (trigger.mapNames)
+			names = trigger.mapNames(names);
+
+		return names.map(name => {
 			const item = new vscode.CompletionItem(name, trigger.kind);
 			item.range = range;
 			item.filterText = name;
@@ -409,6 +416,22 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 				kind: vscode.CompletionItemKind.Method,
 				requires: 'ObjectiveC',
 				replaceStart: position.character - objcMethodMatch[2].length,
+			};
+		}
+
+		// ObjC.classes.SomeClass.  →  public class method names as JS properties
+		const objcDotMethodMatch = text.match(/ObjC\.classes\.(\w+)\.(\w*)$/);
+		if (objcDotMethodMatch) {
+			return {
+				cacheKey: `methods:${objcDotMethodMatch[1]}`,
+				method: 'methods',
+				params: { className: objcDotMethodMatch[1] },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'ObjectiveC',
+				replaceStart: position.character - objcDotMethodMatch[2].length,
+				mapNames: (names) => names
+					.filter(n => n.startsWith('+ ') && !n.startsWith('+ _'))
+					.map(n => n.substring(2).replace(/:/g, '_')),
 			};
 		}
 

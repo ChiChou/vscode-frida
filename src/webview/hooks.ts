@@ -189,7 +189,7 @@ export function generateObjCHooks(selections: MethodSelection[]): string {
 
         const argExprs = m.args.map((arg, i) => {
           const argIdx = i + 2;
-          return arg.type[0] === '@' ? `new ObjC.Object(args[${argIdx}]).toString()` : `args[${argIdx}]`;
+          return arg.type.startsWith('@') ? `new ObjC.Object(args[${argIdx}]).toString()` : `args[${argIdx}]`;
         });
 
         yield `  // ${m.name}`;
@@ -203,7 +203,7 @@ export function generateObjCHooks(selections: MethodSelection[]): string {
         }
         yield `    },`;
         yield `    onLeave(retval) {`;
-        if (m.returnType[0] === '@') {
+        if (m.returnType.startsWith('@')) {
           yield `      if (!retval.isNull()) {`;
           yield `        console.log('[${className} ${cleanSel}] returned:', new ObjC.Object(retval).toString());`;
           yield `      } else {`;
