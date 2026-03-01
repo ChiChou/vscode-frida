@@ -18,7 +18,7 @@
 
 ### 安装 frida-tools
 
-由于 [PEP0668](https://peps.python.org/pep-0666/)，全局运行 `pip3 install frida-tools` 可能会遇到错误。
+由于 [PEP0668](https://peps.python.org/pep-0668/)，全局运行 `pip3 install frida-tools` 可能会遇到错误。
 
 推荐的方式是在 VSCode 中打开一个文件夹（工作区），然后使用 Python 扩展创建并激活虚拟环境。在这种情况下，扩展将使用当前激活的 Python venv 来加载 frida 命令。
 
@@ -65,10 +65,11 @@ Frida 脚本的上下文感知补全，支持 JavaScript / TypeScript：
 
 * `ObjC.classes.<ClassName>` — 补全 Objective-C 类名
 * `ObjC.classes.Foo['<method>']` — 补全方法选择器
+* `ObjC.classes.Foo.method` — 补全类方法选择器
 * `Java.use('<ClassName>')` — 补全 Java 类名
 * `Process.getModuleByName('<name>')` — 补全已加载模块名
 
-需要 `.vscode/frida.json` 目标配置。使用 **Set LSP Target** 命令生成。
+由于语言服务器依赖于目标进程上下文，你需要在工作区中创建 Frida 目标配置文件：`.vscode/frida.json`。你可以使用 **Set LSP Target** 命令通过选定的进程或应用来生成它。
 
 ### JavaScript REPL
 

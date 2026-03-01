@@ -65,10 +65,11 @@ Context-aware completions for Frida scripts in JavaScript / TypeScript:
 
 * `ObjC.classes.<ClassName>` — completes Objective-C class names
 * `ObjC.classes.Foo['<method>']` — completes method selectors
+* `ObjC.classes.Foo.method` — completes class method selectors
 * `Java.use('<ClassName>')` — completes Java class names
 * `Process.getModuleByName('<name>')` — completes loaded module names
 
-Requires a `.vscode/frida.json` target configuration. Use the **Set LSP Target** command to generate it.
+As the language server depends on the target process context, you need to create a Frida target configuration file in your workspace: `.vscode/frida.json`. You can use the **Set LSP Target** command to generate it with the selected process or app.
 
 ### JavaScript REPL
 
@@ -101,7 +102,7 @@ Generate VSCode `launch.json` and `tasks.json` for debugging Frida scripts with 
 
 For Android devices, **Open Shell** is a wrapper for `adb shell`.
 
-For iOS it gives an SSH shell. It might ask for credentials depending on your setup.
+For iOS it gives an SSH shell on jailbroken devices. May need to configure credentials.
 
 ### Remote Device Support
 

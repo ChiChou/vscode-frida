@@ -1,5 +1,10 @@
 # Change Log
 
+### v0.11.1 - 02 Mar, 2026
+
+* ObjC class method completion
+* Fix LSP crash for unknown type encodings
+
 ### v0.11.0 - 27 Feb, 2026
 
 * Frida 17 support
