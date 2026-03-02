@@ -3,25 +3,25 @@
   const vscode = acquireVsCodeApi();
 
   // Indexed data built from Record<string, string> sent by agent
-  var names = null;     // string[]
-  var parentOf = null;  // number[] — parentOf[i] = parent index, -1 for root
-  var children = null;  // number[][] — children[i] = direct subclass indices
-  var roots = null;     // number[] — root class indices
+  let names = null;     // string[]
+  let parentOf = null;  // number[] — parentOf[i] = parent index, -1 for root
+  let children = null;  // number[][] — children[i] = direct subclass indices
+  let roots = null;     // number[] — root class indices
 
-  var expandedNodes = new Set(); // set of indices
-  var filterDebounce = null;
+  let expandedNodes = new Set(); // set of indices
+  let filterDebounce = null;
 
-  var $treeBody = document.getElementById('tree-body');
-  var $treeFilter = document.getElementById('tree-filter');
-  var $btnExpandAll = document.getElementById('btn-expand-all');
-  var $btnCollapseAll = document.getElementById('btn-collapse-all');
+  const $treeBody = document.getElementById('tree-body');
+  const $treeFilter = document.getElementById('tree-filter');
+  const $btnExpandAll = document.getElementById('btn-expand-all');
+  const $btnCollapseAll = document.getElementById('btn-collapse-all');
 
-  window.addEventListener('message', function (event) {
-    var msg = event.data;
+  window.addEventListener('message', (event) => {
+    const msg = event.data;
     switch (msg.type) {
       case 'setData':
         buildFromRecord(msg.hierarchy);
-        for (var i = 0; i < roots.length; i++) expandedNodes.add(roots[i]);
+        for (let i = 0; i < roots.length; i++) expandedNodes.add(roots[i]);
         renderTree();
         break;
       case 'setLoading':
@@ -35,34 +35,34 @@
     }
   });
 
-  $treeFilter.addEventListener('input', function () {
+  $treeFilter.addEventListener('input', () => {
     clearTimeout(filterDebounce);
     filterDebounce = setTimeout(renderTree, 150);
   });
 
-  $btnExpandAll.addEventListener('click', function () {
+  $btnExpandAll.addEventListener('click', () => {
     if (!names) return;
-    for (var i = 0; i < names.length; i++) {
+    for (let i = 0; i < names.length; i++) {
       if (children[i].length > 0) expandedNodes.add(i);
     }
     renderTree();
   });
 
-  $btnCollapseAll.addEventListener('click', function () {
+  $btnCollapseAll.addEventListener('click', () => {
     expandedNodes.clear();
     renderTree();
   });
 
   function buildFromRecord(hierarchy) {
     names = Object.keys(hierarchy);
-    var indexMap = {};
-    for (var i = 0; i < names.length; i++) indexMap[names[i]] = i;
+    const indexMap = {};
+    for (let i = 0; i < names.length; i++) indexMap[names[i]] = i;
     parentOf = new Array(names.length);
     children = new Array(names.length);
-    for (var i = 0; i < names.length; i++) children[i] = [];
+    for (let i = 0; i < names.length; i++) children[i] = [];
     roots = [];
-    for (var i = 0; i < names.length; i++) {
-      var parent = hierarchy[names[i]];
+    for (let i = 0; i < names.length; i++) {
+      const parent = hierarchy[names[i]];
       if (parent && parent in indexMap) {
         parentOf[i] = indexMap[parent];
         children[parentOf[i]].push(i);
@@ -75,11 +75,11 @@
 
   function renderTree() {
     if (!names) return;
-    var query = $treeFilter.value.toLowerCase();
+    const query = $treeFilter.value.toLowerCase();
     $treeBody.innerHTML = '';
-    var fragment = document.createDocumentFragment();
+    const fragment = document.createDocumentFragment();
     if (query) {
-      var visible = findMatching(query);
+      const visible = findMatching(query);
       renderFiltered(fragment, roots, 0, visible);
     } else {
       renderNodes(fragment, roots, 0);
@@ -88,11 +88,11 @@
   }
 
   function findMatching(query) {
-    var visible = new Set();
-    for (var i = 0; i < names.length; i++) {
+    const visible = new Set();
+    for (let i = 0; i < names.length; i++) {
       if (names[i].toLowerCase().includes(query)) {
         // Mark this node and all its ancestors
-        var idx = i;
+        let idx = i;
         while (idx !== -1 && !visible.has(idx)) {
           visible.add(idx);
           idx = parentOf[idx];
@@ -103,29 +103,29 @@
   }
 
   function sortedByName(indices) {
-    return indices.slice().sort(function (a, b) {
+    return indices.slice().sort((a, b) => {
       return names[a] < names[b] ? -1 : names[a] > names[b] ? 1 : 0;
     });
   }
 
   function renderFiltered(container, indices, depth, visible) {
-    var sorted = sortedByName(indices.filter(function (i) { return visible.has(i); }));
-    for (var j = 0; j < sorted.length; j++) {
-      var i = sorted[j];
-      var childCount = children[i].length;
-      var isLeaf = childCount === 0;
+    const sorted = sortedByName(indices.filter((i) => visible.has(i)));
+    for (let j = 0; j < sorted.length; j++) {
+      const i = sorted[j];
+      const childCount = children[i].length;
+      const isLeaf = childCount === 0;
       container.appendChild(createRow(i, depth, isLeaf, true, childCount));
       if (!isLeaf) renderFiltered(container, children[i], depth + 1, visible);
     }
   }
 
   function renderNodes(container, indices, depth) {
-    var sorted = sortedByName(indices);
-    for (var j = 0; j < sorted.length; j++) {
-      var i = sorted[j];
-      var childCount = children[i].length;
-      var isLeaf = childCount === 0;
-      var expanded = expandedNodes.has(i);
+    const sorted = sortedByName(indices);
+    for (let j = 0; j < sorted.length; j++) {
+      const i = sorted[j];
+      const childCount = children[i].length;
+      const isLeaf = childCount === 0;
+      const expanded = expandedNodes.has(i);
       container.appendChild(createRow(i, depth, isLeaf, expanded, childCount));
       if (expanded && !isLeaf) {
         renderNodes(container, children[i], depth + 1);
@@ -134,21 +134,21 @@
   }
 
   function createRow(idx, depth, isLeaf, expanded, childCount) {
-    var row = document.createElement('div');
+    const row = document.createElement('div');
     row.className = 'tree-node' + (isLeaf ? ' tree-leaf' : '');
 
-    var inner = document.createElement('div');
+    const inner = document.createElement('div');
     inner.className = 'tree-row';
 
-    var indent = document.createElement('span');
+    const indent = document.createElement('span');
     indent.className = 'tree-indent';
     indent.style.width = (depth * 16) + 'px';
 
-    var toggle = document.createElement('span');
+    const toggle = document.createElement('span');
     toggle.className = 'tree-toggle';
     if (!isLeaf) toggle.textContent = expanded ? '\u25BC' : '\u25B6';
 
-    var label = document.createElement('span');
+    const label = document.createElement('span');
     label.className = 'tree-label';
     label.textContent = names[idx];
 
@@ -157,20 +157,18 @@
     inner.appendChild(label);
 
     if (!isLeaf && childCount > 0) {
-      var count = document.createElement('span');
+      const count = document.createElement('span');
       count.className = 'tree-count';
       count.textContent = '(' + childCount + ')';
       inner.appendChild(count);
     }
 
     if (!isLeaf) {
-      (function (i) {
-        inner.addEventListener('click', function () {
-          if (expandedNodes.has(i)) expandedNodes.delete(i);
-          else expandedNodes.add(i);
-          renderTree();
-        });
-      })(idx);
+      inner.addEventListener('click', () => {
+        if (expandedNodes.has(idx)) expandedNodes.delete(idx);
+        else expandedNodes.add(idx);
+        renderTree();
+      });
     }
 
     row.appendChild(inner);
@@ -178,11 +176,11 @@
   }
 
   function showError(message) {
-    var toast = document.createElement('div');
+    const toast = document.createElement('div');
     toast.className = 'error-toast';
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(function () { toast.remove(); }, 5000);
+    setTimeout(() => toast.remove(), 5000);
   }
 
   vscode.postMessage({ type: 'ready' });
