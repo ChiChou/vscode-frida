@@ -32,7 +32,7 @@ const methods = {
   classMembers: async (_name: string): Promise<ClassMemberInfo> => ({ methods: [], fields: [] }),
   superClasses: async (_name: string): Promise<string[]> => [],
 
-  classesHierarchy: (): [string[], number[]] => [[], []],
+  classesHierarchy: (): Record<string, string> => ({}),
 
   modules: () => Process.enumerateModules(),
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),

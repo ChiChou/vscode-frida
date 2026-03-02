@@ -2,7 +2,7 @@
   // @ts-ignore
   const vscode = acquireVsCodeApi();
 
-  // Indexed data built from [names, parents] sent by agent
+  // Indexed data built from Record<string, string> sent by agent
   var names = null;     // string[]
   var parentOf = null;  // number[] — parentOf[i] = parent index, -1 for root
   var children = null;  // number[][] — children[i] = direct subclass indices
@@ -20,7 +20,7 @@
     var msg = event.data;
     switch (msg.type) {
       case 'setData':
-        buildFromFlat(msg.names, msg.parents);
+        buildFromRecord(msg.hierarchy);
         for (var i = 0; i < roots.length; i++) expandedNodes.add(roots[i]);
         renderTree();
         break;
@@ -53,17 +53,22 @@
     renderTree();
   });
 
-  function buildFromFlat(n, parents) {
-    names = n;
-    parentOf = parents;
+  function buildFromRecord(hierarchy) {
+    names = Object.keys(hierarchy);
+    var indexMap = {};
+    for (var i = 0; i < names.length; i++) indexMap[names[i]] = i;
+    parentOf = new Array(names.length);
     children = new Array(names.length);
     for (var i = 0; i < names.length; i++) children[i] = [];
     roots = [];
     for (var i = 0; i < names.length; i++) {
-      if (parents[i] === -1) {
-        roots.push(i);
+      var parent = hierarchy[names[i]];
+      if (parent && parent in indexMap) {
+        parentOf[i] = indexMap[parent];
+        children[parentOf[i]].push(i);
       } else {
-        children[parents[i]].push(i);
+        parentOf[i] = -1;
+        roots.push(i);
       }
     }
   }

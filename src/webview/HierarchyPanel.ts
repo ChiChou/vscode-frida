@@ -61,9 +61,10 @@ export class HierarchyPanel {
     try {
       logger.appendLine(`Loading class hierarchy for ${this.target.label}`);
       this.post({ type: 'setLoading', loading: true });
-      const [names, parents] = await rpc(this.target, 'classes_hierarchy') as [string[], number[]];
-      logger.appendLine(`Loaded hierarchy: ${names.length} classes`);
-      this.post({ type: 'setData', names, parents });
+      const hierarchy = await rpc(this.target, 'classes_hierarchy') as Record<string, string>;
+      const count = Object.keys(hierarchy).length;
+      logger.appendLine(`Loaded hierarchy: ${count} classes`);
+      this.post({ type: 'setData', hierarchy });
     } catch (err: any) {
       logger.appendLine(`Error: failed to load class hierarchy - ${err.message}`);
       this.post({ type: 'error', message: err.message });

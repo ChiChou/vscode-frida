@@ -10,7 +10,7 @@ interface Methods {
   methodsOf: (name: string) => Promise<MethodInfo[]>;
   ownMethodsOf: (name: string) => Promise<MethodInfo[]>;
   superClasses: (name: string) => Promise<string[]>;
-  classesHierarchy: () => [string[], number[]];
+  classesHierarchy: () => Record<string, string>;
 }
 
 function getClass(name: string): ObjC.Object {
@@ -76,26 +76,15 @@ export function applyOverrides(methods: Methods): void {
   };
 
   methods.classesHierarchy = () => {
-    const names = Object.keys(ObjC.classes);
-    const indexMap: Record<string, number> = {};
-    for (let i = 0; i < names.length; i++)
-      indexMap[names[i]] = i;
-
-    const parents = new Array<number>(names.length);
-    for (let i = 0; i < names.length; i++) {
+    const result: Record<string, string> = {};
+    for (const name of Object.keys(ObjC.classes)) {
       try {
-        const sup = ObjC.classes[names[i]].$superClass;
-        if (sup) {
-          const pn = sup.$className;
-          parents[i] = pn in indexMap ? indexMap[pn] : -1;
-        } else {
-          parents[i] = -1;
-        }
+        const sup = ObjC.classes[name].$superClass;
+        result[name] = sup ? sup.$className : '';
       } catch (_) {
-        parents[i] = -1;
+        result[name] = '';
       }
     }
-
-    return [names, parents];
+    return result;
   };
 }
