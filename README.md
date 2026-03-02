@@ -1,8 +1,10 @@
-![Icon](icon.png)
-
 # Frida Workbench for VSCode
 
-**Unofficial** frida workbench for VSCode [![](https://img.shields.io/visual-studio-marketplace/v/CodeColorist.vscode-frida?color=%230af&label=install&logo=visual-studio-code&logoColor=%230ac&style=plastic)](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
+[Repository](https://github.com/chichou/vscode-frida)
+[Issues](https://github.com/ChiChou/vscode-frida/issues)
+[Install](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
+
+**Unofficial** frida extension for Visual Studio Code by [@CodeColorist](https://infosec.exchange/@codecolorist)
 
 ## Prerequisites
 

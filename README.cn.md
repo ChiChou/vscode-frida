@@ -1,8 +1,10 @@
-![Icon](icon.png)
-
 # 将 Frida 集成到 VSCode
 
-**非官方** Frida VSCode 工作台 [![](https://img.shields.io/visual-studio-marketplace/v/CodeColorist.vscode-frida?color=%230af&label=install&logo=visual-studio-code&logoColor=%230ac&style=plastic)](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
+[仓库](https://github.com/chichou/vscode-frida)
+[问题](https://github.com/ChiChou/vscode-frida/issues)
+[安装](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
+
+**非官方** Frida VSCode 扩展，由 [@CodeColorist](https://infosec.exchange/@codecolorist) 开发
 
 ## 前置要求
 
