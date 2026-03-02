@@ -169,11 +169,7 @@
                 "title": "%frida.external.apk%",
                 "category": "Frida"
             },
-            {
-                "command": "frida.external.dump",
-                "title": "%frida.external.dump%",
-                "category": "Frida"
-            },
+
             {
                 "command": "frida.device.androidserver",
                 "title": "%frida.device.androidserver%",
@@ -255,10 +251,7 @@
                     "command": "frida.external.objection",
                     "when": "false"
                 },
-                {
-                    "command": "frida.external.dump",
-                    "when": "false"
-                },
+
                 {
                     "command": "frida.external.apk",
                     "when": "false"
@@ -466,11 +459,7 @@
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
                     "group": "5_frida_external@2"
                 },
-                {
-                    "command": "frida.external.dump",
-                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "5_frida_external@3"
-                },
+
                 {
                     "command": "frida.external.apk",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",

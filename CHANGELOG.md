@@ -1,20 +1,19 @@
 # Change Log
 
-### v0.11.2 - 02 Mar, 2026
+* Remove iOS app dump (bagbak)
+
+### v0.11.5 - 02 Mar, 2026
 
 * Fix "frida.ProtocolError: connection closed" error
-
-### v0.11.1 - 02 Mar, 2026
-
 * ObjC class method completion
 * Fix LSP crash for unknown type encodings
-
-### v0.11.0 - 27 Feb, 2026
-
 * Frida 17 support
 * Objective-C Hierarchy View and Java Packages View
 * Modules & Classes panels with hook code generation
 * Use AI to generate inform function signatures
+
+Notice: do not use v0.11.0-v0.11.4, I accidently broke package.json and they could only
+run in debug, not production.
 
 ### v0.9.0 - 10 Sep, 2024
 

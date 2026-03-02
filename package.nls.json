@@ -24,7 +24,6 @@
     "frida.view.packages": "Java Package Tree",
     "frida.external.objection": "Objection",
     "frida.external.apk": "Pull APK from Device",
-    "frida.external.dump": "Dump App Package",
     "frida.device.androidserver": "Start frida-server",
     "frida.external.shell": "Open Shell",
     "frida.boilerplate.agent": "Create Frida Agent",

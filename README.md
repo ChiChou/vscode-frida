@@ -96,7 +96,7 @@ Generate VSCode `launch.json` and `tasks.json` for debugging Frida scripts with 
 ### Android Tools
 
 * **Download and start frida-server** on Android device (automatic architecture detection)
-* **Pull APK** from device
+* **Pull APK** from device (right-click on Android app to pull)
 
 ### External Tools Integration
 

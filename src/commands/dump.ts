@@ -3,9 +3,6 @@ import * as vscode from 'vscode';
 
 import ADB from '../driver/adb';
 import { AppItem, TargetItem } from "../providers/devices";
-import { DeviceType } from '../types';
-import { cmd } from '../utils';
-import { logger } from '../logger';
 
 export default async function dump(target: TargetItem) {
   if (!(target instanceof AppItem)) {
@@ -13,8 +10,8 @@ export default async function dump(target: TargetItem) {
     return;
   }
 
-  if (target.device.os !== 'ios' && target.device.os !== 'android') {
-    vscode.window.showErrorMessage(vscode.l10n.t('This command only supports iOS or Android'));
+  if (target.device.os !== 'android') {
+    vscode.window.showErrorMessage(vscode.l10n.t('This command only supports Android'));
     return;
   }
 
@@ -34,32 +31,18 @@ export default async function dump(target: TargetItem) {
   const destURI = destinations[0];
   const output = destURI.fsPath;
 
-  // save preferred path
   vscode.workspace.getConfiguration('frida').update('decryptOutput', output, true);
 
-  let artifact: vscode.Uri;
+  const artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.apk`);
 
   try {
-    if (target.device.os === 'ios') {
-      logger.appendLine(`Dump iOS app ${target.data.identifier} via bagbak to ${output}`);
-      artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.ipa`);
-      await bagbak(target, artifact);
-    } else if (target.device.os === 'android') {
-      logger.appendLine(`Dump Android app ${target.data.identifier} via APK pull to ${output}`);
-      artifact = vscode.Uri.joinPath(destURI, `${target.data.identifier}.apk`);
-      await pull(target, artifact);
-    } else {
-      vscode.window.showErrorMessage(vscode.l10n.t('This command only supports iOS or Android'));
-      return;
-    }
+    await pull(target, artifact);
   } catch (e) {
-    logger.appendLine(`Error: failed to dump ${target.data.identifier} - ${(e as Error).message}`);
     vscode.window.showInformationMessage(
-      vscode.l10n.t('failed to dump application:\n{0}', (e as Error).message));
+      vscode.l10n.t('failed to pull application:\n{0}', (e as Error).message));
     return;
   }
 
-  logger.appendLine(`Dump completed: ${target.data.identifier}`);
   const actionOpen = vscode.l10n.t('Open');
   const option = await vscode.window.showInformationMessage(
     vscode.l10n.t('Successfully pulled package {0}', target.data.identifier),
@@ -80,42 +63,4 @@ async function pull(target: AppItem, output: vscode.Uri) {
   } else {
     vscode.window.showErrorMessage(vscode.l10n.t('Failed to get package path: {0}', path));
   }
-}
-
-async function bagbak(target: AppItem, output: vscode.Uri) {
-  const shellArgs: string[] = [];
-  switch (target.device.type) {
-    case DeviceType.Remote:
-      shellArgs.push.apply(shellArgs, ['-H', target.device.id]);
-      break;
-    case DeviceType.USB:
-      if (target.device.id !== 'usb') { shellArgs.push.apply(shellArgs, ['-D', target.device.id]); }
-      break;
-    default:
-      vscode.window.showErrorMessage(vscode.l10n.t('Unsupported device type'));
-      return;
-  }
-
-  shellArgs.push.apply(shellArgs, [target.data.identifier, '-o', output.fsPath]);
-
-  const term = vscode.window.createTerminal({
-    name: 'bagbak',
-    shellPath: cmd('bagbak'),
-    shellArgs,
-  });
-
-  return new Promise<void>((resolve, reject) => {
-    vscode.window.onDidCloseTerminal((e) => {
-      if (e === term) {
-        if (term.exitStatus?.code === 0) {
-          resolve();
-        } else {
-          reject(new Error(`bagbak exited with code ${term.exitStatus?.code}`));
-        }
-      }
-    });
-
-    term.show();
-  });
-
 }

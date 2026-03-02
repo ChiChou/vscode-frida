@@ -94,7 +94,7 @@ Frida 脚本的上下文感知补全，支持 JavaScript / TypeScript：
 ### Android 工具
 
 * **下载并启动 frida-server** 在 Android 设备上（自动架构检测）
-* **拉取 APK** 从设备
+* **拉取 APK** 从设备（右键点击 Android 应用进行拉取）
 
 ### 外部工具集成
 
