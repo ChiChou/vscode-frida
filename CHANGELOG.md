@@ -1,5 +1,6 @@
 # Change Log
 
+* Support split apk
 * Remove iOS app dump (bagbak)
 
 ### v0.11.5 - 02 Mar, 2026

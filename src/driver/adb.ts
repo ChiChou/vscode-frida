@@ -32,8 +32,17 @@ export default class ADB {
     return this.cmd('push', local.fsPath, remote);
   }
 
-  async pull(remote: string, local: vscode.Uri) {
-    return this.cmd('pull', remote, local.fsPath);
+  async pull(...args: [...string[], vscode.Uri]) {
+    const local = args.pop() as vscode.Uri;
+    return this.cmd('pull', ...args as string[], local.fsPath);
+  }
+
+  async pmPath(pkg: string): Promise<string[]> {
+    const output = await this.shell('pm', 'path', pkg);
+    return output.split('\n')
+      .map(line => line.trim())
+      .filter(line => line.startsWith('package:'))
+      .map(line => line.substring(8));
   }
 
   interactive(...cmd: string[]) {
