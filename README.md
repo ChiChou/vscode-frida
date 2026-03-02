@@ -1,10 +1,12 @@
 # Frida Workbench for VSCode
 
-[Repository](https://github.com/chichou/vscode-frida)
-[Issues](https://github.com/ChiChou/vscode-frida/issues)
-[Install](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
+[**Repository**](https://github.com/chichou/vscode-frida) | 
+[**Issues**](https://github.com/ChiChou/vscode-frida/issues) | 
+[**Install**](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
 
-**Unofficial** frida extension for Visual Studio Code by [@CodeColorist](https://infosec.exchange/@codecolorist)
+**Unofficial** frida extension for Visual Studio Code by [@CodeColorist](https://infosec.exchange/@codecolorist) 
+
+[中文说明](README.cn.md)
 
 ## Prerequisites
 
