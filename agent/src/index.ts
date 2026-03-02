@@ -8,7 +8,7 @@ import { start, stop } from './log.js';
 import { Runtime } from './types.js';
 import type { MethodInfo, FieldInfo, ClassMemberInfo } from './types.js';
 import { applyOverrides as applyJavaOverrides } from './java/inspect.js';
-import { applyOverrides as applyObjCOverrides, objcClassHierarchy } from './fruity/inspect.js';
+import { applyOverrides as applyObjCOverrides } from './fruity/inspect.js';
 
 const methods = {
   start,
@@ -32,7 +32,7 @@ const methods = {
   classMembers: async (_name: string): Promise<ClassMemberInfo> => ({ methods: [], fields: [] }),
   superClasses: async (_name: string): Promise<string[]> => [],
 
-  objcClassHierarchy,
+  classesHierarchy: (): [string[], number[]] => [[], []],
 
   modules: () => Process.enumerateModules(),
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),

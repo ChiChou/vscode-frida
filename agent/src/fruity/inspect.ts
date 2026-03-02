@@ -10,6 +10,7 @@ interface Methods {
   methodsOf: (name: string) => Promise<MethodInfo[]>;
   ownMethodsOf: (name: string) => Promise<MethodInfo[]>;
   superClasses: (name: string) => Promise<string[]>;
+  classesHierarchy: () => [string[], number[]];
 }
 
 function getClass(name: string): ObjC.Object {
@@ -52,32 +53,6 @@ function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
   };
 }
 
-export function objcClassHierarchy(): [string[], number[]] {
-  if (!ObjC.available) throw new Error("Objective-C not available");
-
-  const names = Object.keys(ObjC.classes);
-  const indexMap: Record<string, number> = {};
-  for (let i = 0; i < names.length; i++)
-    indexMap[names[i]] = i;
-
-  const parents = new Array<number>(names.length);
-  for (let i = 0; i < names.length; i++) {
-    try {
-      const sup = ObjC.classes[names[i]].$superClass;
-      if (sup) {
-        const pn = sup.$className;
-        parents[i] = pn in indexMap ? indexMap[pn] : -1;
-      } else {
-        parents[i] = -1;
-      }
-    } catch (_) {
-      parents[i] = -1;
-    }
-  }
-
-  return [names, parents];
-}
-
 export function applyOverrides(methods: Methods): void {
   methods.classes = async () => Object.keys(ObjC.classes);
   methods.protocols = async () => Object.keys(ObjC.protocols);
@@ -98,5 +73,29 @@ export function applyOverrides(methods: Methods): void {
       cls = cls.$superClass;
     }
     return chain;
+  };
+
+  methods.classesHierarchy = () => {
+    const names = Object.keys(ObjC.classes);
+    const indexMap: Record<string, number> = {};
+    for (let i = 0; i < names.length; i++)
+      indexMap[names[i]] = i;
+
+    const parents = new Array<number>(names.length);
+    for (let i = 0; i < names.length; i++) {
+      try {
+        const sup = ObjC.classes[names[i]].$superClass;
+        if (sup) {
+          const pn = sup.$className;
+          parents[i] = pn in indexMap ? indexMap[pn] : -1;
+        } else {
+          parents[i] = -1;
+        }
+      } catch (_) {
+        parents[i] = -1;
+      }
+    }
+
+    return [names, parents];
   };
 }
