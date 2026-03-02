@@ -8,7 +8,7 @@
     },
     "displayName": "frida Workbench",
     "description": "%extension.description%",
-    "version": "0.11.2",
+    "version": "0.11.3",
     "engines": {
         "vscode": "^1.104.0"
     },
@@ -218,11 +218,13 @@
             "frida-sidebar": [
                 {
                     "id": "fridaApps",
-                    "name": "%frida.apps%"
+                    "name": "%frida.apps%",
+                    "icon": "resources/icon.svg"
                 },
                 {
                     "id": "fridaPs",
-                    "name": "%frida.ps%"
+                    "name": "%frida.ps%",
+                    "icon": "resources/icon.svg"
                 }
             ]
         },
