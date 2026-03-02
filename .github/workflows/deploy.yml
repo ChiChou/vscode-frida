@@ -28,6 +28,11 @@ jobs:
         cd agent
         npm install
         npm run build
+    - name: Package VSIX
+      run: vsce package
+    - name: Get version
+      id: version
+      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
     - name: Publish
       run: npm run deploy
       env:
@@ -43,3 +48,12 @@ jobs:
         body: ''
         draft: false
         prerelease: false
+    - name: Upload VSIX to Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./vscode-frida-${{ steps.version.outputs.VERSION }}.vsix
+        asset_name: vscode-frida-${{ steps.version.outputs.VERSION }}.vsix
+        asset_content_type: application/zip
