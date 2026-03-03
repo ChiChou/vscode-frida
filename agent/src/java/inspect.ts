@@ -1,6 +1,8 @@
 import Java from 'frida-java-bridge';
 
 import type { ArgInfo, MethodInfo, FieldInfo, ClassMemberInfo } from '../types.js';
+import { manifest } from './manifest.js';
+import { perform } from './util.js';
 
 interface Methods {
   classes: () => Promise<string[]>;
@@ -10,14 +12,7 @@ interface Methods {
   ownFieldsOf: (name: string) => Promise<FieldInfo[]>;
   classMembers: (name: string) => Promise<ClassMemberInfo>;
   superClasses: (name: string) => Promise<string[]>;
-}
-
-function perform<T>(fn: () => T): Promise<T> {
-  return new Promise<T>((resolve) => {
-    Java.perform(() => {
-      resolve(fn());
-    });
-  });
+  manifest: () => Promise<string>;
 }
 
 function shortenType(t: string): string {
@@ -132,4 +127,6 @@ export function applyOverrides(methods: Methods): void {
     const sup = Java.use(name).class.getSuperclass()?.getName();
     return sup ? [sup] : [];
   });
+
+  methods.manifest = manifest;
 }

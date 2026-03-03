@@ -11,6 +11,7 @@ interface Methods {
   ownMethodsOf: (name: string) => Promise<MethodInfo[]>;
   superClasses: (name: string) => Promise<string[]>;
   classesHierarchy: () => Record<string, string>;
+  infoPlist: () => Promise<string>;
 }
 
 function getClass(name: string): ObjC.Object {
@@ -86,5 +87,27 @@ export function applyOverrides(methods: Methods): void {
       }
     }
     return result;
+  };
+
+  methods.infoPlist = async () => {
+    const bundle = ObjC.classes.NSBundle.mainBundle();
+    const dict = bundle.infoDictionary();
+
+    const format = 100; // NSPropertyListXMLFormat_v1_0
+    const errorPtr = Memory.alloc(Process.pointerSize);
+    errorPtr.writePointer(NULL);
+
+    const data = ObjC.classes.NSPropertyListSerialization
+      .dataWithPropertyList_format_options_error_(dict, format, 0, errorPtr);
+
+    const err = errorPtr.readPointer();
+    if (!err.isNull()) {
+      const nsErr = new ObjC.Object(err);
+      throw new Error(nsErr.localizedDescription().toString());
+    }
+
+    const nsString = ObjC.classes.NSString.alloc()
+      .initWithData_encoding_(data, 4); // NSUTF8StringEncoding
+    return nsString.toString() as string;
   };
 }
