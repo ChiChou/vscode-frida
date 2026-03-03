@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.12.1 - 03 Mar, 2026
+
+* Add syntax highlight to CModule (c source)
+
 ### v0.12.0 - 03 Mar, 2026
 
 * Remove bagbak
