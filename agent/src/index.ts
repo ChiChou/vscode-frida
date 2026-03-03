@@ -9,6 +9,7 @@ import { Runtime } from './types.js';
 import type { MethodInfo, FieldInfo, ClassMemberInfo } from './types.js';
 import { applyOverrides as applyJavaOverrides } from './java/inspect.js';
 import { applyOverrides as applyObjCOverrides } from './fruity/inspect.js';
+import * as memory from './memory.js';
 
 const methods = {
   start,
@@ -38,6 +39,16 @@ const methods = {
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
   imports: (name: string) => Process.findModuleByName(name)?.enumerateImports(),
   symbols: (name: string) => Process.findModuleByName(name)?.enumerateSymbols(),
+
+  ranges: memory.ranges,
+  scanMemory: memory.scan,
+  readMemory: memory.read,
+  scanAll: memory.scanAll,
+  cancelScan: memory.cancelScan,
+  dump: memory.dump,
+
+  manifest: async (): Promise<string> => { throw new Error('manifest not available on this platform'); },
+  infoPlist: async (): Promise<string> => { throw new Error('infoPlist not available on this platform'); },
 };
 
 if (Java.available) {

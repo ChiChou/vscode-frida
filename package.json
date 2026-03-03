@@ -33,6 +33,14 @@
                     "default": null,
                     "description": "%frida.decryptOutput%"
                 },
+                "frida.dumpOutput": {
+                    "type": [
+                        "string",
+                        "null"
+                    ],
+                    "default": null,
+                    "description": "%frida.dumpOutput%"
+                },
                 "frida.androidServerPath": {
                     "type": [
                         "string",
@@ -157,6 +165,31 @@
             {
                 "command": "frida.view.packages",
                 "title": "%frida.view.packages%",
+                "category": "Frida"
+            },
+            {
+                "command": "frida.view.dashboard",
+                "title": "%frida.view.dashboard%",
+                "category": "Frida"
+            },
+            {
+                "command": "frida.view.memory",
+                "title": "%frida.view.memory%",
+                "category": "Frida"
+            },
+            {
+                "command": "frida.view.scanner",
+                "title": "%frida.view.scanner%",
+                "category": "Frida"
+            },
+            {
+                "command": "frida.view.manifest",
+                "title": "AndroidManifest.xml",
+                "category": "Frida"
+            },
+            {
+                "command": "frida.view.infoPlist",
+                "title": "Info.plist",
                 "category": "Frida"
             },
             {
@@ -285,6 +318,26 @@
                     "when": "false"
                 },
                 {
+                    "command": "frida.view.dashboard",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.memory",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.scanner",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.manifest",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.infoPlist",
+                    "when": "false"
+                },
+                {
                     "command": "frida.attach",
                     "when": "false"
                 },
@@ -407,68 +460,112 @@
                 {
                     "command": "frida.view.modules",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "3_frida_views@1"
+                    "group": "3_frida_inspect@1"
                 },
                 {
                     "command": "frida.view.modules",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
-                    "group": "3_frida_views@1"
+                    "group": "3_frida_inspect@1"
                 },
                 {
                     "command": "frida.view.classes",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "3_frida_views@2"
+                    "group": "3_frida_inspect@2"
                 },
                 {
                     "command": "frida.view.classes",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
-                    "group": "3_frida_views@2"
+                    "group": "3_frida_inspect@2"
                 },
                 {
                     "command": "frida.view.hierarchy",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "3_frida_views@3"
+                    "group": "3_frida_inspect@3"
                 },
                 {
                     "command": "frida.view.hierarchy",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "3_frida_views@3"
+                    "group": "3_frida_inspect@3"
                 },
                 {
                     "command": "frida.view.packages",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
-                    "group": "3_frida_views@3"
+                    "group": "3_frida_inspect@3"
                 },
                 {
                     "command": "frida.view.packages",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|android$/",
-                    "group": "3_frida_views@3"
+                    "group": "3_frida_inspect@3"
+                },
+                {
+                    "command": "frida.view.manifest",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
+                    "group": "4_frida_manifest@1"
+                },
+                {
+                    "command": "frida.view.manifest",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|android$/",
+                    "group": "4_frida_manifest@1"
+                },
+                {
+                    "command": "frida.view.infoPlist",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "4_frida_manifest@1"
+                },
+                {
+                    "command": "frida.view.infoPlist",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "4_frida_manifest@1"
+                },
+                {
+                    "command": "frida.view.memory",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/",
+                    "group": "5_frida_memory@1"
+                },
+                {
+                    "command": "frida.view.memory",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
+                    "group": "5_frida_memory@1"
+                },
+                {
+                    "command": "frida.view.scanner",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/",
+                    "group": "5_frida_memory@2"
+                },
+                {
+                    "command": "frida.view.scanner",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
+                    "group": "5_frida_memory@2"
                 },
                 {
                     "command": "frida.syslog",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "4_frida_logger@1"
+                    "group": "6_frida_logger@1"
                 },
                 {
                     "command": "frida.syslog",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
-                    "group": "4_frida_logger@1"
+                    "group": "6_frida_logger@1"
                 },
                 {
                     "command": "frida.external.objection",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/",
-                    "group": "5_frida_external@2"
+                    "group": "7_frida_external@2"
                 },
-
                 {
                     "command": "frida.external.apk",
                     "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
-                    "group": "5_frida_external@3"
+                    "group": "7_frida_external@3"
                 },
                 {
                     "command": "frida.external.shell",
                     "when": "viewItem =~ /^device\\|\\w+\\|(android|ios)$/ || viewItem =~ /^device\\|\\local/",
                     "group": "1_frida_dev_external@1"
+                },
+                {
+                    "command": "frida.view.dashboard",
+                    "when": "viewItem =~ /^device\\|/",
+                    "group": "1_frida_dev_setup@2"
                 },
                 {
                     "command": "frida.device.copy",

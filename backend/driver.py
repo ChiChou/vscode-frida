@@ -7,6 +7,81 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 
+def dump_memory(agent, address, size):
+    import signal
+    import threading
+
+    done = threading.Event()
+    stdout = sys.stdout.buffer
+
+    def on_message(message, data):
+        if message['type'] != 'send':
+            return
+        payload = message['payload']
+        if payload.get('subject') != 'dump':
+            return
+        if payload['event'] == 'data' and data is not None:
+            stdout.write(data)
+            stdout.flush()
+        elif payload['event'] == 'end':
+            done.set()
+
+    def on_signal(sig, frame):
+        done.set()
+
+    agent.script.on('message', on_message)
+    signal.signal(signal.SIGINT, on_signal)
+
+    agent.invoke('dump', address, size)
+    done.wait()
+
+    # agent.unload()
+
+
+def interactive_loop(agent):
+    import json
+    import threading
+
+    stdout_lock = threading.Lock()
+
+    def write_line(obj):
+        line = json.dumps(obj) + '\n'
+        with stdout_lock:
+            sys.stdout.write(line)
+            sys.stdout.flush()
+
+    def on_message(message, data):
+        if message['type'] == 'send':
+            write_line({'type': 'send', 'payload': message['payload']})
+
+    agent.script.on('message', on_message)
+    write_line({'type': 'ready'})
+
+    def handle_command(cmd):
+        cmd_id = cmd.get('id')
+        try:
+            result = agent.invoke(cmd['method'], *cmd.get('args', []))
+            write_line({'id': cmd_id, 'result': result})
+        except Exception as e:
+            write_line({'id': cmd_id, 'error': str(e)})
+
+    for line in sys.stdin:
+        line = line.strip()
+        if not line:
+            continue
+        try:
+            cmd = json.loads(line)
+        except json.JSONDecodeError as e:
+            write_line({'error': str(e)})
+            continue
+        threading.Thread(target=handle_command, args=(cmd,), daemon=True).start()
+
+    # do not call unload, there is a
+    # werid null ptr deref or UAF bug in frida
+
+    # agent.unload()
+
+
 def main(args):
     from backend import core, rpc, syslog
 
@@ -49,6 +124,14 @@ def main(args):
     if args.action == 'rpc':
         return agent.invoke(args.method, *args.args)
 
+    if args.action == 'dump':
+        dump_memory(agent, args.address, int(args.size))
+        return
+
+    if args.action == 'interactive':
+        interactive_loop(agent)
+        return
+
     if args.action == 'syslog':
         syslog.pipe(agent)
         return
@@ -89,6 +172,11 @@ if __name__ == '__main__':
     rpc_parser.add_argument('method')
     rpc_parser.add_argument('args', metavar='N', nargs='*', default=[])
 
+    dump_parser = subparsers.add_parser('dump', parents=[requires_app])
+    dump_parser.add_argument('address')
+    dump_parser.add_argument('size')
+
+    subparsers.add_parser('interactive', parents=[requires_app])
     subparsers.add_parser('syslog', parents=[requires_app])
     subparsers.add_parser('syslog2', parents=[requires_app])
 
@@ -104,5 +192,5 @@ if __name__ == '__main__':
             sys.exit(-1)
 
     import json
-    if args.action not in ['syslog', 'download', 'upload']:
+    if args.action not in ['syslog', 'interactive', 'dump', 'download', 'upload']:
         print(json.dumps(result))
