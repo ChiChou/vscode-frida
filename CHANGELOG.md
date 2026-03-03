@@ -3,6 +3,16 @@
 * Support split apk
 * Remove iOS app dump (bagbak)
 
+### v0.12.0 - 03 Mar, 2026
+
+* Remove bagbak
+* Support split APK
+* Device dashboard view
+* AndroidManifest and Info.plist viewing
+* Memory scanning and dumping functionality
+* Interactive session support for backend communication
+* i18n improvements and localizations
+
 ### v0.11.5 - 02 Mar, 2026
 
 * Fix "frida.ProtocolError: connection closed" error

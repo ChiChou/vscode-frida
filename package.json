@@ -8,7 +8,7 @@
     },
     "displayName": "frida Workbench",
     "description": "%extension.description%",
-    "version": "0.11.5",
+    "version": "0.12.0",
     "engines": {
         "vscode": "^1.94.0"
     },
