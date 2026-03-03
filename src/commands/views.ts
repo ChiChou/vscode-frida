@@ -38,8 +38,8 @@ export function packages(target: TargetItem) {
   new PackageTreePanel(extensionUri, target).show();
 }
 
-export function dashboard(device: DeviceItem) {
-  logger.appendLine(`Open dashboard for ${device.data.name}`);
+export function detail(device: DeviceItem) {
+  logger.appendLine(`Open device detail for ${device.data.name}`);
   new DeviceDashboardPanel(extensionUri, device).show();
 }
 

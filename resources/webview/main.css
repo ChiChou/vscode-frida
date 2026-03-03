@@ -461,6 +461,8 @@ button:disabled {
 
 .dashboard-card-body .info-row {
   display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   padding: 3px 0;
 }
 

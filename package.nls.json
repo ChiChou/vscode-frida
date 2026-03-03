@@ -23,7 +23,7 @@
     "frida.view.classes": "Classes",
     "frida.view.hierarchy": "Objective-C Class Hierarchy",
     "frida.view.packages": "Java Package Tree",
-    "frida.view.dashboard": "Device Dashboard",
+    "frida.view.detail": "Device Detail",
     "frida.view.memory": "Memory Ranges",
     "frida.view.scanner": "Memory Scanner",
     "frida.external.objection": "Objection",

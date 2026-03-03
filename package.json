@@ -168,8 +168,8 @@
                 "category": "Frida"
             },
             {
-                "command": "frida.view.dashboard",
-                "title": "%frida.view.dashboard%",
+                "command": "frida.view.detail",
+                "title": "%frida.view.detail%",
                 "category": "Frida"
             },
             {
@@ -318,7 +318,7 @@
                     "when": "false"
                 },
                 {
-                    "command": "frida.view.dashboard",
+                    "command": "frida.view.detail",
                     "when": "false"
                 },
                 {
@@ -563,7 +563,7 @@
                     "group": "1_frida_dev_external@1"
                 },
                 {
-                    "command": "frida.view.dashboard",
+                    "command": "frida.view.detail",
                     "when": "viewItem =~ /^device\\|/",
                     "group": "1_frida_dev_setup@2"
                 },

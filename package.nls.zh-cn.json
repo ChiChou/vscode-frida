@@ -23,7 +23,7 @@
     "frida.view.classes": "类",
     "frida.view.hierarchy": "Objective-C 类继承树",
     "frida.view.packages": "Java 包结构树",
-    "frida.view.dashboard": "设备仪表盘",
+    "frida.view.detail": "设备详情",
     "frida.view.memory": "内存区域",
     "frida.view.scanner": "内存扫描器",
     "frida.external.objection": "Objection",

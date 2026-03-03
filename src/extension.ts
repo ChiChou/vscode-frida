@@ -67,7 +67,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.view.modules', views.modules));
 	push(register('frida.view.hierarchy', views.hierarchy));
 	push(register('frida.view.packages', views.packages));
-	push(register('frida.view.dashboard', views.dashboard));
+	push(register('frida.view.detail', views.detail));
 	push(register('frida.view.memory', views.memory));
 	push(register('frida.view.scanner', views.scanner));
 	push(register('frida.view.manifest', views.manifest));
