@@ -1,0 +1,48 @@
+{
+    "$schema": "https://raw.githubusercontent.com/nicolo-ribaudo/tc39-proposal-scope-mapping/refs/heads/main/tmlanguage.schema.json",
+    "scopeName": "inline.c.frida.cmodule",
+    "injectionSelector": "L:source.js -comment, L:source.ts -comment",
+    "patterns": [
+        {
+            "name": "string.js.taggedTemplate.cmodule",
+            "begin": "(?:new\\s+)?CModule\\s*\\(\\s*(`)",
+            "beginCaptures": {
+                "1": {
+                    "name": "punctuation.definition.string.template.begin.js"
+                }
+            },
+            "end": "(`)",
+            "endCaptures": {
+                "1": {
+                    "name": "punctuation.definition.string.template.end.js"
+                }
+            },
+            "contentName": "meta.embedded.block.c",
+            "patterns": [
+                {
+                    "name": "meta.template.expression.js",
+                    "begin": "\\$\\{",
+                    "beginCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.template-expression.begin.js"
+                        }
+                    },
+                    "end": "\\}",
+                    "endCaptures": {
+                        "0": {
+                            "name": "punctuation.definition.template-expression.end.js"
+                        }
+                    },
+                    "patterns": [
+                        {
+                            "include": "source.js"
+                        }
+                    ]
+                },
+                {
+                    "include": "source.c"
+                }
+            ]
+        }
+    ]
+}

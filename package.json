@@ -51,6 +51,21 @@
                 }
             }
         },
+        "grammars": [
+            {
+                "scopeName": "inline.c.frida.cmodule",
+                "path": "./syntaxes/cmodule.tmLanguage.json",
+                "injectTo": [
+                    "source.js",
+                    "source.ts",
+                    "source.js.jsx",
+                    "source.tsx"
+                ],
+                "embeddedLanguages": {
+                    "meta.embedded.block.c": "c"
+                }
+            }
+        ],
         "commands": [
             {
                 "command": "frida.ps.refresh",
