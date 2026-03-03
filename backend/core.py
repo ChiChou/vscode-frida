@@ -93,7 +93,14 @@ def ps(device: frida.core.Device) -> list:
 
 
 def device_info(device: frida.core.Device) -> dict:
-    return device.query_system_parameters()
+    params = device.query_system_parameters()
+    params['frida'] = frida.__version__
+    params['device'] = {
+        'id': device.id,
+        'name': device.name,
+        'type': device.type,
+    }
+    return params
 
 
 def find_app(device: frida.core.Device, bundle: str):
