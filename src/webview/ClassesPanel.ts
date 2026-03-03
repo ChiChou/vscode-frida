@@ -161,6 +161,9 @@ export class ClassesPanel {
 
     const i18n = {
       hook: l10n.t('Hook'),
+      batchHook: l10n.t('Batch Hook'),
+      methods: l10n.t(' methods'),
+      selected: l10n.t(' selected'),
     };
 
     return `<!DOCTYPE html>

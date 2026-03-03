@@ -189,7 +189,7 @@
     const query = $methodFilter.value.toLowerCase();
     const filtered = filterMethods(query);
 
-    $methodCount.textContent = filtered.length + ' methods';
+    $methodCount.textContent = filtered.length + window.I18N.methods;
     $methodList.innerHTML = '';
     renderChunk(filtered, 0, $methodList, renderMethodRow);
   }
@@ -281,7 +281,7 @@
 
   function updateSelectionCount() {
     const count = checkedMethods.size;
-    $selectionCount.textContent = count + ' selected';
+    $selectionCount.textContent = count + window.I18N.selected;
     $btnHook.disabled = count === 0;
   }
 

@@ -143,6 +143,8 @@ export class ModulesPanel {
       generateHookSmart: l10n.t('With AI'),
       hook: l10n.t('Hook'),
       hookAI: l10n.t('Hook (AI)'),
+      exports: l10n.t(' exports'),
+      selected: l10n.t(' selected'),
     };
 
     return `<!DOCTYPE html>

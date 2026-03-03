@@ -26,7 +26,6 @@
     "frida.view.detail": "设备详情",
     "frida.view.memory": "内存区域",
     "frida.view.scanner": "内存扫描器",
-    "frida.external.objection": "Objection",
     "frida.external.apk": "从设备提取 APK",
     "frida.external.dump": "导出应用包",
     "frida.device.androidserver": "启动 frida-server",
@@ -76,7 +75,7 @@
     "Hook (AI)": "Hook (AI)",
     "Batch Hook": "批量 Hook",
     "With AI": "使用 AI",
-    "Dashboard - {0}": "仪表盘 - {0}",
+    "Detail - {0}": "详情 - {0}",
     "Memory - {0}": "内存 - {0}",
     "Device": "设备",
     "Operating System": "操作系统",
@@ -116,5 +115,12 @@
     "Dumping {0}": "正在转储 {0}",
     "Dumped {0} bytes to {1}": "已转储 {0} 字节到 {1}",
     "Dump failed": "转储失败",
-    "Reveal": "在文件管理器中显示"
+    "Reveal": "显示",
+    "Disconnected": "已断开连接",
+    "Scan error": "扫描错误",
+    "Invalid pattern": "无效的模式",
+    "Search...": "搜索...",
+    " exports": " 个导出",
+    " methods": " 个方法",
+    " selected": " 已选择"
 }

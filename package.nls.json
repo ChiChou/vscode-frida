@@ -26,7 +26,6 @@
     "frida.view.detail": "Device Detail",
     "frida.view.memory": "Memory Ranges",
     "frida.view.scanner": "Memory Scanner",
-    "frida.external.objection": "Objection",
     "frida.external.apk": "Pull APK from Device",
     "frida.device.androidserver": "Start frida-server",
     "frida.external.shell": "Open Shell",
@@ -75,7 +74,7 @@
     "Hook (AI)": "Hook (AI)",
     "Batch Hook": "Batch Hook",
     "With AI": "With AI",
-    "Dashboard - {0}": "Dashboard - {0}",
+    "Detail - {0}": "Detail - {0}",
     "Memory - {0}": "Memory - {0}",
     "Device": "Device",
     "Operating System": "Operating System",
@@ -115,5 +114,12 @@
     "Dumping {0}": "Dumping {0}",
     "Dumped {0} bytes to {1}": "Dumped {0} bytes to {1}",
     "Dump failed": "Dump failed",
-    "Reveal": "Reveal"
+    "Reveal": "Reveal",
+    "Disconnected": "Disconnected",
+    "Scan error": "Scan error",
+    "Invalid pattern": "Invalid pattern",
+    "Search...": "Search...",
+    " exports": " exports",
+    " methods": " methods",
+    " selected": " selected"
 }

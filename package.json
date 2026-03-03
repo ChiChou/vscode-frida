@@ -194,7 +194,7 @@
             },
             {
                 "command": "frida.external.objection",
-                "title": "%frida.external.objection%",
+                "title": "Objection",
                 "category": "Frida"
             },
             {

@@ -60,7 +60,7 @@
         break;
       case 'disconnected':
         $statusText.style.display = '';
-        $statusText.textContent = 'Disconnected';
+        $statusText.textContent = window.I18N.disconnected;
         $statusText.className = 'placeholder';
         $scanInput.disabled = true;
         $btnScan.disabled = true;
@@ -68,7 +68,7 @@
         break;
       case 'error':
         $statusText.style.display = '';
-        $statusText.textContent = 'Error';
+        $statusText.textContent = window.I18N.scanError;
         $statusText.className = 'placeholder';
         $scanInput.disabled = true;
         $btnScan.disabled = true;
@@ -136,7 +136,7 @@
 
     const pattern = convertPattern(input, scanMode);
     if (!pattern) {
-      showError('Invalid pattern');
+      showError(window.I18N.invalidPattern);
       return;
     }
 
@@ -231,7 +231,7 @@
   function updatePlaceholder() {
     switch (scanMode) {
       case 'string':
-        $scanInput.placeholder = 'Search string...';
+        $scanInput.placeholder = window.I18N.search;
         break;
       case 'hex':
         $scanInput.placeholder = 'AA BB CC ?? DD...';

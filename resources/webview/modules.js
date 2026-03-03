@@ -153,7 +153,7 @@
     const query = $exportFilter.value.toLowerCase();
     const filtered = filterExports(query);
 
-    $exportCount.textContent = filtered.length + ' exports';
+    $exportCount.textContent = filtered.length + window.I18N.exports;
     $exportList.innerHTML = '';
     renderChunk(filtered, 0, $exportList, renderExportRow);
   }
@@ -228,7 +228,7 @@
 
   function updateSelectionCount() {
     const count = checkedFunctions.size;
-    $selectionCount.textContent = count + ' selected';
+    $selectionCount.textContent = count + window.I18N.selected;
     $btnHookBasic.disabled = count === 0;
     $btnHookSmart.disabled = count === 0;
   }
