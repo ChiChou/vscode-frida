@@ -80,10 +80,10 @@ export class DeviceDashboardPanel {
     const i18n = {
       device: l10n.t('Device'),
       os: l10n.t('Operating System'),
-      frida: l10n.t('Frida'),
+      frida: 'Frida',
       security: l10n.t('Security'),
       name: l10n.t('Name'),
-      id: l10n.t('ID'),
+      id: 'ID',
       type: l10n.t('Type'),
       version: l10n.t('Version'),
       arch: l10n.t('Architecture'),

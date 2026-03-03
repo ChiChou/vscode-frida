@@ -160,7 +160,7 @@ export class ClassesPanel {
     const nonce = getNonce();
 
     const i18n = {
-      hook: l10n.t('Hook'),
+      hook: 'Hook',
       batchHook: l10n.t('Batch Hook'),
       methods: l10n.t(' methods'),
       selected: l10n.t(' selected'),

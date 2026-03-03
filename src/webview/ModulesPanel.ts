@@ -141,8 +141,8 @@ export class ModulesPanel {
       generating: l10n.t('Generating...'),
       generateHookBasic: l10n.t('Batch Hook'),
       generateHookSmart: l10n.t('With AI'),
-      hook: l10n.t('Hook'),
-      hookAI: l10n.t('Hook (AI)'),
+      hook: 'Hook',
+      hookAI: 'Hook (AI)',
       exports: l10n.t(' exports'),
       selected: l10n.t(' selected'),
     };
