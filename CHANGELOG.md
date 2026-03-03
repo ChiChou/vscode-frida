@@ -1,12 +1,10 @@
 # Change Log
 
-* Support split apk
-* Remove iOS app dump (bagbak)
-
 ### v0.12.0 - 03 Mar, 2026
 
 * Remove bagbak
 * Support split APK
+* Remove iOS app dump (bagbak)
 * Device dashboard view
 * AndroidManifest and Info.plist viewing
 * Memory scanning and dumping functionality
