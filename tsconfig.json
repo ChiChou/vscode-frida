@@ -20,6 +20,7 @@
 		"node_modules",
 		".vscode-test",
 		"server",
-		"agent"
+		"agent",
+		"manifest.ts"
 	]
 }
