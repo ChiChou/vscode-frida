@@ -46,6 +46,12 @@ Browse loaded native modules and their exported functions for any attached proce
 
 Explore runtime classes and methods for both Java and Objective-C. Filter classes, toggle between own and inherited methods, and batch-select methods for hook generation.
 
+#### Class Dump
+
+Dump class headers for reverse engineering:
+* **Objective-C** — generate header files from runtime class metadata
+* **Java** — generate decompiled class stubs with package and import statements
+
 ### Hook Generation
 
 Generate Frida hook code from the Modules and Classes panels:
