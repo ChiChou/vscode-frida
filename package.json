@@ -8,7 +8,7 @@
     },
     "displayName": "frida Workbench",
     "description": "%extension.description%",
-    "version": "0.12.1",
+    "version": "0.12.2",
     "engines": {
         "vscode": "^1.94.0"
     },
@@ -207,7 +207,6 @@
                 "title": "%frida.external.apk%",
                 "category": "Frida"
             },
-
             {
                 "command": "frida.device.androidserver",
                 "title": "%frida.device.androidserver%",
@@ -289,7 +288,6 @@
                     "command": "frida.external.objection",
                     "when": "false"
                 },
-
                 {
                     "command": "frida.external.apk",
                     "when": "false"
