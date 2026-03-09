@@ -4,7 +4,7 @@
 [**Issues**](https://github.com/ChiChou/vscode-frida/issues) | 
 [**Install**](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
 
-**Unofficial** frida extension for Visual Studio Code by [@CodeColorist](https://infosec.exchange/@codecolorist) 
+This is a community contributed project, not affiliated with the official Frida team. It is developed and maintained by [@CodeColorist](https://infosec.exchange/@codecolorist) as an open-source extension for Visual Studio Code to enhance the Frida scripting experience.
 
 [中文说明](README.cn.md)
 
@@ -45,14 +45,6 @@ Browse loaded native modules and their exported functions for any attached proce
 #### Classes & Methods Browser
 
 Explore runtime classes and methods for both Java and Objective-C. Filter classes, toggle between own and inherited methods, and batch-select methods for hook generation.
-
-#### Objective-C Hierarchy View (iOS)
-
-Visualize the complete Objective-C class inheritance tree with expand/collapse controls and class filtering.
-
-#### Java Package Tree (Android)
-
-Browse Java classes organized by package namespace in a hierarchical tree view.
 
 ### Hook Generation
 

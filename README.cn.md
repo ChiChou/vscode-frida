@@ -4,7 +4,7 @@
 [**GitHub Issues**](https://github.com/ChiChou/vscode-frida/issues) | 
 [**安装到 VSCode**](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
 
-**非官方** Frida VSCode 扩展
+本项目为社区贡献项目，与 Frida 官方团队无关。由 [@CodeColorist](https://infosec.exchange/@codecolorist) 开发和维护，是一个开源的 Visual Studio Code 扩展，旨在提升 Frida 脚本开发体验。
 
 ## 前置要求
 
@@ -43,14 +43,6 @@
 #### 类和方法浏览器
 
 探索 Java 和 Objective-C 的运行时类和方法。筛选类，在自有方法和继承方法之间切换，批量选择方法用于 Hook 生成。
-
-#### Objective-C 层级视图（iOS）
-
-可视化完整的 Objective-C 类继承树，支持展开/折叠控制和类筛选。
-
-#### Java 包树（Android）
-
-按包命名空间分层浏览 Java 类。
 
 ### Hook 生成
 

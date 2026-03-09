@@ -10,7 +10,6 @@ interface Methods {
   methodsOf: (name: string) => Promise<MethodInfo[]>;
   ownMethodsOf: (name: string) => Promise<MethodInfo[]>;
   superClasses: (name: string) => Promise<string[]>;
-  classesHierarchy: () => Record<string, string>;
   classInfo: (name: string) => Promise<ObjCClassInfo | JavaClassInfo>;
   infoPlist: () => Promise<string>;
 }
@@ -68,19 +67,6 @@ export function applyOverrides(methods: Methods): void {
       cls = cls.$superClass;
     }
     return chain;
-  };
-
-  methods.classesHierarchy = () => {
-    const result: Record<string, string> = {};
-    for (const name of Object.keys(ObjC.classes)) {
-      try {
-        const sup = ObjC.classes[name].$superClass;
-        result[name] = sup ? sup.$className : '';
-      } catch (_) {
-        result[name] = '';
-      }
-    }
-    return result;
   };
 
   methods.classInfo = async (name: string): Promise<ObjCClassInfo> => {

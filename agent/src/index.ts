@@ -34,8 +34,6 @@ const methods = {
   superClasses: async (_name: string): Promise<string[]> => [],
   classInfo: async (_name: string): Promise<ObjCClassInfo | JavaClassInfo> => { throw new Error('classInfo not available on this platform'); },
 
-  classesHierarchy: (): Record<string, string> => ({}),
-
   modules: () => Process.enumerateModules(),
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
   imports: (name: string) => Process.findModuleByName(name)?.enumerateImports(),

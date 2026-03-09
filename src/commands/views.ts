@@ -3,8 +3,6 @@ import { rpc } from '../driver/backend';
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
 import { ModulesPanel } from '../webview/ModulesPanel';
 import { ClassesPanel } from '../webview/ClassesPanel';
-import { HierarchyPanel } from '../webview/HierarchyPanel';
-import { PackageTreePanel } from '../webview/PackageTreePanel';
 import { DeviceDashboardPanel } from '../webview/DeviceDashboardPanel';
 import { MemoryPanel } from '../webview/MemoryPanel';
 import { MemoryScannerPanel } from '../webview/MemoryScannerPanel';
@@ -27,16 +25,6 @@ export function classes(target: TargetItem) {
   logger.appendLine(`Open classes panel for ${target.label}`);
   const panel = new ClassesPanel(extensionUri, target);
   panel.show();
-}
-
-export function hierarchy(target: TargetItem) {
-  logger.appendLine(`Open hierarchy panel for ${target.label}`);
-  new HierarchyPanel(extensionUri, target).show();
-}
-
-export function packages(target: TargetItem) {
-  logger.appendLine(`Open packages panel for ${target.label}`);
-  new PackageTreePanel(extensionUri, target).show();
 }
 
 export function detail(device: DeviceItem) {

@@ -173,16 +173,6 @@
                 "category": "Frida"
             },
             {
-                "command": "frida.view.hierarchy",
-                "title": "%frida.view.hierarchy%",
-                "category": "Frida"
-            },
-            {
-                "command": "frida.view.packages",
-                "title": "%frida.view.packages%",
-                "category": "Frida"
-            },
-            {
                 "command": "frida.view.detail",
                 "title": "%frida.view.detail%",
                 "category": "Frida"
@@ -322,14 +312,6 @@
                 },
                 {
                     "command": "frida.view.classes",
-                    "when": "false"
-                },
-                {
-                    "command": "frida.view.hierarchy",
-                    "when": "false"
-                },
-                {
-                    "command": "frida.view.packages",
                     "when": "false"
                 },
                 {
@@ -491,26 +473,6 @@
                     "command": "frida.view.classes",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
                     "group": "3_frida_inspect@2"
-                },
-                {
-                    "command": "frida.view.hierarchy",
-                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "3_frida_inspect@3"
-                },
-                {
-                    "command": "frida.view.hierarchy",
-                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
-                    "group": "3_frida_inspect@3"
-                },
-                {
-                    "command": "frida.view.packages",
-                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|android$/",
-                    "group": "3_frida_inspect@3"
-                },
-                {
-                    "command": "frida.view.packages",
-                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|android$/",
-                    "group": "3_frida_inspect@3"
                 },
                 {
                     "command": "frida.view.manifest",
