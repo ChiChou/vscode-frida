@@ -835,6 +835,17 @@ export interface JavaClassInfo {
   fields: { name: string; type: string; modifiers: string }[];
 }
 
+const javaPrimitives = new Set(['void', 'boolean', 'byte', 'char', 'short', 'int', 'long', 'float', 'double']);
+
+/** Strip array prefix and JNI encoding, return the base qualified class name or null for primitives. */
+function resolveJavaType(t: string): string | null {
+  let s = t;
+  while (s.startsWith('[')) s = s.substring(1);
+  if (s.startsWith('L') && s.endsWith(';')) s = s.substring(1, s.length - 1);
+  if (javaPrimitives.has(s) || !s.includes('.')) return null;
+  return s;
+}
+
 function shortenJavaType(t: string): string {
   // "[Lcom.example.Foo;" -> "Foo[]", "com.example.Foo" -> "Foo"
   let arrayDepth = 0;
@@ -851,8 +862,55 @@ function shortenJavaType(t: string): string {
   return short + '[]'.repeat(arrayDepth);
 }
 
+function collectJavaImports(info: JavaClassInfo): string[] {
+  const types = new Set<string>();
+  const ownPackage = info.name.lastIndexOf('.') >= 0
+    ? info.name.substring(0, info.name.lastIndexOf('.'))
+    : '';
+
+  function add(t: string) {
+    const resolved = resolveJavaType(t);
+    if (resolved) types.add(resolved);
+  }
+
+  if (info.superClass) add(info.superClass);
+  for (const iface of info.interfaces) add(iface);
+  for (const f of info.fields) add(f.type);
+  for (const m of info.methods) {
+    add(m.returnType);
+    for (const a of m.args) add(a);
+  }
+
+  return [...types]
+    .filter(t => {
+      // exclude java.lang.* (auto-imported) and same-package classes
+      if (t.startsWith('java.lang.') && !t.substring('java.lang.'.length).includes('.')) return false;
+      if (t === info.name) return false;
+      const pkg = t.lastIndexOf('.') >= 0 ? t.substring(0, t.lastIndexOf('.')) : '';
+      if (pkg === ownPackage) return false;
+      return true;
+    })
+    .sort();
+}
+
 export function generateJavaHeader(info: JavaClassInfo): string {
   function* generate(): Generator<string, void, undefined> {
+    // package
+    const lastDot = info.name.lastIndexOf('.');
+    if (lastDot >= 0) {
+      yield `package ${info.name.substring(0, lastDot)};`;
+      yield '';
+    }
+
+    // imports
+    const imports = collectJavaImports(info);
+    if (imports.length > 0) {
+      for (const imp of imports) {
+        yield `import ${imp};`;
+      }
+      yield '';
+    }
+
     // class declaration
     const keyword = info.modifiers.includes('interface') ? '' : 'class ';
     const mods = info.modifiers ? info.modifiers + ' ' : '';
