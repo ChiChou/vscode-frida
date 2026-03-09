@@ -1,5 +1,16 @@
 # Change Log
 
+### v0.12.2 - 10 Mar, 2026
+
+* Objective-C class dump
+* Java class dump
+* Add package and imports to Java header generation
+* Add dump buttons to hierarchy and package tree views
+* Add shift-click range selection for checkboxes
+* Fix empty class name
+* Remove hierarchy and package tree views
+* Cleanup tslint leftover
+
 ### v0.12.1 - 03 Mar, 2026
 
 * Add syntax highlight to CModule (c source)
