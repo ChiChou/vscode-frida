@@ -425,6 +425,28 @@ button:disabled {
   visibility: hidden;
 }
 
+.tree-row .tree-dump-btn {
+  opacity: 0;
+  margin-left: auto;
+  padding: 1px 6px;
+  background: var(--vscode-button-secondaryBackground, var(--vscode-button-background));
+  color: var(--vscode-button-secondaryForeground, var(--vscode-button-foreground));
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 11px;
+  flex-shrink: 0;
+  line-height: 18px;
+}
+
+.tree-row:hover .tree-dump-btn {
+  opacity: 1;
+}
+
+.tree-row .tree-dump-btn:hover {
+  background: var(--vscode-button-secondaryHoverBackground, var(--vscode-button-hoverBackground));
+}
+
 /* Dashboard cards */
 .dashboard-container {
   padding: 16px;

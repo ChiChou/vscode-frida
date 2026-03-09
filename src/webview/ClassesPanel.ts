@@ -150,20 +150,25 @@ export class ClassesPanel {
   }
 
   private async classDump(className: string) {
-    try {
-      const info = await rpc(this.target, 'class_info', className);
-      if (this.runtime === 'Java') {
-        const header = generateJavaHeader(info as JavaClassInfo);
-        const shortName = className.split('.').pop() ?? className;
-        await openUntitledDocument(`${shortName}.java`, header, 'java');
-      } else {
-        const header = generateHeader(info as ObjCClassInfo);
-        await openUntitledDocument(`${className}.h`, header, 'objective-c');
+    await vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: l10n.t('Dumping {0}...', className) },
+      async () => {
+        try {
+          const info = await rpc(this.target, 'class_info', className);
+          if (this.runtime === 'Java') {
+            const header = generateJavaHeader(info as JavaClassInfo);
+            const shortName = className.split('.').pop() ?? className;
+            await openUntitledDocument(`${shortName}.java`, header, 'java');
+          } else {
+            const header = generateHeader(info as ObjCClassInfo);
+            await openUntitledDocument(`${className}.h`, header, 'objective-c');
+          }
+        } catch (err: any) {
+          logger.appendLine(`Error: failed to dump class ${className} - ${err.message}`);
+          this.post({ type: 'error', message: err.message });
+        }
       }
-    } catch (err: any) {
-      logger.appendLine(`Error: failed to dump class ${className} - ${err.message}`);
-      this.post({ type: 'error', message: err.message });
-    }
+    );
   }
 
   private async generateHook(selections: MethodSelection[]) {

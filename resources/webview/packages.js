@@ -102,11 +102,11 @@
     if (query) {
       const matching = findMatching(rootNodes, query);
       const fragment = document.createDocumentFragment();
-      renderFilteredNodes(fragment, rootNodes, 0, matching);
+      renderFilteredNodes(fragment, rootNodes, 0, matching, '');
       $treeBody.appendChild(fragment);
     } else {
       const fragment = document.createDocumentFragment();
-      renderNodes(fragment, rootNodes, 0);
+      renderNodes(fragment, rootNodes, 0, '');
       $treeBody.appendChild(fragment);
     }
   }
@@ -127,21 +127,22 @@
     }
   }
 
-  function renderFilteredNodes(container, node, depth, matching) {
+  function renderFilteredNodes(container, node, depth, matching, prefix) {
     const keys = Object.keys(node).filter(k => matching.has(k));
     keys.sort();
     for (const key of keys) {
       const children = node[key];
       const childCount = Object.keys(children).length;
       const isLeaf = childCount === 0;
+      const fullName = prefix ? prefix + '.' + key : key;
 
-      const row = createRow(key, depth, isLeaf, true, childCount);
+      const row = createRow(key, depth, isLeaf, true, childCount, isLeaf ? fullName : null);
       container.appendChild(row);
-      renderFilteredNodes(container, children, depth + 1, matching);
+      renderFilteredNodes(container, children, depth + 1, matching, fullName);
     }
   }
 
-  function renderNodes(container, node, depth) {
+  function renderNodes(container, node, depth, prefix) {
     const keys = Object.keys(node);
     keys.sort();
     for (const key of keys) {
@@ -149,17 +150,18 @@
       const childCount = Object.keys(children).length;
       const isLeaf = childCount === 0;
       const expanded = expandedNodes.has(key);
+      const fullName = prefix ? prefix + '.' + key : key;
 
-      const row = createRow(key, depth, isLeaf, expanded, childCount);
+      const row = createRow(key, depth, isLeaf, expanded, childCount, isLeaf ? fullName : null);
       container.appendChild(row);
 
       if (expanded && !isLeaf) {
-        renderNodes(container, children, depth + 1);
+        renderNodes(container, children, depth + 1, fullName);
       }
     }
   }
 
-  function createRow(name, depth, isLeaf, expanded, childCount) {
+  function createRow(name, depth, isLeaf, expanded, childCount, fullClassName) {
     const row = document.createElement('div');
     row.className = 'tree-node' + (isLeaf ? ' tree-leaf' : '');
 
@@ -189,6 +191,18 @@
       count.className = 'tree-count';
       count.textContent = '(' + childCount + ')';
       inner.appendChild(count);
+    }
+
+    if (isLeaf && fullClassName) {
+      const dumpBtn = document.createElement('button');
+      dumpBtn.className = 'tree-dump-btn';
+      dumpBtn.textContent = 'Dump';
+      dumpBtn.title = 'Class Dump';
+      dumpBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        vscode.postMessage({ type: 'classDump', className: fullClassName });
+      });
+      inner.appendChild(dumpBtn);
     }
 
     if (!isLeaf) {

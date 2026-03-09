@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
+import { generateJavaHeader, JavaClassInfo } from '../classdump';
+import { openUntitledDocument } from '../utils';
 import { logger } from '../logger';
 
 export class PackageTreePanel {
@@ -54,6 +56,9 @@ export class PackageTreePanel {
       case 'ready':
         await this.loadClasses();
         break;
+      case 'classDump':
+        await this.classDump(msg.className);
+        break;
     }
   }
 
@@ -70,6 +75,23 @@ export class PackageTreePanel {
     } finally {
       this.post({ type: 'setLoading', loading: false });
     }
+  }
+
+  private async classDump(className: string) {
+    await vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: l10n.t('Dumping {0}...', className) },
+      async () => {
+        try {
+          const info = await rpc(this.target, 'class_info', className) as JavaClassInfo;
+          const header = generateJavaHeader(info);
+          const shortName = className.split('.').pop() ?? className;
+          await openUntitledDocument(`${shortName}.java`, header, 'java');
+        } catch (err: any) {
+          logger.appendLine(`Error: failed to dump class ${className} - ${err.message}`);
+          this.post({ type: 'error', message: err.message });
+        }
+      }
+    );
   }
 
   private getHtml(webview: vscode.Webview): string {

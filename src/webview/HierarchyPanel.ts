@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
+import { generateHeader, ObjCClassInfo } from '../classdump';
+import { openUntitledDocument } from '../utils';
 import { logger } from '../logger';
 
 export class HierarchyPanel {
@@ -54,6 +56,9 @@ export class HierarchyPanel {
       case 'ready':
         await this.loadHierarchy();
         break;
+      case 'classDump':
+        await this.classDump(msg.className);
+        break;
     }
   }
 
@@ -71,6 +76,22 @@ export class HierarchyPanel {
     } finally {
       this.post({ type: 'setLoading', loading: false });
     }
+  }
+
+  private async classDump(className: string) {
+    await vscode.window.withProgress(
+      { location: vscode.ProgressLocation.Notification, title: l10n.t('Dumping {0}...', className) },
+      async () => {
+        try {
+          const info = await rpc(this.target, 'class_info', className) as ObjCClassInfo;
+          const header = generateHeader(info);
+          await openUntitledDocument(`${className}.h`, header, 'objective-c');
+        } catch (err: any) {
+          logger.appendLine(`Error: failed to dump class ${className} - ${err.message}`);
+          this.post({ type: 'error', message: err.message });
+        }
+      }
+    );
   }
 
   private getHtml(webview: vscode.Webview): string {

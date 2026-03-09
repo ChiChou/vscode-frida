@@ -129,11 +129,26 @@
     };
   }
 
+  function clearDetailState() {
+    allMethods = [];
+    checkedMethods.clear();
+    $methodList.innerHTML = '';
+    $methodFilter.value = '';
+    $selectAll.checked = false;
+    $breadcrumb.style.display = 'none';
+    $breadcrumb.innerHTML = '';
+    $methodToolbar.style.display = 'none';
+    $actions.style.display = 'none';
+    updateSelectionCount();
+  }
+
   function selectClassByName(className) {
     if (!allClasses.includes(className)) return;
 
     selectedClassName = className;
     $detailTitle.textContent = className;
+
+    clearDetailState();
 
     $classList.querySelectorAll('.list-row').forEach(r => {
       if (r.dataset.name === className) {
@@ -181,6 +196,8 @@
     row.addEventListener('click', () => {
       selectedClassName = c;
       $detailTitle.textContent = c;
+
+      clearDetailState();
 
       $classList.querySelectorAll('.list-row').forEach(r => r.classList.remove('selected'));
       row.classList.add('selected');

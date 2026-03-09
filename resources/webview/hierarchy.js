@@ -163,6 +163,16 @@
       inner.appendChild(count);
     }
 
+    const dumpBtn = document.createElement('button');
+    dumpBtn.className = 'tree-dump-btn';
+    dumpBtn.textContent = 'Dump';
+    dumpBtn.title = 'Class Dump';
+    dumpBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      vscode.postMessage({ type: 'classDump', className: names[idx] });
+    });
+    inner.appendChild(dumpBtn);
+
     if (!isLeaf) {
       inner.addEventListener('click', () => {
         if (expandedNodes.has(idx)) expandedNodes.delete(idx);
