@@ -84,6 +84,9 @@ def handle_request(agent: AppAgent | ProcessAgent, request: dict) -> dict:
                 result = {"methods": methods, "fields": fields}
             else:
                 result = {"methods": [], "fields": []}
+        elif method == "classInfo":
+            class_name = params["className"]
+            result = agent.invoke("class_info", class_name)
         else:
             return {"id": req_id, "error": f"Unknown method: {method}"}
 

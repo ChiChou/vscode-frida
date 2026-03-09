@@ -1,7 +1,7 @@
 import ObjC from 'frida-objc-bridge';
 
-import type { ArgInfo, MethodInfo } from '../types.js';
-import { api as objcApi } from './runtime.js';
+import type { ArgInfo, MethodInfo, ObjCClassInfo, JavaClassInfo } from '../types.js';
+import { api as objcApi, getClass, copyIvars, copyProperties, copyClassProperties, copyProtocols, copyOwnMethods } from './runtime.js';
 import { parse as parseTypeEncoding } from './signature.js';
 
 interface Methods {
@@ -11,12 +11,8 @@ interface Methods {
   ownMethodsOf: (name: string) => Promise<MethodInfo[]>;
   superClasses: (name: string) => Promise<string[]>;
   classesHierarchy: () => Record<string, string>;
+  classInfo: (name: string) => Promise<ObjCClassInfo | JavaClassInfo>;
   infoPlist: () => Promise<string>;
-}
-
-function getClass(name: string): ObjC.Object {
-  if (ObjC.classes.hasOwnProperty(name)) return ObjC.classes[name];
-  throw new Error(`Class ${name} not found`);
 }
 
 function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
@@ -34,11 +30,9 @@ function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
       const typesPtr = objcApi.method_getTypeEncoding(methodHandle);
       if (!typesPtr.isNull()) {
         const enc = typesPtr.readUtf8String() as string;
-        // parseTypeEncoding returns [retType, selfType, cmdType, arg0Type, …]
         const types = parseTypeEncoding(enc);
         if (types.length > 0)
           retType = types[0];
-        // skip types[1] (self) and types[2] (_cmd), actual args start at index 3
         for (let i = 3; i < types.length; i++)
           args.push({ type: types[i] });
       }
@@ -87,6 +81,39 @@ export function applyOverrides(methods: Methods): void {
       }
     }
     return result;
+  };
+
+  methods.classInfo = async (name: string): Promise<ObjCClassInfo> => {
+    const cls = getClass(name);
+
+    // superclass
+    const sup = cls.$superClass;
+    const superClass = sup ? sup.$className : null;
+
+    // protocols
+    const protocols = copyProtocols(cls);
+
+    // methods: instance + class
+    const instanceMethods = copyOwnMethods(cls, false);
+    const classMethods = copyOwnMethods(cls, true);
+    const allMethods = [...instanceMethods, ...classMethods];
+
+    // properties: instance + class
+    const instanceProps = copyProperties(cls).map(p => ({ ...p, isClass: false }));
+    const classProps = copyClassProperties(cls).map(p => ({ ...p, isClass: true }));
+    const properties = [...instanceProps, ...classProps];
+
+    // ivars
+    const ivars = copyIvars(cls);
+
+    return {
+      name,
+      superClass,
+      protocols,
+      methods: allMethods,
+      properties,
+      ivars,
+    };
   };
 
   methods.infoPlist = async () => {

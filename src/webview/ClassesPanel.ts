@@ -3,6 +3,8 @@ import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 import { generateObjCHooks, generateJavaHooks, MethodSelection } from './hooks';
+import { generateHeader, ObjCClassInfo, generateJavaHeader, JavaClassInfo } from '../classdump';
+import { openUntitledDocument } from '../utils';
 import { logger } from '../logger';
 
 interface MethodInfo {
@@ -75,6 +77,9 @@ export class ClassesPanel {
       case 'generateHook':
         this.generateHook(msg.selections as MethodSelection[]);
         break;
+      case 'classDump':
+        await this.classDump(msg.className);
+        break;
       case 'navigateClass':
         this.post({ type: 'selectClass', className: msg.className });
         break;
@@ -144,13 +149,30 @@ export class ClassesPanel {
     }
   }
 
-  private generateHook(selections: MethodSelection[]) {
+  private async classDump(className: string) {
+    try {
+      const info = await rpc(this.target, 'class_info', className);
+      if (this.runtime === 'Java') {
+        const header = generateJavaHeader(info as JavaClassInfo);
+        const shortName = className.split('.').pop() ?? className;
+        await openUntitledDocument(`${shortName}.java`, header, 'java');
+      } else {
+        const header = generateHeader(info as ObjCClassInfo);
+        await openUntitledDocument(`${className}.h`, header, 'objective-c');
+      }
+    } catch (err: any) {
+      logger.appendLine(`Error: failed to dump class ${className} - ${err.message}`);
+      this.post({ type: 'error', message: err.message });
+    }
+  }
+
+  private async generateHook(selections: MethodSelection[]) {
     const code = this.runtime === 'Java'
       ? generateJavaHooks(selections)
       : generateObjCHooks(selections);
     if (code) {
-      vscode.workspace.openTextDocument({ content: code, language: 'javascript' })
-        .then(doc => vscode.window.showTextDocument(doc));
+      const className = selections[0]?.className ?? 'hook';
+      await openUntitledDocument(`${className}.js`, code, 'javascript');
     }
   }
 
@@ -162,6 +184,7 @@ export class ClassesPanel {
     const i18n = {
       hook: 'Hook',
       batchHook: l10n.t('Batch Hook'),
+      classDump: l10n.t('Class Dump'),
       methods: l10n.t(' methods'),
       selected: l10n.t(' selected'),
     };
@@ -209,6 +232,7 @@ export class ClassesPanel {
       <div class="actions" id="actions" style="display:none">
         <button id="btn-hook" disabled>${l10n.t('Batch Hook')}</button>
         <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>
+        <button id="btn-classdump" style="display:none;margin-left:auto">${l10n.t('Class Dump')}</button>
       </div>
     </div>
   </div>

@@ -8,6 +8,7 @@ import { PackageTreePanel } from '../webview/PackageTreePanel';
 import { DeviceDashboardPanel } from '../webview/DeviceDashboardPanel';
 import { MemoryPanel } from '../webview/MemoryPanel';
 import { MemoryScannerPanel } from '../webview/MemoryScannerPanel';
+import { openUntitledDocument } from '../utils';
 import { logger } from '../logger';
 
 let extensionUri: vscode.Uri;
@@ -60,14 +61,7 @@ async function fetchAndShow(target: TargetItem, method: string, filename: string
     async () => {
       try {
         const xml = await rpc(target, method) as string;
-        const dir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath ?? '';
-        const uri = vscode.Uri.parse(`untitled:${vscode.Uri.joinPath(vscode.Uri.file(dir), filename).fsPath}`);
-        const doc = await vscode.workspace.openTextDocument(uri);
-        const editor = await vscode.window.showTextDocument(doc);
-        await editor.edit(edit => {
-          edit.insert(new vscode.Position(0, 0), xml);
-        });
-        vscode.languages.setTextDocumentLanguage(doc, 'xml');
+        await openUntitledDocument(filename, xml, 'xml');
       } catch (err: any) {
         logger.appendLine(`Error: failed to load ${method} - ${err.message}`);
         vscode.window.showErrorMessage(err.message);

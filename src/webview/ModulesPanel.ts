@@ -3,6 +3,7 @@ import { l10n } from 'vscode';
 import { rpc } from '../driver/backend';
 import { TargetItem } from '../providers/devices';
 import { generateNativeHooks, generateNativeHooksBasic, NativeHookRequest } from './hooks';
+import { openUntitledDocument } from '../utils';
 import { logger } from '../logger';
 
 interface ModuleInfo {
@@ -124,8 +125,7 @@ export class ModulesPanel {
         ? await generateNativeHooks(req)
         : generateNativeHooksBasic(req);
       if (code) {
-        vscode.workspace.openTextDocument({ content: code, language: 'javascript' })
-          .then(doc => vscode.window.showTextDocument(doc));
+        await openUntitledDocument(`${req.module}.js`, code, 'javascript');
       }
     } finally {
       this.post({ type: 'hookGenerated' });

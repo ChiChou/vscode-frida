@@ -94,9 +94,17 @@ function libobjcFn<R extends NativeFunctionReturnValue, A extends Ptr[]>(
   ) as unknown as Fn<R, A>;
 }
 
+export function getClass(name: string): ObjC.Object {
+  const cls = ObjC.classes[name];
+  if (!cls)
+    throw new Error(`Class ${name} not found`);
+
+  return cls;
+}
+
 let extras: {
   class_copyPropertyList: Fn<NativePointer, [Ptr, Ptr]>;
-  property_copyAttributeValue: Fn<NativePointer, [Ptr, Ptr]>;
+  property_getAttributes: Fn<NativePointer, [Ptr]>;
 };
 
 function extraApi() {
@@ -106,10 +114,10 @@ function extraApi() {
       "pointer",
       "pointer",
     ]),
-    property_copyAttributeValue: libobjcFn(
-      "property_copyAttributeValue",
+    property_getAttributes: libobjcFn(
+      "property_getAttributes",
       "pointer",
-      ["pointer", "pointer"],
+      ["pointer"],
     ),
   });
 }
@@ -179,23 +187,20 @@ export function copyIvars(clazz: ObjC.Object): Ivar[] {
   return result;
 }
 
-const PROPERTY_ATTRS = "TRC&WNOD" as const;
-export type Property = Record<(typeof PROPERTY_ATTRS)[number], string>;
+export interface PropertyInfo {
+  name: string;
+  attributes: string;
+}
 
-export function copyProperties(clazz: ObjC.Object): Record<string, Property> {
-  const { class_copyPropertyList, property_copyAttributeValue } = extraApi();
-  const result: Record<string, Property> = {};
+function copyPropertyList(classHandle: NativePointerValue): PropertyInfo[] {
+  const { class_copyPropertyList, property_getAttributes } = extraApi();
+  const result: PropertyInfo[] = [];
 
   const nPropsBuf = Memory.alloc(Process.pointerSize);
-  const props = class_copyPropertyList(clazz.handle, nPropsBuf);
+  const props = class_copyPropertyList(classHandle, nPropsBuf);
   const nProps = nPropsBuf.readUInt();
 
   if (props.isNull()) return result;
-
-  const keys: Record<string, NativePointerValue> = {};
-  for (const c of PROPERTY_ATTRS) {
-    keys[c] = Memory.allocUtf8String(c);
-  }
 
   try {
     for (let i = 0; i < nProps; i++) {
@@ -203,18 +208,70 @@ export function copyProperties(clazz: ObjC.Object): Record<string, Property> {
       const namePtr = api.property_getName(handle);
       if (namePtr.isNull()) continue;
       const name = namePtr.readUtf8String() as string;
-      const attrs: Record<string, string> = {};
-
-      for (const [key, keyStr] of Object.entries(keys)) {
-        const v = property_copyAttributeValue(handle, keyStr);
-        if (v.isNull()) continue;
-        attrs[key] = v.readUtf8String() as string;
-      }
-
-      result[name] = attrs;
+      const attrPtr = property_getAttributes(handle);
+      if (attrPtr.isNull()) continue;
+      const attributes = attrPtr.readUtf8String() as string;
+      result.push({ name, attributes });
     }
   } finally {
     api.free(props);
+  }
+
+  return result;
+}
+
+export function copyProperties(clazz: ObjC.Object): PropertyInfo[] {
+  return copyPropertyList(clazz.handle);
+}
+
+export function copyClassProperties(clazz: ObjC.Object): PropertyInfo[] {
+  return copyPropertyList(api.object_getClass(clazz.handle));
+}
+
+export function copyProtocols(clazz: ObjC.Object): string[] {
+  const { pointerSize } = Process;
+  const countBuf = Memory.alloc(pointerSize);
+  const list = api.class_copyProtocolList(clazz.handle, countBuf);
+  const result: string[] = [];
+
+  if (list.isNull()) return result;
+
+  try {
+    const count = countBuf.readUInt();
+    for (let i = 0; i < count; i++) {
+      const handle = list.add(i * pointerSize).readPointer();
+      const name = api.protocol_getName(handle).readUtf8String() as string;
+      result.push(name);
+    }
+  } finally {
+    api.free(list);
+  }
+
+  return result;
+}
+
+export function copyOwnMethods(clazz: ObjC.Object, isMetaClass: boolean): { selector: string; types: string }[] {
+  const { pointerSize } = Process;
+  const target = isMetaClass ? api.object_getClass(clazz.handle) : clazz.handle;
+  const countBuf = Memory.alloc(pointerSize);
+  const list = api.class_copyMethodList(target, countBuf);
+  const result: { selector: string; types: string }[] = [];
+
+  if (list.isNull()) return result;
+
+  try {
+    const count = countBuf.readUInt();
+    const prefix = isMetaClass ? '+ ' : '- ';
+    for (let i = 0; i < count; i++) {
+      const handle = list.add(i * pointerSize).readPointer();
+      const selPtr = api.method_getName(handle);
+      const selector = prefix + (api.sel_getName(selPtr).readUtf8String() as string);
+      const typesPtr = api.method_getTypeEncoding(handle);
+      const types = typesPtr.isNull() ? '' : typesPtr.readUtf8String() as string;
+      result.push({ selector, types });
+    }
+  } finally {
+    api.free(list);
   }
 
   return result;

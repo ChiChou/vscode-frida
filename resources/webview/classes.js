@@ -22,6 +22,7 @@
   const $selectAll = document.getElementById('select-all');
   const $methodCount = document.getElementById('method-count');
   const $btnHook = document.getElementById('btn-hook');
+  const $btnClassDump = document.getElementById('btn-classdump');
   const $selectionCount = document.getElementById('selection-count');
   const $actions = document.getElementById('actions');
 
@@ -34,6 +35,7 @@
         break;
       case 'setRuntime':
         runtime = msg.runtime;
+        $btnClassDump.style.display = (runtime === 'ObjectiveC' || runtime === 'Java') ? '' : 'none';
         break;
       case 'setMethods':
         allMethods = msg.methods;
@@ -104,6 +106,14 @@
     vscode.postMessage({
       type: 'generateHook',
       selections: Array.from(checkedMethods.values()),
+    });
+  });
+
+  $btnClassDump.addEventListener('click', () => {
+    if (!selectedClassName) return;
+    vscode.postMessage({
+      type: 'classDump',
+      className: selectedClassName,
     });
   });
 

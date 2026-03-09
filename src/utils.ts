@@ -2,7 +2,7 @@ import which from 'which';
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import { join } from 'path';
-import { platform } from 'os';
+import { platform, tmpdir } from 'os';
 import { DeviceType } from './types';
 import { AppItem, ProcessItem } from './providers/devices';
 
@@ -90,6 +90,19 @@ export async function interpreter(cli = 'frida'): Promise<string> {
   logger.appendLine(`Resolved Python interpreter (PATH): ${path}`);
   cache.set(cli, path);
   return path;
+}
+
+export async function openUntitledDocument(filename: string, content: string, language?: string): Promise<void> {
+  const dir = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || tmpdir();
+  const uri = vscode.Uri.parse(`untitled:${vscode.Uri.joinPath(vscode.Uri.file(dir), filename).fsPath}`);
+  const doc = await vscode.workspace.openTextDocument(uri);
+  const editor = await vscode.window.showTextDocument(doc);
+  await editor.edit(edit => {
+    edit.insert(new vscode.Position(0, 0), content);
+  });
+  if (language) {
+    await vscode.languages.setTextDocumentLanguage(doc, language);
+  }
 }
 
 export function expandDevParam(node: AppItem | ProcessItem) {
