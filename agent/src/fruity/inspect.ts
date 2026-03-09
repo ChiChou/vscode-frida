@@ -70,7 +70,7 @@ export function applyOverrides(methods: Methods): void {
     const chain: string[] = [];
     let cls = getClass(name).$superClass;
     while (cls) {
-      chain.push(cls.name);
+      chain.push(cls.$className);
       cls = cls.$superClass;
     }
     return chain;
