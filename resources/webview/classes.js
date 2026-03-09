@@ -10,6 +10,7 @@
   let checkedMethods = new Map(); // name -> full MethodInfo with className
   let runtime = 'Generic';
   let filterDebounce = null;
+  let lastCheckedMethodName = null;
 
   const $classList = document.getElementById('class-list');
   const $methodList = document.getElementById('method-list');
@@ -40,6 +41,7 @@
       case 'setMethods':
         allMethods = msg.methods;
         checkedMethods.clear();
+        lastCheckedMethodName = null;
         renderMethods();
         $methodToolbar.style.display = '';
         $actions.style.display = 'flex';
@@ -228,12 +230,32 @@
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = checkedMethods.has(m.name);
-    cb.addEventListener('change', () => {
-      if (cb.checked) {
-        checkedMethods.set(m.name, toSelection(m));
+    cb.addEventListener('click', (ev) => {
+      if (ev.shiftKey && lastCheckedMethodName != null) {
+        const query = $methodFilter.value.toLowerCase();
+        const filtered = filterMethods(query);
+        const curIdx = filtered.findIndex(x => x.name === m.name);
+        const lastIdx = filtered.findIndex(x => x.name === lastCheckedMethodName);
+        if (curIdx >= 0 && lastIdx >= 0) {
+          const from = Math.min(curIdx, lastIdx);
+          const to = Math.max(curIdx, lastIdx);
+          for (let i = from; i <= to; i++) {
+            if (cb.checked) {
+              checkedMethods.set(filtered[i].name, toSelection(filtered[i]));
+            } else {
+              checkedMethods.delete(filtered[i].name);
+            }
+          }
+          renderMethods();
+        }
       } else {
-        checkedMethods.delete(m.name);
+        if (cb.checked) {
+          checkedMethods.set(m.name, toSelection(m));
+        } else {
+          checkedMethods.delete(m.name);
+        }
       }
+      lastCheckedMethodName = m.name;
       updateSelectionCount();
     });
 

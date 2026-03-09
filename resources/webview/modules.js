@@ -10,6 +10,7 @@
   let selectedModuleInfo = null;
   let checkedFunctions = new Set();
   let filterDebounce = null;
+  let lastCheckedExportName = null;
 
   const $moduleList = document.getElementById('module-list');
   const $exportList = document.getElementById('export-list');
@@ -37,6 +38,7 @@
       case 'setExports':
         allExports = msg.exports;
         checkedFunctions.clear();
+        lastCheckedExportName = null;
         renderExports();
         $exportToolbar.style.display = '';
         $actions.style.display = 'flex';
@@ -165,12 +167,32 @@
     const cb = document.createElement('input');
     cb.type = 'checkbox';
     cb.checked = checkedFunctions.has(e.name);
-    cb.addEventListener('change', () => {
-      if (cb.checked) {
-        checkedFunctions.add(e.name);
+    cb.addEventListener('click', (ev) => {
+      if (ev.shiftKey && lastCheckedExportName != null) {
+        const query = $exportFilter.value.toLowerCase();
+        const filtered = filterExports(query);
+        const curIdx = filtered.findIndex(x => x.name === e.name);
+        const lastIdx = filtered.findIndex(x => x.name === lastCheckedExportName);
+        if (curIdx >= 0 && lastIdx >= 0) {
+          const from = Math.min(curIdx, lastIdx);
+          const to = Math.max(curIdx, lastIdx);
+          for (let i = from; i <= to; i++) {
+            if (cb.checked) {
+              checkedFunctions.add(filtered[i].name);
+            } else {
+              checkedFunctions.delete(filtered[i].name);
+            }
+          }
+          renderExports();
+        }
       } else {
-        checkedFunctions.delete(e.name);
+        if (cb.checked) {
+          checkedFunctions.add(e.name);
+        } else {
+          checkedFunctions.delete(e.name);
+        }
       }
+      lastCheckedExportName = e.name;
       updateSelectionCount();
     });
 
