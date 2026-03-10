@@ -44,7 +44,7 @@ Browse loaded native modules and their exported functions for any attached proce
 
 #### Classes & Methods Browser
 
-Explore runtime classes and methods for both Java and Objective-C. Filter classes, toggle between own and inherited methods, and batch-select methods for hook generation.
+Explore runtime classes and methods for both Java and Objective-C. Filter classes, toggle between own and inherited methods, and batch-select methods for hook generation. Also includes **Objective-C protocol inspection** to browse and analyze protocols.
 
 #### Class Dump
 
