@@ -3,6 +3,7 @@ import { rpc } from '../driver/backend';
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
 import { ModulesPanel } from '../webview/ModulesPanel';
 import { ClassesPanel } from '../webview/ClassesPanel';
+import { ProtocolsPanel } from '../webview/ProtocolsPanel';
 import { DeviceDashboardPanel } from '../webview/DeviceDashboardPanel';
 import { MemoryPanel } from '../webview/MemoryPanel';
 import { MemoryScannerPanel } from '../webview/MemoryScannerPanel';
@@ -24,6 +25,12 @@ export function modules(target: TargetItem) {
 export function classes(target: TargetItem) {
   logger.appendLine(`Open classes panel for ${target.label}`);
   const panel = new ClassesPanel(extensionUri, target);
+  panel.show();
+}
+
+export function protocols(target: TargetItem) {
+  logger.appendLine(`Open protocols panel for ${target.label}`);
+  const panel = new ProtocolsPanel(extensionUri, target);
   panel.show();
 }
 

@@ -54,7 +54,13 @@ export interface ObjCClassInfo {
   ivars: ObjCIvarInfo[];
 }
 
-// --- Java class info ---
+export interface ObjCProtocolInfo {
+  name: string;
+  parentProtocols: string[];
+  methods: ObjCMethodInfo[];
+  optionalMethods: ObjCMethodInfo[];
+  properties: ObjCPropertyInfo[];
+}
 
 export interface JavaMethodInfo {
   name: string;

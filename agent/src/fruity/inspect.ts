@@ -1,7 +1,7 @@
 import ObjC from 'frida-objc-bridge';
 
-import type { ArgInfo, MethodInfo, ObjCClassInfo, JavaClassInfo } from '../types.js';
-import { api as objcApi, getClass, copyIvars, copyProperties, copyClassProperties, copyProtocols, copyOwnMethods } from './runtime.js';
+import type { ArgInfo, MethodInfo, ObjCClassInfo, ObjCMethodInfo, ObjCPropertyInfo, ObjCProtocolInfo, JavaClassInfo } from '../types.js';
+import { api as objcApi, getClass, copyIvars, copyProperties, copyClassProperties, copyProtocols, copyOwnMethods, getProtocolMethodExtendedTypes } from './runtime.js';
 import { parse as parseTypeEncoding } from './signature.js';
 
 interface Methods {
@@ -11,6 +11,10 @@ interface Methods {
   ownMethodsOf: (name: string) => Promise<MethodInfo[]>;
   superClasses: (name: string) => Promise<string[]>;
   classInfo: (name: string) => Promise<ObjCClassInfo | JavaClassInfo>;
+  protocolMethodsOf: (name: string) => Promise<MethodInfo[]>;
+  ownProtocolMethodsOf: (name: string) => Promise<MethodInfo[]>;
+  parentProtocols: (name: string) => Promise<string[]>;
+  protocolInfo: (name: string) => Promise<ObjCProtocolInfo>;
   infoPlist: () => Promise<string>;
 }
 
@@ -22,7 +26,7 @@ function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
   let retType = 'v';
 
   try {
-    const selPtr = objcApi.sel_registerName(Memory.allocUtf8String(cleanSel));
+    const selPtr = ObjC.selector(cleanSel);
     const target = isInstance ? cls.handle : objcApi.object_getClass(cls.handle);
     const methodHandle = objcApi.class_getInstanceMethod(target, selPtr);
     if (!methodHandle.isNull()) {
@@ -45,6 +49,66 @@ function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
     returnType: retType,
     isStatic: !isInstance,
   };
+}
+
+function getProtocolBridge(name: string): ObjC.Protocol {
+  const proto = ObjC.protocols[name];
+  if (!proto) throw new Error(`Protocol ${name} not found`);
+  return proto;
+}
+
+function bridgeMethodToMethodInfo(selector: string, info: { types: string }): MethodInfo {
+  const isInstance = selector.startsWith('- ');
+  const args: ArgInfo[] = [];
+  let retType = 'v';
+
+  if (info.types) {
+    try {
+      const types = parseTypeEncoding(info.types);
+      if (types.length > 0) retType = types[0];
+      for (let i = 3; i < types.length; i++) args.push({ type: types[i] });
+    } catch (_) { /* type encoding unavailable */ }
+  }
+
+  return {
+    name: selector,
+    display: selector,
+    args,
+    returnType: retType,
+    isStatic: !isInstance,
+  };
+}
+
+function collectProtocolMethods(proto: ObjC.Protocol, ownOnly: boolean): MethodInfo[] {
+  const result: MethodInfo[] = [];
+  const seen = new Set<string>();
+
+  for (const [selector, info] of Object.entries(proto.methods)) {
+    if (!seen.has(selector)) {
+      seen.add(selector);
+      result.push(bridgeMethodToMethodInfo(selector, info));
+    }
+  }
+
+  if (!ownOnly) {
+    for (const parent of Object.values(proto.protocols)) {
+      for (const [selector, info] of Object.entries(parent.methods)) {
+        if (!seen.has(selector)) {
+          seen.add(selector);
+          result.push(bridgeMethodToMethodInfo(selector, info));
+        }
+      }
+    }
+  }
+
+  return result;
+}
+
+/** Convert bridge property dict { T: '@"NSString"', R: '', C: '' } to attribute string 'T@"NSString",R,C' */
+function propertyDictToAttrString(attrs: Record<string, string>): string {
+  return Object.entries(attrs)
+    .map(([key, value]) => value ? `${key}${value}` : key)
+    .join(',');
 }
 
 export function applyOverrides(methods: Methods): void {
@@ -99,6 +163,51 @@ export function applyOverrides(methods: Methods): void {
       methods: allMethods,
       properties,
       ivars,
+    };
+  };
+
+  methods.ownProtocolMethodsOf = async (name: string) => {
+    return collectProtocolMethods(getProtocolBridge(name), true);
+  };
+  methods.protocolMethodsOf = async (name: string) => {
+    return collectProtocolMethods(getProtocolBridge(name), false);
+  };
+  methods.parentProtocols = async (name: string) => {
+    return Object.keys(getProtocolBridge(name).protocols);
+  };
+  methods.protocolInfo = async (name: string): Promise<ObjCProtocolInfo> => {
+    const proto = getProtocolBridge(name);
+    const handle = proto.handle;
+
+    const required: ObjCMethodInfo[] = [];
+    const optional: ObjCMethodInfo[] = [];
+    for (const [selector, info] of Object.entries(proto.methods)) {
+      const isInstance = selector.startsWith('- ');
+      const bareSel = selector.substring(2);
+      const extTypes = getProtocolMethodExtendedTypes(handle, bareSel, info.required, isInstance);
+      const entry = { selector, types: extTypes ?? info.types };
+      if (info.required) {
+        required.push(entry);
+      } else {
+        optional.push(entry);
+      }
+    }
+
+    const parentProtocols = Object.keys(proto.protocols);
+
+    const properties: ObjCPropertyInfo[] = Object.entries(proto.properties)
+      .map(([propName, attrs]) => ({
+        name: propName,
+        attributes: propertyDictToAttrString(attrs),
+        isClass: false,
+      }));
+
+    return {
+      name,
+      parentProtocols,
+      methods: required,
+      optionalMethods: optional,
+      properties,
     };
   };
 

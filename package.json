@@ -173,6 +173,11 @@
                 "category": "Frida"
             },
             {
+                "command": "frida.view.protocols",
+                "title": "%frida.view.protocols%",
+                "category": "Frida"
+            },
+            {
                 "command": "frida.view.detail",
                 "title": "%frida.view.detail%",
                 "category": "Frida"
@@ -310,6 +315,10 @@
                 },
                 {
                     "command": "frida.view.classes",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.protocols",
                     "when": "false"
                 },
                 {
@@ -471,6 +480,16 @@
                     "command": "frida.view.classes",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
                     "group": "3_frida_inspect@2"
+                },
+                {
+                    "command": "frida.view.protocols",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "3_frida_inspect@3"
+                },
+                {
+                    "command": "frida.view.protocols",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "3_frida_inspect@3"
                 },
                 {
                     "command": "frida.view.manifest",

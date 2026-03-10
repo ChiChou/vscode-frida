@@ -1,10 +1,10 @@
 import ObjC from "frida-objc-bridge";
 
 type Ptr = NativePointerValue;
-type Fn<R extends NativeFunctionReturnValue, A extends Ptr[]> = NativeFunction<
-  R,
-  A
->;
+type Fn<
+  R extends NativeFunctionReturnValue,
+  A extends NativeFunctionArgumentValue[] | [],
+> = NativeFunction<R, A>;
 
 interface ObjCApi {
   // libsystem_malloc
@@ -19,7 +19,7 @@ interface ObjCApi {
   objc_msgSendSuper_fpret?: NativePointer;
 
   // libobjc - class management
-  objc_getClassList: Fn<number, [Ptr, Ptr]>;
+  objc_getClassList: Fn<number, [Ptr, number]>;
   objc_lookUpClass: Fn<NativePointer, [Ptr]>;
   objc_allocateClassPair: Fn<NativePointer, [Ptr, Ptr, Ptr]>;
   objc_disposeClassPair: Fn<void, [Ptr]>;
@@ -45,11 +45,11 @@ interface ObjCApi {
   objc_allocateProtocol: Fn<NativePointer, [Ptr]>;
   objc_registerProtocol: Fn<void, [Ptr]>;
   protocol_getName: Fn<NativePointer, [Ptr]>;
-  protocol_copyMethodDescriptionList: Fn<NativePointer, [Ptr, Ptr, Ptr, Ptr]>;
+  protocol_copyMethodDescriptionList: Fn<NativePointer, [Ptr, number, number, Ptr]>;
   protocol_copyPropertyList: Fn<NativePointer, [Ptr, Ptr]>;
   protocol_copyProtocolList: Fn<NativePointer, [Ptr, Ptr]>;
   protocol_addProtocol: Fn<void, [Ptr, Ptr]>;
-  protocol_addMethodDescription: Fn<void, [Ptr, Ptr, Ptr, Ptr, Ptr]>;
+  protocol_addMethodDescription: Fn<void, [Ptr, Ptr, Ptr, number, number]>;
 
   // libobjc - ivar
   ivar_getName: Fn<NativePointer, [Ptr]>;
@@ -82,7 +82,7 @@ interface ObjCApi {
 
 export const api = ObjC.api as unknown as ObjCApi;
 
-function libobjcFn<R extends NativeFunctionReturnValue, A extends Ptr[]>(
+function libobjcFn<R extends NativeFunctionReturnValue, A extends NativeFunctionArgumentValue[] | []>(
   name: string,
   ret: NativeFunctionReturnType,
   args: NativeFunctionArgumentType[],
@@ -105,10 +105,12 @@ export function getClass(name: string): ObjC.Object {
 let extras: {
   class_copyPropertyList: Fn<NativePointer, [Ptr, Ptr]>;
   property_getAttributes: Fn<NativePointer, [Ptr]>;
+  _protocol_getMethodTypeEncoding: Fn<NativePointer, [Ptr, Ptr, number, number]>;
 };
 
 function extraApi() {
   if (extras) return extras;
+
   return (extras = {
     class_copyPropertyList: libobjcFn("class_copyPropertyList", "pointer", [
       "pointer",
@@ -119,7 +121,32 @@ function extraApi() {
       "pointer",
       ["pointer"],
     ),
+    _protocol_getMethodTypeEncoding: libobjcFn(
+      "_protocol_getMethodTypeEncoding",
+      "pointer",
+      ["pointer", "pointer", "bool", "bool"],
+    ),
   });
+}
+
+/**
+ * Get extended type encoding for a protocol method (includes class names like @"NSString").
+ * Returns null if the method is not found in the protocol.
+ */
+export function getProtocolMethodExtendedTypes(
+  protoHandle: NativePointer,
+  selector: string,
+  isRequired: boolean,
+  isInstance: boolean,
+): string | null {
+  const { _protocol_getMethodTypeEncoding } = extraApi();
+  const sel = ObjC.selector(selector);
+  const p = _protocol_getMethodTypeEncoding(protoHandle, sel, isRequired ? 1 : 0, isInstance ? 1 : 0);
+  if (!p.isNull()) {
+    const s = p.readUtf8String();
+    if (s) return s;
+  }
+  return null;
 }
 
 export interface ObjCMethod {
@@ -131,7 +158,7 @@ export interface ObjCMethod {
 export function resolveMethod(clazz: ObjC.Object, sel: string): ObjCMethod {
   const isClassMethod = sel.startsWith("+ ");
   const selName = sel.substring(2);
-  const selPtr = api.sel_registerName(Memory.allocUtf8String(selName));
+  const selPtr = ObjC.selector(selName);
   const target = isClassMethod
     ? api.object_getClass(clazz.handle)
     : clazz.handle;

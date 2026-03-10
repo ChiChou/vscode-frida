@@ -824,7 +824,73 @@ export function generateHeader(info: ObjCClassInfo): string {
   return [...generate()].join('\n');
 }
 
-// --- Java class dump ---
+export interface ObjCProtocolInfo {
+  name: string;
+  parentProtocols: string[];
+  methods: { selector: string; types: string }[];
+  optionalMethods: { selector: string; types: string }[];
+  properties: { name: string; attributes: string; isClass: boolean }[];
+}
+
+export function generateProtocolHeader(info: ObjCProtocolInfo): string {
+  function* generate(): Generator<string, void, undefined> {
+    const protoPart = info.parentProtocols.length > 0 ? ` <${info.parentProtocols.join(', ')}>` : '';
+    yield `@protocol ${info.name}${protoPart}`;
+    yield '';
+
+    // properties
+    for (const prop of info.properties) {
+      if (prop.attributes) {
+        try {
+          yield `${dumpProperty(prop.name, prop.attributes, prop.isClass)};`;
+        } catch (_) {
+          yield `@property ${prop.name}; /* failed to parse attributes */`;
+        }
+      } else {
+        yield `@property ${prop.name};`;
+      }
+    }
+
+    if (info.properties.length > 0) {
+      yield '';
+    }
+
+    // required methods
+    for (const method of info.methods) {
+      if (!method.types) {
+        yield dump(method.selector, 'v@0:8');
+        continue;
+      }
+      try {
+        yield dump(method.selector, method.types);
+      } catch (_) {
+        yield dump(method.selector, 'v@0:8');
+      }
+    }
+
+    // optional methods
+    if (info.optionalMethods.length > 0) {
+      yield '';
+      yield '@optional';
+      for (const method of info.optionalMethods) {
+        if (!method.types) {
+          yield dump(method.selector, 'v@0:8');
+          continue;
+        }
+        try {
+          yield dump(method.selector, method.types);
+        } catch (_) {
+          yield dump(method.selector, 'v@0:8');
+        }
+      }
+    }
+
+    yield '';
+    yield '@end';
+  }
+
+  return [...generate()].join('\n');
+}
 
 export interface JavaClassInfo {
   modifiers: string;

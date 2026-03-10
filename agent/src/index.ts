@@ -6,7 +6,7 @@ import ObjC from 'frida-objc-bridge';
 
 import { start, stop } from './log.js';
 import { Runtime } from './types.js';
-import type { MethodInfo, FieldInfo, ClassMemberInfo, ObjCClassInfo, JavaClassInfo } from './types.js';
+import type { MethodInfo, FieldInfo, ClassMemberInfo, ObjCClassInfo, ObjCProtocolInfo, JavaClassInfo } from './types.js';
 import { applyOverrides as applyJavaOverrides } from './java/inspect.js';
 import { applyOverrides as applyObjCOverrides } from './fruity/inspect.js';
 import * as memory from './memory.js';
@@ -33,6 +33,11 @@ const methods = {
   classMembers: async (_name: string): Promise<ClassMemberInfo> => ({ methods: [], fields: [] }),
   superClasses: async (_name: string): Promise<string[]> => [],
   classInfo: async (_name: string): Promise<ObjCClassInfo | JavaClassInfo> => { throw new Error('classInfo not available on this platform'); },
+
+  protocolMethodsOf: async (_name: string): Promise<MethodInfo[]> => [],
+  ownProtocolMethodsOf: async (_name: string): Promise<MethodInfo[]> => [],
+  parentProtocols: async (_name: string): Promise<string[]> => [],
+  protocolInfo: async (_name: string): Promise<ObjCProtocolInfo> => { throw new Error('protocolInfo not available on this platform'); },
 
   modules: () => Process.enumerateModules(),
   exports: (name: string) => Process.findModuleByName(name)?.enumerateExports(),
