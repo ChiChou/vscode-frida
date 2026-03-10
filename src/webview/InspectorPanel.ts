@@ -247,14 +247,13 @@ export class InspectorPanel {
     const i18n = {
       hook: 'Hook',
       batchHook: l10n.t('Batch Hook'),
-      classDump: l10n.t('Class Dump'),
-      protocolDump: l10n.t('Protocol Dump'),
+      classDump: l10n.t('Generate Header'),
+      protocolDump: l10n.t('Generate Header'),
       methods: l10n.t(' methods'),
       selected: l10n.t(' selected'),
     };
 
-    const isProtocol = this.config.viewType === 'fridaProtocols';
-    const dumpLabel = isProtocol ? l10n.t('Protocol Dump') : l10n.t('Class Dump');
+    const dumpLabel = l10n.t('Generate Header');
 
     return `<!DOCTYPE html>
 <html lang="en">
