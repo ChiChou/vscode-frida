@@ -1,5 +1,9 @@
 # Change Log
 
+### v0.12.3 - 11 Mar, 2026
+
+* Add Objective-C protocol inspection panel
+
 ### v0.12.2 - 10 Mar, 2026
 
 * Objective-C class dump
