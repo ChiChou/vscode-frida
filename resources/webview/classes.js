@@ -9,6 +9,7 @@
   let selectedClassName = null;
   let checkedMethods = new Map(); // name -> full MethodInfo with className
   let runtime = 'Generic';
+  const supportsHooks = window.CONFIG?.supportsHooks !== false;
   let filterDebounce = null;
   let lastCheckedMethodName = null;
 
@@ -46,7 +47,7 @@
         $methodToolbar.style.display = '';
         $actions.style.display = 'flex';
         $methodFilter.value = '';
-        $selectAll.checked = false;
+        if ($selectAll) $selectAll.checked = false;
         updateSelectionCount();
         break;
       case 'setSuperClasses':
@@ -86,7 +87,7 @@
     });
   });
 
-  $selectAll.addEventListener('change', () => {
+  $selectAll?.addEventListener('change', () => {
     const checked = $selectAll.checked;
     const query = $methodFilter.value.toLowerCase();
     const filtered = filterMethods(query);
@@ -103,7 +104,7 @@
     updateSelectionCount();
   });
 
-  $btnHook.addEventListener('click', () => {
+  $btnHook?.addEventListener('click', () => {
     if (checkedMethods.size === 0) return;
     vscode.postMessage({
       type: 'generateHook',
@@ -136,7 +137,7 @@
     checkedMethods.clear();
     $methodList.innerHTML = '';
     $methodFilter.value = '';
-    $selectAll.checked = false;
+    if ($selectAll) $selectAll.checked = false;
     $breadcrumb.style.display = 'none';
     $breadcrumb.innerHTML = '';
     $methodToolbar.style.display = 'none';
@@ -276,9 +277,13 @@
       });
     });
 
-    row.appendChild(cb);
+    if (supportsHooks) {
+      row.appendChild(cb);
+    }
     row.appendChild(nameSpan);
-    row.appendChild(hookBtn);
+    if (supportsHooks) {
+      row.appendChild(hookBtn);
+    }
     return row;
   }
 
@@ -330,8 +335,8 @@
 
   function updateSelectionCount() {
     const count = checkedMethods.size;
-    $selectionCount.textContent = count + window.I18N.selected;
-    $btnHook.disabled = count === 0;
+    if ($selectionCount) $selectionCount.textContent = count + window.I18N.selected;
+    if ($btnHook) $btnHook.disabled = count === 0;
   }
 
   function showError(message) {

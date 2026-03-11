@@ -29,6 +29,7 @@ export interface InspectorConfig {
   rpcHierarchy: string;
   rpcInfo: string;
   supportsHierarchy: boolean;
+  supportsHooks: boolean;
   dumpGenerator: (panel: InspectorPanel, className: string) => Promise<void>;
 }
 
@@ -46,6 +47,7 @@ export const classesConfig: InspectorConfig = {
   rpcHierarchy: 'super_classes',
   rpcInfo: 'class_info',
   supportsHierarchy: true,
+  supportsHooks: true,
   dumpGenerator: async (panel, className) => {
     const info = await rpc(panel.target, 'class_info', className);
     if (panel.runtime === 'Java') {
@@ -73,6 +75,7 @@ export const protocolsConfig: InspectorConfig = {
   rpcHierarchy: 'parent_protocols',
   rpcInfo: 'protocol_info',
   supportsHierarchy: true,
+  supportsHooks: false,
   dumpGenerator: async (panel, protocolName) => {
     const info = await rpc(panel.target, 'protocol_info', protocolName);
     const header = generateProtocolHeader(info as ObjCProtocolInfo);
@@ -288,7 +291,7 @@ export class InspectorPanel {
           </div>
         </div>
         <div class="select-all-row">
-          <input type="checkbox" id="select-all" /><label for="select-all">${l10n.t('Select All')}</label>
+          ${this.config.supportsHooks ? `<input type="checkbox" id="select-all" /><label for="select-all">${l10n.t('Select All')}</label>` : ''}
           <span class="count" id="method-count"></span>
         </div>
       </div>
@@ -296,13 +299,13 @@ export class InspectorPanel {
         <div class="placeholder">${this.config.detailPlaceholder}</div>
       </div>
       <div class="actions" id="actions" style="display:none">
-        <button id="btn-hook" disabled>${l10n.t('Batch Hook')}</button>
-        <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>
+        ${this.config.supportsHooks ? `<button id="btn-hook" disabled>${l10n.t('Batch Hook')}</button>
+        <span class="selection-count" id="selection-count">${l10n.t('{0} selected', '0')}</span>` : ''}
         <button id="btn-classdump" style="display:none;margin-left:auto">${dumpLabel}</button>
       </div>
     </div>
   </div>
-  <script nonce="${nonce}">window.I18N = ${JSON.stringify(i18n)};</script>
+  <script nonce="${nonce}">window.I18N = ${JSON.stringify(i18n)}; window.CONFIG = { supportsHooks: ${this.config.supportsHooks} };</script>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>
 </html>`;
