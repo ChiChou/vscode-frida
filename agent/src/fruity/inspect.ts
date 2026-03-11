@@ -148,6 +148,28 @@ export function applyOverrides(methods: Methods): void {
     const classMethods = copyOwnMethods(cls, true);
     const allMethods = [...instanceMethods, ...classMethods];
 
+    // enrich method type encodings from adopted protocols
+    // protocol extended types preserve class names (e.g. @"NSString") while
+    // class method_getTypeEncoding only has generic id (@)
+    if (protocols.length > 0) {
+      const protoHandles = protocols
+        .map(p => ObjC.protocols[p])
+        .filter(p => p != null);
+
+      for (const method of allMethods) {
+        const isInstance = method.selector.startsWith('- ');
+        const bareSel = method.selector.substring(2);
+        for (const proto of protoHandles) {
+          const extTypes = getProtocolMethodExtendedTypes(proto.handle, bareSel, true, isInstance)
+            ?? getProtocolMethodExtendedTypes(proto.handle, bareSel, false, isInstance);
+          if (extTypes) {
+            method.types = extTypes;
+            break;
+          }
+        }
+      }
+    }
+
     // properties: instance + class
     const instanceProps = copyProperties(cls).map(p => ({ ...p, isClass: false }));
     const classProps = copyClassProperties(cls).map(p => ({ ...p, isClass: true }));
