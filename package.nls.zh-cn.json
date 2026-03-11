@@ -54,7 +54,7 @@
     "Loading classes...": "正在加载类...",
     "Select a class": "选择一个类",
     "Filter methods...": "过滤方法...",
-    "Own methods only": "仅显示自身方法",
+    "Show Inherited": "显示继承方法",
     "Click a class to view its methods": "点击类查看其方法",
     "Select": "选择",
     "Unknown error": "未知错误",

@@ -83,7 +83,7 @@
     vscode.postMessage({
       type: 'loadMethods',
       className: selectedClassName,
-      ownOnly: $ownMethodsToggle.checked,
+      ownOnly: !$ownMethodsToggle.checked,
     });
   });
 
@@ -164,7 +164,7 @@
     vscode.postMessage({
       type: 'loadMethods',
       className: className,
-      ownOnly: $ownMethodsToggle.checked,
+      ownOnly: !$ownMethodsToggle.checked,
     });
   }
 
@@ -208,7 +208,7 @@
       vscode.postMessage({
         type: 'loadMethods',
         className: c,
-        ownOnly: $ownMethodsToggle.checked,
+        ownOnly: !$ownMethodsToggle.checked,
       });
     });
 

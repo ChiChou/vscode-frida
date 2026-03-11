@@ -287,7 +287,7 @@ export class InspectorPanel {
         <div class="pane-header" style="border-bottom:none;padding-bottom:0">
           <div class="method-controls">
             <input type="text" id="method-filter" placeholder="${l10n.t('Filter methods...')}" />
-            <label><input type="checkbox" id="own-methods-toggle" checked /> ${l10n.t('Own methods only')}</label>
+            <label><input type="checkbox" id="own-methods-toggle" /> ${l10n.t('Show Inherited')}</label>
           </div>
         </div>
         <div class="select-all-row">
