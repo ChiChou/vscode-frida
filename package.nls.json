@@ -4,6 +4,7 @@
     "frida.decryptOutput": "Preferred directory to save ipa or apk",
     "frida.dumpOutput": "Preferred directory to save memory dumps",
     "frida.androidServerPath": "Path to frida-server on Android",
+    "frida.refreshInterval": "Auto-refresh interval for device and process lists in milliseconds. Set to 0 to disable.",
     "frida.ps.refresh": "Reload process list",
     "frida.apps.refresh": "Reload application list",
     "frida.remote.add": "Connect Remote Device...",

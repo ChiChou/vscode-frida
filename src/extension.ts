@@ -72,6 +72,24 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.view.manifest', views.manifest));
 	push(register('frida.view.infoPlist', views.infoPlist));
 
+	// auto-refresh timer
+	let refreshTimer: ReturnType<typeof setInterval> | undefined;
+	function startAutoRefresh() {
+		if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = undefined; }
+		const interval = vscode.workspace.getConfiguration('frida').get<number>('refreshInterval', 10000);
+		if (interval > 0) {
+			refreshTimer = setInterval(() => {
+				appsProvider.refresh();
+				psProvider.refresh();
+			}, interval);
+		}
+	}
+	startAutoRefresh();
+	push(vscode.workspace.onDidChangeConfiguration(e => {
+		if (e.affectsConfiguration('frida.refreshInterval')) { startAutoRefresh(); }
+	}));
+	push({ dispose() { if (refreshTimer) { clearInterval(refreshTimer); } } });
+
 	const completionProvider = new FridaCompletionProvider();
 	push(vscode.languages.registerCompletionItemProvider(
 		[{ language: 'javascript' }, { language: 'typescript' }],
