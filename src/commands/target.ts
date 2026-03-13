@@ -4,8 +4,8 @@ import { l10n } from 'vscode';
 import { join } from 'path';
 import { mkdir, writeFile } from 'fs/promises';
 
-import { AppItem, ProcessItem } from '../providers/devices';
-import { logger } from '../logger';
+import { AppItem, ProcessItem } from '@/providers/devices';
+import { logger } from '@/logger';
 
 type TargetConfig = { device: string } & ({ app: string } | { pid: number } | { process: string });
 

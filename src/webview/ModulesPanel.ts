@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { l10n } from 'vscode';
-import { rpc } from '../driver/backend';
-import { TargetItem } from '../providers/devices';
+import { rpc } from '@/driver/backend';
+import { TargetItem } from '@/providers/devices';
 import { generateNativeHooks, generateNativeHooksBasic, NativeHookRequest } from './hooks';
-import { openUntitledDocument } from '../utils';
-import { logger } from '../logger';
+import { openUntitledDocument } from '@/utils';
+import { logger } from '@/logger';
 
 interface ModuleInfo {
   name: string;

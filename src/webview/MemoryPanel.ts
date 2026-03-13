@@ -5,11 +5,11 @@ import { createWriteStream } from 'fs';
 import { unlink } from 'fs/promises';
 import { dirname, join } from 'path';
 import { homedir } from 'os';
-import { rpc } from '../driver/backend';
-import { asParam } from '../driver/remote';
-import { interpreter } from '../utils';
-import { TargetItem, AppItem, ProcessItem } from '../providers/devices';
-import { logger } from '../logger';
+import { rpc } from '@/driver/backend';
+import { asParam } from '@/driver/remote';
+import { interpreter } from '@/utils';
+import { TargetItem, AppItem, ProcessItem } from '@/providers/devices';
+import { logger } from '@/logger';
 
 const py = require('path').join(__dirname, '..', '..', 'backend', 'driver.py');
 

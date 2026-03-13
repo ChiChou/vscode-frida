@@ -1,11 +1,11 @@
 import * as cp from 'child_process';
 import { l10n, OutputChannel, window } from 'vscode';
 
-import { driverScript, lockdownSyslog, os } from '../driver/backend';
-import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
-import { DeviceType } from '../types';
-import { interpreter, refresh } from '../utils';
-import { logger } from '../logger';
+import { driverScript, lockdownSyslog, os } from '@/driver/backend';
+import { AppItem, ProcessItem, TargetItem } from "@/providers/devices";
+import { DeviceType } from '@/types';
+import { interpreter, refresh } from '@/utils';
+import { logger } from '@/logger';
 
 const active: { [key: string]: OutputChannel } = {};
 

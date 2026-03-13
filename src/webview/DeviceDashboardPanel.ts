@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { l10n } from 'vscode';
-import { exec } from '../driver/backend';
-import { DeviceItem } from '../providers/devices';
-import { logger } from '../logger';
+import { exec } from '@/driver/backend';
+import { DeviceItem } from '@/providers/devices';
+import { logger } from '@/logger';
 
 export class DeviceDashboardPanel {
   private panel: vscode.WebviewPanel | undefined;

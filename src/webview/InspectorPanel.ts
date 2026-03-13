@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { l10n } from 'vscode';
-import { rpc } from '../driver/backend';
-import { TargetItem } from '../providers/devices';
+import { rpc } from '@/driver/backend';
+import { TargetItem } from '@/providers/devices';
 import { generateObjCHooks, generateJavaHooks, MethodSelection } from './hooks';
-import { generateHeader, ObjCClassInfo, generateJavaHeader, JavaClassInfo, generateProtocolHeader, ObjCProtocolInfo } from '../classdump';
-import { openUntitledDocument } from '../utils';
-import { logger } from '../logger';
+import { generateHeader, ObjCClassInfo, generateJavaHeader, JavaClassInfo, generateProtocolHeader, ObjCProtocolInfo } from '@/classdump';
+import { openUntitledDocument } from '@/utils';
+import { logger } from '@/logger';
 
 interface MethodInfo {
   name: string;

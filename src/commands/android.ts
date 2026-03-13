@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 import { join } from 'path';
 import { tmpdir } from 'os';
 
-import ADB from '../driver/adb';
-import { DeviceItem, TargetItem } from '../providers/devices';
-import { logger } from '../logger';
-import { interpreter, sleep } from '../utils';
-import { run } from '../term';
+import ADB from '@/driver/adb';
+import { DeviceItem, TargetItem } from '@/providers/devices';
+import { logger } from '@/logger';
+import { interpreter, sleep } from '@/utils';
+import { run } from '@/term';
 
 function getServerPath() {
   return vscode.workspace.getConfiguration('frida')

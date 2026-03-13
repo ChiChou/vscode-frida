@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { l10n } from 'vscode';
 
-import { launch } from '../driver/frida';
-import { AppItem, ProcessItem, TargetItem } from "../providers/devices";
-import { run } from '../term';
-import { DeviceType } from '../types';
-import { interpreter } from '../utils';
-import { logger } from '../logger';
+import { launch } from '@/driver/frida';
+import { AppItem, ProcessItem, TargetItem } from "@/providers/devices";
+import { run } from '@/term';
+import { DeviceType } from '@/types';
+import { interpreter } from '@/utils';
+import { logger } from '@/logger';
 
 export async function explore(target: TargetItem) : Promise<void> {
   if (!target) {

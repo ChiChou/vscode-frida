@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TargetItem } from '../providers/devices';
+import { TargetItem } from '@/providers/devices';
 import { InspectorPanel, classesConfig } from './InspectorPanel';
 
 export class ClassesPanel extends InspectorPanel {

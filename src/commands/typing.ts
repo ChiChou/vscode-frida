@@ -2,8 +2,8 @@ import { createWriteStream, promises as fsp } from 'fs';
 import { get as httpGet } from 'https';
 import { join } from 'path';
 import { Position, ProgressLocation, window, workspace, l10n } from 'vscode';
-import { cmd } from '../utils';
-import { logger } from '../logger';
+import { cmd } from '@/utils';
+import { logger } from '@/logger';
 
 function npmInstall() {
   logger.appendLine('Installing @types/frida-gum via npm');

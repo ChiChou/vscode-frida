@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
 import { l10n } from 'vscode';
-import { InteractiveSession } from '../driver/interactive';
-import { TargetItem } from '../providers/devices';
-import { logger } from '../logger';
+import { InteractiveSession } from '@/driver/interactive';
+import { TargetItem } from '@/providers/devices';
+import { logger } from '@/logger';
 
 export class MemoryScannerPanel {
   private panel: vscode.WebviewPanel | undefined;
