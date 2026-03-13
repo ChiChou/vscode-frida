@@ -1,5 +1,11 @@
 # Change Log
 
+### v0.12.4 - 14 Mar, 2026
+
+* UX improvements for class dump and protocol inspection panels
+* Faster AndroidManifest.xml parser
+* Faster extension startup
+
 ### v0.12.3 - 11 Mar, 2026
 
 * Add Objective-C protocol inspection panel
