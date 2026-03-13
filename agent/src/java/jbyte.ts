@@ -1,5 +1,7 @@
 import Java from "frida-java-bridge";
 
+import type { Static, InputStream, ByteArrayOutputStream } from './wrapper.js';
+
 /**
  * Fast Java byte[] → ArrayBuffer copy using JNI GetByteArrayElements.
  * Falls back to element-by-element copy for plain JS arrays.
@@ -11,7 +13,7 @@ export function readJavaByteArray(
 ): ArrayBuffer | null {
   if (length <= 0) return null;
   const env = Java.vm.getEnv();
-  const handle = array.$handle ?? array.$h;
+  const handle = array.$h;
   const ptr = env.getByteArrayElements(handle);
   try {
     return ptr.add(offset).readByteArray(length)!;
@@ -31,7 +33,7 @@ export function readJavaCharArray(
 ): ArrayBuffer | null {
   if (length <= 0) return null;
   const env = Java.vm.getEnv();
-  const handle = array.$handle ?? array.$h;
+  const handle = array.$h;
   const ptr = env.getCharArrayElements(handle);
   try {
     return ptr.add(offset * 2).readByteArray(length * 2)!;
@@ -48,7 +50,7 @@ export function byteArrayToBuffer(
   arr: Java.Wrapper,
 ): { data: ArrayBuffer; length: number } | null {
   if (arr === null) return null;
-  const handle = arr.$handle ?? arr.$h;
+  const handle = arr.$h;
   if (!handle) throw new Error("byteArrayToBuffer: expected a Java byte[] with a valid handle");
   const env = Java.vm.getEnv();
   const len = env.getArrayLength(handle);
@@ -59,8 +61,8 @@ export function byteArrayToBuffer(
 /**
  * Allocate a reusable Java byte[] buffer.
  */
-export function allocByteBuffer(size: number) {
-  return Java.array("byte", new Array(size).fill(0));
+export function allocByteBuffer(size: number): Java.Wrapper {
+  return Java.array("byte", new Array(size).fill(0)) as unknown as Java.Wrapper;
 }
 
 /**
@@ -68,10 +70,10 @@ export function allocByteBuffer(size: number) {
  * Returns the full contents.
  */
 export function drainInputStream(
-  inputStream: Java.Wrapper,
+  inputStream: InputStream,
   bufferSize = 8192,
 ): ArrayBuffer {
-  const ByteArrayOutputStream = Java.use("java.io.ByteArrayOutputStream");
+  const ByteArrayOutputStream = Java.use("java.io.ByteArrayOutputStream") as Static<ByteArrayOutputStream>;
   const baos = ByteArrayOutputStream.$new();
   const buffer = allocByteBuffer(bufferSize);
   let len: number;

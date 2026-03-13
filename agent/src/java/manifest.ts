@@ -2,12 +2,13 @@ import Java from 'frida-java-bridge';
 
 import { perform } from './util.js';
 import { drainInputStream } from './jbyte.js';
+import type { Static, ZipFile } from './wrapper.js';
 
 let cached: string | null = null;
 
 export function manifest(): Promise<string> {
+  if (cached !== null) return Promise.resolve(cached);
   return perform(() => {
-    if (cached !== null) return cached;
     const xml = readManifestXml();
     cached = xml;
     return xml;
@@ -20,7 +21,7 @@ function readManifestXml(): string {
     .getApplicationContext();
   const sourceDir: string = context.getApplicationInfo().sourceDir.value;
 
-  const ZipFile = Java.use('java.util.zip.ZipFile');
+  const ZipFile = Java.use('java.util.zip.ZipFile') as Static<ZipFile>;
   const zip = ZipFile.$new(sourceDir);
 
   try {

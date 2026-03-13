@@ -1,38 +1,9 @@
 import Java from 'frida-java-bridge';
 
 import type { ArgInfo, MethodInfo, FieldInfo, ClassMemberInfo, ObjCClassInfo, JavaClassInfo } from '../types.js';
+import type { JModifier, JClass, JMethod, JField } from './wrapper.js';
 import { manifest } from './manifest.js';
 import { perform } from './util.js';
-
-// Java reflection types for Java.use<T>()
-interface JModifier {
-  isStatic: Java.MethodDispatcher;
-  toString: Java.MethodDispatcher;
-}
-
-interface JClass {
-  getName: Java.MethodDispatcher;
-  getModifiers: Java.MethodDispatcher;
-  getMethods: Java.MethodDispatcher;
-  getDeclaredMethods: Java.MethodDispatcher;
-  getFields: Java.MethodDispatcher;
-  getDeclaredFields: Java.MethodDispatcher;
-  getSuperclass: Java.MethodDispatcher;
-  getInterfaces: Java.MethodDispatcher;
-}
-
-interface JMethod {
-  getName: Java.MethodDispatcher;
-  getModifiers: Java.MethodDispatcher;
-  getReturnType: Java.MethodDispatcher;
-  getParameterTypes: Java.MethodDispatcher;
-}
-
-interface JField {
-  getName: Java.MethodDispatcher;
-  getModifiers: Java.MethodDispatcher;
-  getType: Java.MethodDispatcher;
-}
 
 interface Methods {
   classes: () => Promise<string[]>;
