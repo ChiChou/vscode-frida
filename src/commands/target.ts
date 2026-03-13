@@ -41,7 +41,15 @@ async function writeTargetConfig(configPath: string, config: TargetConfig): Prom
 export async function setTarget(node: AppItem | ProcessItem): Promise<void> {
 	const root = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
 	if (!root) {
-		vscode.window.showErrorMessage(l10n.t('No workspace folder open'));
+		const open = l10n.t('Open Folder');
+		vscode.window.showErrorMessage(
+			l10n.t('Open a folder or workspace first to save Frida autocomplete target'),
+			open
+		).then(choice => {
+			if (choice === open) {
+				vscode.commands.executeCommand('vscode.openFolder');
+			}
+		});
 		return;
 	}
 
@@ -57,7 +65,7 @@ export async function setTarget(node: AppItem | ProcessItem): Promise<void> {
 
 		const targetName = node instanceof AppItem ? node.data.identifier : node.data.name;
 		logger.appendLine(`Target config created: ${configPath} for ${targetName}`);
-		const actionOpen = l10n.t('Open');
+		const actionOpen = l10n.t('View Config');
 		vscode.window.showInformationMessage(
 			l10n.t('Created .vscode/frida.json for {0}', targetName),
 			actionOpen
