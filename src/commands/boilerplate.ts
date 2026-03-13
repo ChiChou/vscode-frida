@@ -9,12 +9,21 @@ import { logger } from '../logger';
 
 
 async function create(template: string) {
-  let dest: vscode.Uri;
+  let dest: vscode.Uri | undefined;
 
   const { workspaceFolders } = vscode.workspace;
-  {
-    if (workspaceFolders?.length) { dest = workspaceFolders[0].uri; }
+  
+  if (workspaceFolders?.length) {
+    const workspaceUri = workspaceFolders[0].uri;
+    const packageJsonPath = joinPath(workspaceUri.fsPath, 'package.json');
+    const hasPackageJson = await fsp.stat(packageJsonPath).then(() => true).catch(() => false);
 
+    if (!hasPackageJson) {
+      dest = workspaceUri;
+    }
+  }
+
+  if (!dest) {
     const fileUri = await vscode.window.showOpenDialog({
       canSelectFolders: true,
       canSelectMany: false,
