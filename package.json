@@ -16,8 +16,7 @@
         "Other"
     ],
     "activationEvents": [
-        "onLanguage:javascript",
-        "onLanguage:typescript"
+        "onStartupFinished"
     ],
     "main": "./out/extension.js",
     "l10n": "./l10n",

@@ -1,4 +1,3 @@
-import which from 'which';
 import * as vscode from 'vscode';
 import * as cp from 'child_process';
 import { join } from 'path';
@@ -80,6 +79,7 @@ export async function interpreter(cli = 'frida'): Promise<string> {
     // fallback to global package
   }
 
+  const { default: which } = await import('which');
   const where = await which(cli, { all: false, nothrow: true });
   if (!where) {
     const msg = vscode.l10n.t('Could not find command {0} in $PATH, have you installed it or activated the correct venv?', cli);

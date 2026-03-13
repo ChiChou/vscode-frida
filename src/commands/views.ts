@@ -1,12 +1,6 @@
 import * as vscode from 'vscode';
 import { rpc } from '../driver/backend';
-import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
-import { ModulesPanel } from '../webview/ModulesPanel';
-import { ClassesPanel } from '../webview/ClassesPanel';
-import { ProtocolsPanel } from '../webview/ProtocolsPanel';
-import { DeviceDashboardPanel } from '../webview/DeviceDashboardPanel';
-import { MemoryPanel } from '../webview/MemoryPanel';
-import { MemoryScannerPanel } from '../webview/MemoryScannerPanel';
+import { DeviceItem, TargetItem } from '../providers/devices';
 import { openUntitledDocument } from '../utils';
 import { logger } from '../logger';
 
@@ -16,36 +10,39 @@ export function init(context: vscode.ExtensionContext) {
   extensionUri = context.extensionUri;
 }
 
-export function modules(target: TargetItem) {
+export async function modules(target: TargetItem) {
   logger.appendLine(`Open modules panel for ${target.label}`);
-  const panel = new ModulesPanel(extensionUri, target);
-  panel.show();
+  const { ModulesPanel } = await import('../webview/ModulesPanel');
+  new ModulesPanel(extensionUri, target).show();
 }
 
-export function classes(target: TargetItem) {
+export async function classes(target: TargetItem) {
   logger.appendLine(`Open classes panel for ${target.label}`);
-  const panel = new ClassesPanel(extensionUri, target);
-  panel.show();
+  const { ClassesPanel } = await import('../webview/ClassesPanel');
+  new ClassesPanel(extensionUri, target).show();
 }
 
-export function protocols(target: TargetItem) {
+export async function protocols(target: TargetItem) {
   logger.appendLine(`Open protocols panel for ${target.label}`);
-  const panel = new ProtocolsPanel(extensionUri, target);
-  panel.show();
+  const { ProtocolsPanel } = await import('../webview/ProtocolsPanel');
+  new ProtocolsPanel(extensionUri, target).show();
 }
 
-export function detail(device: DeviceItem) {
+export async function detail(device: DeviceItem) {
   logger.appendLine(`Open device detail for ${device.data.name}`);
+  const { DeviceDashboardPanel } = await import('../webview/DeviceDashboardPanel');
   new DeviceDashboardPanel(extensionUri, device).show();
 }
 
-export function memory(target: TargetItem) {
+export async function memory(target: TargetItem) {
   logger.appendLine(`Open memory panel for ${target.label}`);
+  const { MemoryPanel } = await import('../webview/MemoryPanel');
   new MemoryPanel(extensionUri, target).show();
 }
 
-export function scanner(target: TargetItem) {
+export async function scanner(target: TargetItem) {
   logger.appendLine(`Open memory scanner for ${target.label}`);
+  const { MemoryScannerPanel } = await import('../webview/MemoryScannerPanel');
   new MemoryScannerPanel(extensionUri, target).show();
 }
 
