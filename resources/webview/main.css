@@ -495,6 +495,28 @@ button:disabled {
   white-space: nowrap;
 }
 
+/* Tree container (memory panel) */
+.tree-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.tree-header {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--vscode-panel-border);
+  flex-shrink: 0;
+}
+
+.tree-header h2 {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--vscode-foreground);
+}
+
 /* Permission filter checkboxes */
 .perm-filter {
   display: flex;
