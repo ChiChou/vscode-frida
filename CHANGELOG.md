@@ -1,6 +1,6 @@
 # Change Log
 
-### v0.12.4 - 14 Mar, 2026
+### v0.12.6 - 14 Mar, 2026
 
 * UX improvements for class dump and protocol inspection panels
 * Faster AndroidManifest.xml parser
