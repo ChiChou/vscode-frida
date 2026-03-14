@@ -2,10 +2,10 @@ import { createReadStream, createWriteStream, promises as fsp } from 'fs';
 import { join as joinPath } from 'path';
 import * as vscode from 'vscode';
 
-import { AppItem, ProcessItem } from '@/providers/devices';
-import { run } from '@/term';
-import { cmd, expandDevParam, interpreter, resource } from '@/utils';
-import { logger } from '@/logger';
+import { AppItem, ProcessItem } from '../providers/devices';
+import { run } from '../term';
+import { cmd, expandDevParam, interpreter, resource } from '../utils';
+import { logger } from '../logger';
 
 
 async function create(template: string) {

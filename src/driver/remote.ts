@@ -1,5 +1,5 @@
 import { workspace } from "vscode";
-import { logger } from "@/logger";
+import { logger } from "../logger";
 
 const remoteHosts = new Set<string>();
 function loadRemoteHosts() {

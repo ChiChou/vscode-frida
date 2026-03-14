@@ -1,5 +1,5 @@
 import { env, l10n } from 'vscode';
-import { TargetItem, AppItem, ProcessItem, DeviceItem } from "@/providers/devices";
+import { TargetItem, AppItem, ProcessItem, DeviceItem } from "../providers/devices";
 
 export function copy(item: TargetItem) {
   const getText = (item: TargetItem) => {

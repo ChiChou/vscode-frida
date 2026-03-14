@@ -11,10 +11,7 @@
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,
-		"baseUrl": ".",
-		"paths": {
-			"@/*": ["src/*"]
-		}
+		"baseUrl": "."
 	},
 	"exclude": [
 		"node_modules",

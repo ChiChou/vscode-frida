@@ -1,7 +1,7 @@
 import { l10n } from 'vscode';
 import { execFile } from 'child_process';
-import { interpreter } from '@/utils';
-import { logger } from '@/logger';
+import { interpreter } from '../utils';
+import { logger } from '../logger';
 
 
 function deviceParam(device: string) {

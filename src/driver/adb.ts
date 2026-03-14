@@ -1,8 +1,8 @@
 import * as cp from 'child_process';
 import * as vscode from 'vscode';
-import { run } from '@/term';
-import { executable } from "@/utils";
-import { logger } from '@/logger';
+import { run } from '../term';
+import { executable } from "../utils";
+import { logger } from '../logger';
 
 export default class ADB {
   path: string;

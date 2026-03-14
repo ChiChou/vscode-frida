@@ -1,8 +1,8 @@
 import * as vscode from 'vscode';
-import { rpc } from '@/driver/backend';
-import { DeviceItem, TargetItem } from '@/providers/devices';
-import { openUntitledDocument } from '@/utils';
-import { logger } from '@/logger';
+import { rpc } from '../driver/backend';
+import { DeviceItem, TargetItem } from '../providers/devices';
+import { openUntitledDocument } from '../utils';
+import { logger } from '../logger';
 
 let extensionUri: vscode.Uri;
 

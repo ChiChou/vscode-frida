@@ -1,12 +1,12 @@
 import { spawn } from 'child_process';
 import { commands, window, l10n } from 'vscode';
 
-import { os } from '@/driver/backend';
-import { DeviceItem, TargetItem } from '@/providers/devices';
-import { run } from '@/term';
-import { DeviceType } from '@/types';
-import { executable } from '@/utils';
-import { logger } from '@/logger';
+import { os } from '../driver/backend';
+import { DeviceItem, TargetItem } from '../providers/devices';
+import { run } from '../term';
+import { DeviceType } from '../types';
+import { executable } from '../utils';
+import { logger } from '../logger';
 
 
 class PortNotFoundError extends Error { }

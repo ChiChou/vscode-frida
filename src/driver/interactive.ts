@@ -3,9 +3,9 @@ import { spawn, ChildProcess } from 'child_process';
 import { createInterface, Interface } from 'readline';
 
 import { asParam } from './remote';
-import { interpreter } from '@/utils';
-import { logger } from '@/logger';
-import { AppItem, ProcessItem, TargetItem } from '@/providers/devices';
+import { interpreter } from '../utils';
+import { logger } from '../logger';
+import { AppItem, ProcessItem, TargetItem } from '../providers/devices';
 
 const py = require('path').join(__dirname, '..', '..', 'backend', 'driver.py');
 

@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 
-import * as ipc from '@/driver/backend';
+import * as ipc from '../driver/backend';
 
-import { resource } from '@/utils';
-import { ProviderType, App, Process, Device, DeviceType } from '@/types';
-import { logger } from '@/logger';
+import { resource } from '../utils';
+import { ProviderType, App, Process, Device, DeviceType } from '../types';
+import { logger } from '../logger';
 
 export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
 

@@ -5,8 +5,8 @@ import ts from 'typescript';
 import { l10n } from 'vscode';
 import { join } from 'path';
 
-import { interpreter } from '@/utils';
-import { logger } from '@/logger';
+import { interpreter } from '../utils';
+import { logger } from '../logger';
 
 const lspScript = join(__dirname, '..', '..', 'backend', 'lsp.py');
 
