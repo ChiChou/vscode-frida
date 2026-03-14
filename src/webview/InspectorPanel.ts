@@ -252,6 +252,8 @@ export class InspectorPanel {
       batchHook: l10n.t('Batch Hook'),
       classDump: l10n.t('Generate Header'),
       protocolDump: l10n.t('Generate Header'),
+      generateHeader: l10n.t('Generate Header'),
+      generateInterface: l10n.t('Generate Interface'),
       methods: l10n.t(' methods'),
       selected: l10n.t(' selected'),
     };

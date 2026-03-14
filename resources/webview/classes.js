@@ -38,6 +38,7 @@
       case 'setRuntime':
         runtime = msg.runtime;
         $btnClassDump.style.display = (runtime === 'ObjectiveC' || runtime === 'Java') ? '' : 'none';
+        $btnClassDump.textContent = runtime === 'Java' ? I18N.generateInterface : I18N.generateHeader;
         break;
       case 'setMethods':
         allMethods = msg.methods;
