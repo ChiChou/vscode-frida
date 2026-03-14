@@ -1,10 +1,9 @@
 # Change Log
 
-### v0.12.6 - 14 Mar, 2026
+### v0.12.7 - 14 Mar, 2026
 
-* UX improvements for class dump and protocol inspection panels
 * Faster AndroidManifest.xml parser
-* Faster extension startup
+* Fix some UI issues
 
 ### v0.12.3 - 11 Mar, 2026
 
