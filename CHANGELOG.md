@@ -1,5 +1,10 @@
 # Change Log
 
+### v0.12.8 - 18 Mar, 2026
+
+* Improve Java method overload completions
+* Improve LSP configuration documentation with detailed examples
+
 ### v0.12.7 - 14 Mar, 2026
 
 * Faster AndroidManifest.xml parser
