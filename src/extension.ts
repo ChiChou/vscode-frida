@@ -94,7 +94,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(vscode.languages.registerCompletionItemProvider(
 		[{ language: 'javascript' }, { language: 'typescript' }],
 		completionProvider,
-		'.', "'", '"', '`'
+		'.', "'", '"', '`', '['
 	));
 	push(completionProvider);
 

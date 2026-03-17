@@ -79,7 +79,14 @@ def handle_request(agent: AppAgent | ProcessAgent, request: dict) -> dict:
             class_name = params["className"]
             raw = agent.invoke("class_members", class_name)
             if raw:
-                methods = [m["name"] for m in raw.get("methods", [])]
+                methods = [
+                    {
+                        "name": m["name"],
+                        "display": m.get("display", m["name"]),
+                        "args": [a["type"] for a in m.get("args", [])],
+                    }
+                    for m in raw.get("methods", [])
+                ]
                 fields = [f["name"] for f in raw.get("fields", [])]
                 result = {"methods": methods, "fields": fields}
             else:

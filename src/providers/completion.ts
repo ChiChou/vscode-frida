@@ -20,6 +20,19 @@ interface LspResponse {
 	runtime?: Runtime;
 }
 
+interface MethodEntry {
+	name: string;
+	display: string;
+	args: string[];
+}
+
+interface MemberCacheEntry {
+	methods: MethodEntry[];
+	fields: string[];
+}
+
+type CacheValue = string[] | MemberCacheEntry;
+
 type CacheKey = 'classes' | 'modules' | `exports:${string}` | `methods:${string}` | `members:${string}`;
 
 interface TriggerMatch {
@@ -32,13 +45,19 @@ interface TriggerMatch {
 	replaceStart: number;
 	/** Optional filter+transform applied to raw results before creating items */
 	mapNames?: (names: string[]) => string[];
+	/** If set, show overload signatures for this method name as inline suggestion */
+	overloadOf?: string;
+	/** Quote character used to open the overload arg (determines insertText format) */
+	overloadQuote?: string;
+	/** If set, suggest "overload" as a property of a method wrapper */
+	suggestOverload?: boolean;
 }
 
 export class FridaCompletionProvider implements vscode.CompletionItemProvider, vscode.Disposable {
 	private process: cp.ChildProcess | null = null;
 	private ready = false;
 	private starting = false;
-	private cache = new Map<CacheKey, string[]>();
+	private cache = new Map<CacheKey, CacheValue>();
 	private pendingRequests = new Map<number, {
 		resolve: (value: any) => void;
 		reject: (reason: any) => void;
@@ -228,15 +247,15 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 		});
 	}
 
-	private async fetchAndCache(key: CacheKey, method: string, params?: Record<string, string>): Promise<string[] | { methods: string[]; fields: string[] } | null> {
+	private async fetchAndCache(key: CacheKey, method: string, params?: Record<string, string>): Promise<CacheValue | null> {
 		try {
 			const result = await this.sendRequest(method, params);
 			if (Array.isArray(result)) {
 				this.cache.set(key, result);
 				return result;
 			} else if (result && typeof result === 'object') {
-				this.cache.set(key, result as any);
-				return result as { methods: string[]; fields: string[] };
+				this.cache.set(key, result as MemberCacheEntry);
+				return result as MemberCacheEntry;
 			}
 			return null;
 		} catch (e: any) {
@@ -246,23 +265,26 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 	}
 
 	private createCompletionItems(
-		result: string[] | { methods: string[]; fields: string[] },
+		result: CacheValue,
 		trigger: TriggerMatch,
 		position: vscode.Position
 	): vscode.CompletionItem[] {
 		const range = new vscode.Range(position.line, trigger.replaceStart, position.line, position.character);
 		const isMemberCache = trigger.cacheKey.startsWith('members:');
 
-		if (isMemberCache && typeof result === 'object' && !Array.isArray(result)) {
-			const memberCache = result as { methods: string[]; fields: string[] };
+		// Member completion: deduplicate overloaded method names
+		if (isMemberCache && !Array.isArray(result)) {
 			const items: vscode.CompletionItem[] = [];
-			for (const name of memberCache.methods) {
-				const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Method);
+			const seenMethods = new Set<string>();
+			for (const m of result.methods) {
+				if (seenMethods.has(m.name)) continue;
+				seenMethods.add(m.name);
+				const item = new vscode.CompletionItem(m.name, vscode.CompletionItemKind.Method);
 				item.range = range;
-				item.filterText = name;
+				item.filterText = m.name;
 				items.push(item);
 			}
-			for (const name of memberCache.fields) {
+			for (const name of result.fields) {
 				const item = new vscode.CompletionItem(name, vscode.CompletionItemKind.Field);
 				item.range = range;
 				item.filterText = name;
@@ -447,6 +469,64 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 			};
 		}
 
+		// Java.use("Foo").bar.overload('  →  overload signatures (triggered by quote)
+		const javaOverloadMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]+)['"`]\)\.(\w+)\.overload\((['"`])([^)]*)$/);
+		if (javaOverloadMatch) {
+			return {
+				cacheKey: `members:${javaOverloadMatch[1]}`,
+				method: 'classMembers',
+				params: { className: javaOverloadMatch[1] },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'Java',
+				replaceStart: position.character - javaOverloadMatch[4].length,
+				overloadOf: javaOverloadMatch[2],
+				overloadQuote: javaOverloadMatch[3],
+			};
+		}
+
+		// Java.use("Foo")['bar'].overload('  →  overload signatures via bracket notation
+		const javaBracketOverloadMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]+)['"`]\)\[['"`](\w+)['"`]\]\.overload\((['"`])([^)]*)$/);
+		if (javaBracketOverloadMatch) {
+			return {
+				cacheKey: `members:${javaBracketOverloadMatch[1]}`,
+				method: 'classMembers',
+				params: { className: javaBracketOverloadMatch[1] },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'Java',
+				replaceStart: position.character - javaBracketOverloadMatch[4].length,
+				overloadOf: javaBracketOverloadMatch[2],
+				overloadQuote: javaBracketOverloadMatch[3],
+			};
+		}
+
+		// Java.use("Foo").bar.  →  suggest "overload" on method wrapper
+		const javaMethodPropMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]+)['"`]\)\.(\w+)\.(\w*)$/);
+		if (javaMethodPropMatch) {
+			return {
+				cacheKey: `members:${javaMethodPropMatch[1]}`,
+				method: 'classMembers',
+				params: { className: javaMethodPropMatch[1] },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'Java',
+				replaceStart: position.character - javaMethodPropMatch[3].length,
+				suggestOverload: true,
+			};
+		}
+
+		// Java.use("Foo")['bar'].  →  suggest "overload" on method wrapper
+		const javaBracketMethodPropMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]+)['"`]\)\[['"`]\w+['"`]\]\.(\w*)$/);
+		if (javaBracketMethodPropMatch) {
+			return {
+				cacheKey: `members:${javaBracketMethodPropMatch[1]}`,
+				method: 'classMembers',
+				params: { className: javaBracketMethodPropMatch[1] },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'Java',
+				replaceStart: position.character - javaBracketMethodPropMatch[2].length,
+				suggestOverload: true,
+			};
+		}
+
 		// Java.use(" or Java.choose("  →  class names
 		const javaMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]*)$/);
 		if (javaMatch) {
@@ -456,6 +536,19 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 				kind: vscode.CompletionItemKind.Class,
 				requires: 'Java',
 				replaceStart: position.character - javaMatch[1].length,
+			};
+		}
+
+		// Java.use("SomeClass")[' →  methods and fields via bracket notation
+		const javaBracketMatch = text.match(/Java\.(?:use|choose)\(['"`]([^'"`]+)['"`]\)\[['"`](\w*)$/);
+		if (javaBracketMatch) {
+			return {
+				cacheKey: `members:${javaBracketMatch[1]}`,
+				method: 'classMembers',
+				params: { className: javaBracketMatch[1] },
+				kind: vscode.CompletionItemKind.Method,
+				requires: 'Java',
+				replaceStart: position.character - javaBracketMatch[2].length,
 			};
 		}
 
@@ -472,6 +565,60 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 				requires: 'Java',
 				replaceStart: position.character - afterDot.length,
 			};
+		}
+
+		// variableName.method.overload('  →  overload signatures (resolve variable)
+		const varOverloadMatch = text.match(/(\w+)\.(\w+)\.overload\((['"`])([^)]*)$/);
+		if (varOverloadMatch && document) {
+			const varName = varOverloadMatch[1];
+			const className = this.findJavaClassForVariable(document, position, varName);
+			if (className) {
+				return {
+					cacheKey: `members:${className}`,
+					method: 'classMembers',
+					params: { className },
+					kind: vscode.CompletionItemKind.Method,
+					requires: 'Java',
+					replaceStart: position.character - varOverloadMatch[4].length,
+					overloadOf: varOverloadMatch[2],
+					overloadQuote: varOverloadMatch[3],
+				};
+			}
+		}
+
+		// variableName.method.  →  suggest "overload" on method wrapper (resolve variable)
+		const varMethodPropMatch = text.match(/(\w+)\.(\w+)\.(\w*)$/);
+		if (varMethodPropMatch && document) {
+			const varName = varMethodPropMatch[1];
+			const className = this.findJavaClassForVariable(document, position, varName);
+			if (className) {
+				return {
+					cacheKey: `members:${className}`,
+					method: 'classMembers',
+					params: { className },
+					kind: vscode.CompletionItemKind.Method,
+					requires: 'Java',
+					replaceStart: position.character - varMethodPropMatch[3].length,
+					suggestOverload: true,
+				};
+			}
+		}
+
+		// variableName['  →  methods and fields via bracket (resolve variable)
+		const varBracketMatch = text.match(/(\w+)\[['"`](\w*)$/);
+		if (varBracketMatch && document) {
+			const varName = varBracketMatch[1];
+			const className = this.findJavaClassForVariable(document, position, varName);
+			if (className) {
+				return {
+					cacheKey: `members:${className}`,
+					method: 'classMembers',
+					params: { className },
+					kind: vscode.CompletionItemKind.Method,
+					requires: 'Java',
+					replaceStart: position.character - varBracketMatch[2].length,
+				};
+			}
 		}
 
 		// variableName.  →  methods and fields (if variable was assigned from Java.use/choose)
@@ -506,6 +653,36 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 		return null;
 	}
 
+	private async fetchTriggerResult(trigger: TriggerMatch): Promise<CacheValue | null> {
+		// Check runtime compatibility if we already know the runtime
+		if (trigger.requires && this.runtime !== 'Generic' && this.runtime !== trigger.requires) {
+			logger.appendLine(`[frida-lsp] Skip ${trigger.cacheKey}: runtime=${this.runtime}, requires=${trigger.requires}`);
+			return null;
+		}
+
+		const cached = this.cache.get(trigger.cacheKey);
+		if (cached) {
+			logger.appendLine(`[frida-lsp] Cache hit: ${trigger.cacheKey}`);
+			return cached;
+		}
+
+		// Not cached — start process if needed and fetch
+		const processReady = await this.ensureProcess();
+		if (!processReady) {
+			logger.appendLine(`[frida-lsp] Process not ready for ${trigger.cacheKey}`);
+			return null;
+		}
+
+		// Re-check runtime after process is ready
+		if (trigger.requires && this.runtime !== trigger.requires) {
+			logger.appendLine(`[frida-lsp] Skip ${trigger.cacheKey}: runtime=${this.runtime}, requires=${trigger.requires}`);
+			return null;
+		}
+
+		logger.appendLine(`[frida-lsp] Fetching ${trigger.cacheKey}`);
+		return this.fetchAndCache(trigger.cacheKey, trigger.method, trigger.params);
+	}
+
 	async provideCompletionItems(
 		document: vscode.TextDocument,
 		position: vscode.Position,
@@ -519,42 +696,58 @@ export class FridaCompletionProvider implements vscode.CompletionItemProvider, v
 			return undefined;
 		}
 
-		// disable GitHub Copilot inline suggestions for 1 minute, 
+		// disable GitHub Copilot inline suggestions for 1 minute,
 		// to avoid conflicts and confusion
 		vscode.commands.executeCommand('editor.action.inlineSuggest.snooze', 1);
 
-		// Check runtime compatibility if we already know the runtime
-		if (trigger.requires && this.runtime !== 'Generic' && this.runtime !== trigger.requires) {
-			logger.appendLine(`[frida-lsp] Skip ${trigger.cacheKey}: runtime=${this.runtime}, requires=${trigger.requires}`);
-			return undefined;
+		// Method wrapper property: suggest "overload" without fetching
+		if (trigger.suggestOverload) {
+			const range = new vscode.Range(position.line, trigger.replaceStart, position.line, position.character);
+			const item = new vscode.CompletionItem('overload', vscode.CompletionItemKind.Method);
+			item.range = range;
+			return [item];
 		}
 
-		const cached = this.cache.get(trigger.cacheKey);
-		if (cached) {
-			logger.appendLine(`[frida-lsp] Cache hit: ${trigger.cacheKey}`);
-			return this.createCompletionItems(cached, trigger, position);
-		}
-
-		// Not cached — start process if needed and fetch
-		const processReady = await this.ensureProcess();
-		if (!processReady) {
-			logger.appendLine(`[frida-lsp] Process not ready for ${trigger.cacheKey}`);
-			return undefined;
-		}
-
-		// Re-check runtime after process is ready
-		if (trigger.requires && this.runtime !== trigger.requires) {
-			logger.appendLine(`[frida-lsp] Skip ${trigger.cacheKey}: runtime=${this.runtime}, requires=${trigger.requires}`);
-			return undefined;
-		}
-
-		logger.appendLine(`[frida-lsp] Fetching ${trigger.cacheKey}`);
-		const result = await this.fetchAndCache(trigger.cacheKey, trigger.method, trigger.params);
-
+		const result = await this.fetchTriggerResult(trigger);
 		if (!result) {
 			return undefined;
 		}
 
+		// Overload completion: show each overload signature
+		if (trigger.overloadOf && !Array.isArray(result)) {
+			return this.createOverloadItems(result, trigger, position);
+		}
+
 		return this.createCompletionItems(result, trigger, position);
+	}
+
+	private createOverloadItems(
+		result: MemberCacheEntry,
+		trigger: TriggerMatch,
+		position: vscode.Position,
+	): vscode.CompletionItem[] {
+		const overloads = result.methods.filter(m => m.name === trigger.overloadOf);
+		const q = trigger.overloadQuote || "'";
+		const seen = new Set<string>();
+		const items: vscode.CompletionItem[] = [];
+		const range = new vscode.Range(position.line, trigger.replaceStart, position.line, position.character);
+
+		for (const m of overloads) {
+			if (m.args.length === 0) continue;
+			const argsStr = m.args.join(`${q}, ${q}`);
+			const key = m.args.join(',');
+			if (seen.has(key)) continue;
+			seen.add(key);
+			// User already typed the opening quote, complete the rest
+			const insertText = `${argsStr}${q})`;
+			const item = new vscode.CompletionItem(insertText, vscode.CompletionItemKind.Method);
+			item.range = range;
+			item.detail = m.display;
+			item.filterText = insertText;
+			items.push(item);
+		}
+
+		logger.appendLine(`[frida-lsp] Overload: ${overloads.length} overloads, ${items.length} items for ${trigger.overloadOf}`);
+		return items;
 	}
 }

@@ -29,9 +29,7 @@ export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
     if (element) {
       return element.children();
     } else {
-      logger.appendLine('Enumerating devices');
       return ipc.devices().then(devices => {
-        logger.appendLine(`Found ${devices.length} device(s)`);
         return devices.map(device => new DeviceItem(device, this.type));
       });
     }
