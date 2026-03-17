@@ -71,11 +71,42 @@ Context-aware completions for Frida scripts in JavaScript / TypeScript:
 * `Java.use('<ClassName>')` — completes Java class names
 * `Process.getModuleByName('<name>')` — completes loaded module names
 
-As the language server depends on the target process context, you need to create a Frida target configuration file in your workspace: `.vscode/frida.json`. You can use the **Set LSP Target** command to generate it with the selected process or app.
+The language server depends on a target process context. You need to create a configuration file `.vscode/frida.json` in your workspace. The easiest way is to right-click a process or app in the sidebar and select **Set LSP Target**, which generates the file automatically.
 
-### JavaScript REPL
+#### `.vscode/frida.json` Configuration
 
-Open and activate a REPL at the bottom. Use the "frida" button at the top of any active `js` / `typescript` document to send the code to the active REPL.
+The file specifies which device and target the LSP should attach to. It requires a `device` field and exactly one of `app`, `pid`, or `process`.
+
+**Attach by app identifier** (recommended — spawns or attaches to the app):
+
+```json
+{
+    "device": "local",
+    "app": "com.example.myapp"
+}
+```
+
+**Attach by process name:**
+
+```json
+{
+    "device": "local",
+    "process": "myprocess"
+}
+```
+
+**Attach by PID** (useful when multiple processes share the same name):
+
+```json
+{
+    "device": "local",
+    "pid": 1234
+}
+```
+
+The `device` value corresponds to the Frida device ID — `local` for the host machine, `usb` for a USB-connected device, or a `host:port` string for remote devices.
+
+The LSP watches this file for changes. Editing or recreating it automatically restarts the language server with the new target.
 
 ### Syslog
 

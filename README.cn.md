@@ -69,11 +69,42 @@ Frida 脚本的上下文感知补全，支持 JavaScript / TypeScript：
 * `Java.use('<ClassName>')` — 补全 Java 类名
 * `Process.getModuleByName('<name>')` — 补全已加载模块名
 
-由于语言服务器依赖于目标进程上下文，你需要在工作区中创建 Frida 目标配置文件：`.vscode/frida.json`。你可以使用 **Set LSP Target** 命令通过选定的进程或应用来生成它。
+语言服务器依赖于目标进程上下文，你需要在工作区中创建配置文件 `.vscode/frida.json`。最简单的方式是在侧边栏中右键点击进程或应用，选择 **Set LSP Target**，即可自动生成该文件。
 
-### JavaScript REPL
+#### `.vscode/frida.json` 配置说明
 
-在底部打开并激活 REPL。使用任何活动的 `js` / `typescript` 文档顶部的 "frida" 按钮将代码发送到活动的 REPL。
+该文件指定 LSP 应附加的设备和目标。需要一个 `device` 字段，以及 `app`、`pid`、`process` 三者之一。
+
+**通过应用标识符附加**（推荐 — 启动或附加到应用）：
+
+```json
+{
+    "device": "local",
+    "app": "com.example.myapp"
+}
+```
+
+**通过进程名附加：**
+
+```json
+{
+    "device": "local",
+    "process": "myprocess"
+}
+```
+
+**通过 PID 附加**（当多个进程同名时使用）：
+
+```json
+{
+    "device": "local",
+    "pid": 1234
+}
+```
+
+`device` 值对应 Frida 设备 ID — `local` 表示本机，`usb` 表示 USB 连接的设备，或使用 `host:port` 字符串连接远程设备。
+
+LSP 会监听此文件的变化。编辑或重新创建该文件会自动使用新目标重启语言服务器。
 
 ### 系统日志
 
