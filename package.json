@@ -594,15 +594,14 @@
         "compile": "tsc -p ./",
         "watch": "tsc -watch -p ./",
         "pretest": "npm run compile",
+        "lint": "oxlint",
         "deploy": "vsce publish"
     },
     "devDependencies": {
         "@types/node": "^22.8.1",
         "@types/vscode": "^1.94.0",
         "@types/which": "^3.0.4",
-        "@typescript-eslint/eslint-plugin": "^8.11.0",
-        "@typescript-eslint/parser": "^8.11.0",
-        "eslint": "^9.13.0"
+        "oxlint": "^0.16.6"
     },
     "dependencies": {
         "typescript": "^5.9.3",
