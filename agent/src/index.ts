@@ -1,9 +1,6 @@
 import Java from 'frida-java-bridge';
 import ObjC from 'frida-objc-bridge';
 
-/* eslint-disable curly */
-/* eslint-disable @typescript-eslint/naming-convention */
-
 import { start, stop } from './log.js';
 import { Runtime } from './types.js';
 import type { MethodInfo, FieldInfo, ClassMemberInfo, ObjCClassInfo, ObjCProtocolInfo, JavaClassInfo } from './types.js';

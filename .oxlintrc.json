@@ -1,0 +1,16 @@
+{
+  "rules": {
+    "curly": "off",
+    "eqeqeq": "warn",
+    "no-redeclare": "warn",
+    "no-unused-expressions": "warn",
+    "no-throw-literal": "warn",
+    "no-unused-vars": [
+      "warn",
+      {
+        "caughtErrors": "none",
+        "argsIgnorePattern": "^_"
+      }
+    ]
+  }
+}

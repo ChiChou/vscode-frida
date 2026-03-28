@@ -620,7 +620,7 @@
         "@types/node": "^22.8.1",
         "@types/vscode": "^1.94.0",
         "@types/which": "^3.0.4",
-        "oxlint": "^0.16.6"
+        "oxlint": "^1.57.0"
     },
     "dependencies": {
         "typescript": "^5.9.3",
