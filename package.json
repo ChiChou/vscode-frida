@@ -208,6 +208,11 @@
                 "category": "Frida"
             },
             {
+                "command": "frida.view.entitlements",
+                "title": "Entitlements",
+                "category": "Frida"
+            },
+            {
                 "command": "frida.external.objection",
                 "title": "Objection",
                 "category": "Frida"
@@ -344,6 +349,10 @@
                 },
                 {
                     "command": "frida.view.infoPlist",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.view.entitlements",
                     "when": "false"
                 },
                 {
@@ -515,6 +524,16 @@
                     "command": "frida.view.infoPlist",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
                     "group": "4_frida_manifest@1"
+                },
+                {
+                    "command": "frida.view.entitlements",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "4_frida_manifest@2"
+                },
+                {
+                    "command": "frida.view.entitlements",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/ && viewItem =~ /\\|ios$/",
+                    "group": "4_frida_manifest@2"
                 },
                 {
                     "command": "frida.view.memory",

@@ -76,3 +76,7 @@ export function manifest(target: TargetItem) {
 export function infoPlist(target: TargetItem) {
   return fetchAndShow(target, 'info_plist', 'Info.plist');
 }
+
+export function entitlements(target: TargetItem) {
+  return fetchAndShow(target, 'entitlements', 'Entitlements.plist');
+}

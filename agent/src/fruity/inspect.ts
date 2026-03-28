@@ -16,6 +16,7 @@ interface Methods {
   parentProtocols: (name: string) => Promise<string[]>;
   protocolInfo: (name: string) => Promise<ObjCProtocolInfo>;
   infoPlist: () => Promise<string>;
+  entitlements: (path?: string) => Promise<string>;
 }
 
 function inspectObjCMethod(cls: ObjC.Object, sel: string): MethodInfo {
@@ -231,6 +232,68 @@ export function applyOverrides(methods: Methods): void {
       optionalMethods: optional,
       properties,
     };
+  };
+
+  methods.entitlements = async (path?: string) => {
+    const kSecCSDefaultFlags = 0;
+    const kSecCSSigningInformation = 1 << 1;
+    const kSecCSRequirementInformation = 1 << 2;
+
+    const Security = Process.findModuleByName('Security')!;
+    const SecStaticCodeCreateWithPath = new NativeFunction(
+      Security.findExportByName('SecStaticCodeCreateWithPath')!, 'int', ['pointer', 'uint32', 'pointer']);
+    const SecCodeCopySigningInformation = new NativeFunction(
+      Security.findExportByName('SecCodeCopySigningInformation')!, 'int', ['pointer', 'uint32', 'pointer']);
+    const kSecCodeInfoEntitlementsDictPtr = Security.findExportByName('kSecCodeInfoEntitlementsDict')!;
+    const kSecCodeInfoEntitlementsDict = new ObjC.Object(kSecCodeInfoEntitlementsDictPtr.readPointer());
+
+    const CF = Process.findModuleByName('CoreFoundation')!;
+    const CFRelease = new NativeFunction(CF.findExportByName('CFRelease')!, 'void', ['pointer']);
+
+    const url = path
+      ? ObjC.classes.NSURL.fileURLWithPath_(path)
+      : ObjC.classes.NSBundle.mainBundle().bundleURL();
+    if (!url) throw new Error(`invalid file url ${path}`);
+
+    const pCodeRef = Memory.alloc(Process.pointerSize);
+    const pSignInfo = Memory.alloc(Process.pointerSize);
+
+    let rc = SecStaticCodeCreateWithPath(url, kSecCSDefaultFlags, pCodeRef) as number;
+    if (rc !== 0) throw new Error(`SecStaticCodeCreateWithPath failed: ${rc}`);
+
+    const codeRef = pCodeRef.readPointer();
+    try {
+      rc = SecCodeCopySigningInformation(
+        codeRef, kSecCSSigningInformation | kSecCSRequirementInformation, pSignInfo) as number;
+      if (rc !== 0) throw new Error(`SecCodeCopySigningInformation failed: ${rc}`);
+
+      const signInfo = pSignInfo.readPointer();
+      try {
+        const dict = new ObjC.Object(signInfo).objectForKey_(kSecCodeInfoEntitlementsDict);
+        if (!dict) return '';
+
+        const NSPropertyListXMLFormat_v1_0 = 100;
+        const errorPtr = Memory.alloc(Process.pointerSize);
+        errorPtr.writePointer(NULL);
+
+        const data = ObjC.classes.NSPropertyListSerialization
+          .dataWithPropertyList_format_options_error_(dict, NSPropertyListXMLFormat_v1_0, 0, errorPtr);
+
+        const err = errorPtr.readPointer();
+        if (!err.isNull()) {
+          const nsErr = new ObjC.Object(err);
+          throw new Error(nsErr.localizedDescription().toString());
+        }
+
+        const NSUTF8StringEncoding = 4;
+        const nsString = ObjC.classes.NSString.alloc().initWithData_encoding_(data, NSUTF8StringEncoding);
+        return nsString.toString() as string;
+      } finally {
+        CFRelease(signInfo);
+      }
+    } finally {
+      CFRelease(codeRef);
+    }
   };
 
   methods.infoPlist = async () => {

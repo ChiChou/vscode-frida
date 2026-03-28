@@ -53,6 +53,7 @@ const methods = {
 
   manifest: async (): Promise<string> => { throw new Error('manifest not available on this platform'); },
   infoPlist: async (): Promise<string> => { throw new Error('infoPlist not available on this platform'); },
+  entitlements: async (_?: string): Promise<string> => { throw new Error('entitlements not available on this platform'); },
 };
 
 if (Java.available) {

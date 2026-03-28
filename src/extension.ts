@@ -71,6 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.view.scanner', views.scanner));
 	push(register('frida.view.manifest', views.manifest));
 	push(register('frida.view.infoPlist', views.infoPlist));
+	push(register('frida.view.entitlements', views.entitlements));
 
 	// auto-refresh timer
 	let refreshTimer: ReturnType<typeof setInterval> | undefined;
