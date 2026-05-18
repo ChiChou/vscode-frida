@@ -27,35 +27,35 @@ async function repl(args: string[], id: string) {
 
 vscode.window.onDidCloseTerminal(t => terminals.delete(t));
 
-export function spawn(node?: AppItem) {
+export async function spawn(node?: AppItem) {
   if (!node) { return; }
 
   logger.appendLine(`Spawn ${node.data.identifier} on device ${node.device.id}`);
-  repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
+  await repl(['-f', node.data.identifier, ...expandDevParam(node)], node.data.name);
   refresh();
 }
 
-export function spawnSuspended(node?: AppItem) {
+export async function spawnSuspended(node?: AppItem) {
   if (!node) { return; }
 
   logger.appendLine(`Spawn suspended ${node.data.identifier} on device ${node.device.id}`);
-  repl(['-f', node.data.identifier, ...expandDevParam(node), '--pause'], node.data.name);
+  await repl(['-f', node.data.identifier, ...expandDevParam(node), '--pause'], node.data.name);
   refresh();
 }
 
-export function kill(node?: TargetItem) {
+export async function kill(node?: TargetItem) {
   if (!node) { return; }
 
   if ((node instanceof AppItem && node.data.pid) || node instanceof ProcessItem) {
     logger.appendLine(`Kill PID ${node.data.pid} on device ${node.device.id}`);
-    terminate(node.device.id, node.data.pid.toString());
+    await terminate(node.device.id, node.data.pid.toString());
     refresh();
   } else {
     vscode.window.showWarningMessage(vscode.l10n.t('Target is not running'));
   }
 }
 
-export function attach(node?: TargetItem) {
+export async function attach(node?: TargetItem) {
   if (!node) { return; }
 
   if (node instanceof AppItem || node instanceof ProcessItem) {
@@ -65,7 +65,7 @@ export function attach(node?: TargetItem) {
     }
 
     logger.appendLine(`Attach to PID ${node.data.pid} on device ${node.device.id}`);
-    repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString());
+    await repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString());
   }
 }
 

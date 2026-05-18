@@ -50,7 +50,7 @@ async function create(template: string) {
   });
 
   if (!(workspaceFolders?.length)) {
-    vscode.commands.executeCommand('vscode.openFolder', dest);
+    await vscode.commands.executeCommand('vscode.openFolder', dest);
   }
 
   await run({

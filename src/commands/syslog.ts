@@ -55,7 +55,7 @@ export async function show(node: TargetItem) {
   const type = await os(node.device.id);
   if (type === 'ios' && node.device.type === DeviceType.USB) {
     logger.appendLine(`Syslog via lockdown for ${node.data.name} on device ${node.device.id}`);
-    lockdownSyslog(node.device.id, bundleOrPid);
+    return lockdownSyslog(node.device.id, bundleOrPid);
   } else if (type === 'linux' || type === 'macos') {
     const args = [driverScript(), 'syslog', '--device', node.device.id, ...bundleOrPid];
     const python3 = await interpreter();

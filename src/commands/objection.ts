@@ -53,7 +53,7 @@ export async function explore(target: TargetItem) : Promise<void> {
   logger.appendLine(`Objection explore ${gadget} on device ${target.device.id}`);
   const shellArgs = ['-m', 'objection.console.cli', '-g', gadget, ...device, 'explore'];
   const shellPath = await interpreter('objection');
-  run({
+  await run({
     name,
     shellArgs,
     shellPath,

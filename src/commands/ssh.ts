@@ -74,7 +74,7 @@ export async function shell(node: TargetItem) {
 
   if (node.data.id === 'local') {
     logger.appendLine('Shell: opening local terminal');
-    commands.executeCommand('workbench.action.terminal.new');
+    await commands.executeCommand('workbench.action.terminal.new');
     return;
   }
 

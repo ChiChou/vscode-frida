@@ -20,9 +20,27 @@ import { FridaCompletionProvider } from './providers/completion';
 import * as target from './commands/target';
 import { logger } from './logger';
 
+function errorMessage(error: unknown): string {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	return String(error);
+}
+
 export function activate(context: vscode.ExtensionContext) {
 	logger.appendLine('Frida extension activated');
-	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, cb);
+	const register = (cmd: string, cb: (...args: any[]) => any) => vscode.commands.registerCommand(cmd, async (...args: any[]) => {
+		try {
+			return await cb(...args);
+		} catch (error) {
+			const message = errorMessage(error);
+			logger.appendLine(`Error: command ${cmd} failed - ${message}`);
+			if (error instanceof Error && error.stack) {
+				logger.appendLine(error.stack);
+			}
+			vscode.window.showErrorMessage(vscode.l10n.t('Frida command failed: {0}', message));
+		}
+	});
 	const push = (item: vscode.Disposable) => context.subscriptions.push(item);
 
 	const appsProvider = new DevicesProvider(ProviderType.Apps);

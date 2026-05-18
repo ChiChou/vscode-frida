@@ -69,6 +69,6 @@ export default async function dump(target: TargetItem) {
     vscode.l10n.t('Dismiss'));
 
   if (option === actionOpen) {
-    vscode.commands.executeCommand('revealFileInOS', dest);
+    await vscode.commands.executeCommand('revealFileInOS', dest);
   }
 }
