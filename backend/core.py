@@ -47,11 +47,25 @@ def get_device(device_id: str) -> frida.core.Device:
         return frida.get_device(device_id, timeout=1)
 
 
-def info_wrap(props, fmt):
+PROCESS_PARAMETER_KEYS = (
+    'path',
+    'user',
+    'uid',
+    'gid',
+    'ppid',
+    'argv',
+    'started',
+    'current_directory',
+    'cwd',
+)
+
+
+def info_wrap(props, fmt, metadata_status='full', metadata_error=None, include_context=False):
     def wrap(target):
         obj = {prop: getattr(target, prop) for prop in props}
 
-        icons = target.parameters.get('icons', [])
+        params = getattr(target, 'parameters', {}) or {}
+        icons = params.get('icons', [])
         try:
             icon = next(icon for icon in icons if icon.get('format') == 'png')
             data = icon['image']
@@ -59,6 +73,26 @@ def info_wrap(props, fmt):
                 base64.b64encode(data).decode('ascii')
         except StopIteration:
             pass
+
+        if include_context:
+            details = {}
+            for key in PROCESS_PARAMETER_KEYS:
+                if key not in params:
+                    continue
+                value = params[key]
+                if value is not None:
+                    details[key] = value
+
+            if details:
+                obj['parameters'] = details
+
+            obj['path'] = details.get('path') or ''
+            obj['cwd'] = details.get('current_directory') or details.get('cwd') or ''
+            obj['user'] = details.get('user') or ''
+            obj['ppid'] = details.get('ppid') or 0
+            obj['argv'] = details.get('argv') or []
+            obj['metadataStatus'] = metadata_status
+            obj['metadataError'] = metadata_error or ''
 
         return obj
 
@@ -83,13 +117,20 @@ def ps(device: frida.core.Device) -> list:
 
     def fmt(p):
         return '%s-%s' % (device.id, p.name or p.pid)
-    wrap = info_wrap(props, fmt)
 
     try:
-        ps = device.enumerate_processes(scope='full')
-    except frida.TransportError:
-        ps = device.enumerate_processes()
-    return [wrap(p) for p in ps]
+        processes = device.enumerate_processes(scope='full')
+        wrap = info_wrap(props, fmt, include_context=True)
+    except Exception as e:
+        processes = device.enumerate_processes()
+        wrap = info_wrap(
+            props,
+            fmt,
+            metadata_status='limited',
+            metadata_error=str(e),
+            include_context=True,
+        )
+    return [wrap(p) for p in processes]
 
 
 def device_info(device: frida.core.Device) -> dict:

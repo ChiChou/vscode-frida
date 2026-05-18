@@ -51,10 +51,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const psProvider = new DevicesProvider(ProviderType.Processes);
 	vscode.window.registerTreeDataProvider('fridaPs', psProvider);
 
-	push(register('frida.ps.refresh', () => psProvider.refresh()));
+	push(register('frida.ps.refresh', () => {
+		psProvider.refresh();
+	}));
 	push(register('frida.spawn', repl.spawn));
 	push(register('frida.spawn.suspended', repl.spawnSuspended));
 	push(register('frida.attach', repl.attach));
+	push(register('frida.attach.elevated', repl.attachElevated));
 	push(register('frida.kill', repl.kill));
 	push(register('frida.remote.add', repl.addRemote));
 	push(register('frida.remote.remove', repl.delRemote));
@@ -65,6 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.bundle.copy', clipboard.copy));
 	push(register('frida.name.copy', clipboard.copy));
 	push(register('frida.pid.copy', clipboard.copyPid));
+	push(register('frida.path.copy', clipboard.copyPath));
 	push(register('frida.device.copy', clipboard.copy));
 	
 	push(register('frida.device.androidserver', android.startServer));

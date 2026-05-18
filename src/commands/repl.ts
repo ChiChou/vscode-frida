@@ -5,14 +5,28 @@ import { terminate } from '../driver/frida';
 import { all, connect, disconnect } from '../driver/remote';
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
 import { DeviceType } from '../types';
-import { expandDevParam, interpreter, refresh } from '../utils';
+import { expandDevParam, interpreter, refresh, sudo } from '../utils';
 import { logger } from '../logger';
 
 const terminals = new Set<vscode.Terminal>();
 
-async function repl(args: string[], id: string) {
+async function repl(args: string[], id: string, elevated = false) {
   const name = vscode.l10n.t('Frida - {0}', id);
   const shellPath = await interpreter();
+
+  if (elevated) {
+    const sudoPath = await sudo();
+    const term = vscode.window.createTerminal({
+      name,
+      shellPath: sudoPath,
+      shellArgs: [shellPath, '-m', 'frida_tools.repl', ...args],
+      hideFromUser: false
+    });
+    term.show();
+    terminals.add(term);
+    return;
+  }
+
   const py = path.join(__dirname, '..', '..', 'backend', 'pause.py');
   const shellArgs = [py, shellPath, '-m', 'frida_tools.repl', ...args];
   const term = vscode.window.createTerminal({
@@ -55,18 +69,32 @@ export async function kill(node?: TargetItem) {
   }
 }
 
-export async function attach(node?: TargetItem) {
+async function attachWithOptions(node: TargetItem | undefined, elevated: boolean) {
   if (!node) { return; }
 
   if (node instanceof AppItem || node instanceof ProcessItem) {
     if (!node.data.pid) {
       vscode.window.showErrorMessage(
         vscode.l10n.t('App "{0}" must be running before attaching to it', node.data.name));
+      return;
     }
 
-    logger.appendLine(`Attach to PID ${node.data.pid} on device ${node.device.id}`);
-    await repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString());
+    logger.appendLine(`${elevated ? 'Attach elevated' : 'Attach'} to PID ${node.data.pid} on device ${node.device.id}`);
+    await repl([node.data.pid.toString(), ...expandDevParam(node)], node.data.pid.toString(), elevated);
   }
+}
+
+export async function attach(node?: TargetItem) {
+  return attachWithOptions(node, false);
+}
+
+export function attachElevated(node?: TargetItem) {
+  if ((node instanceof AppItem || node instanceof ProcessItem) && node.device.type !== DeviceType.Local) {
+    vscode.window.showWarningMessage(vscode.l10n.t('Elevated attach is only available for local targets'));
+    return;
+  }
+
+  return attachWithOptions(node, true);
 }
 
 export async function addRemote() {

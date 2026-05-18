@@ -30,6 +30,15 @@ export function executable(name: string) {
   return name + (platform() === 'win32' ? '.exe' : '');
 }
 
+export async function sudo(): Promise<string> {
+  const { default: which } = await import('which');
+  const sudoPath = await which(executable('sudo'), { all: false, nothrow: true });
+  if (!sudoPath) {
+    throw new Error(vscode.l10n.t('sudo is not available. Enable Windows sudo or install sudo on this system.'));
+  }
+  return sudoPath;
+}
+
 interface PythonExtensionApi {
   settings: {
     getExecutionDetails(): { execCommand: string[] };

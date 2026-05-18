@@ -31,3 +31,12 @@ export function copyPid(item: AppItem | ProcessItem) {
 
   window.showWarningMessage(l10n.t('Unsupported item type'));
 }
+
+export function copyPath(item: ProcessItem) {
+  if (item instanceof ProcessItem && item.data.path) {
+    env.clipboard.writeText(item.data.path);
+    return;
+  }
+
+  window.showWarningMessage(l10n.t('No executable path is available for this process.'));
+}

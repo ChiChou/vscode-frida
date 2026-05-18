@@ -118,6 +118,15 @@
                 "category": "Frida"
             },
             {
+                "command": "frida.attach.elevated",
+                "title": "%frida.attach.elevated%",
+                "icon": {
+                    "light": "resources/light/attach.svg",
+                    "dark": "resources/dark/attach.svg"
+                },
+                "category": "Frida"
+            },
+            {
                 "command": "frida.device.copy",
                 "title": "%frida.device.copy%"
             },
@@ -132,6 +141,10 @@
             {
                 "command": "frida.pid.copy",
                 "title": "%frida.pid.copy%"
+            },
+            {
+                "command": "frida.path.copy",
+                "title": "%frida.path.copy%"
             },
             {
                 "command": "frida.spawn",
@@ -360,6 +373,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "frida.attach.elevated",
+                    "when": "false"
+                },
+                {
                     "command": "frida.kill",
                     "when": "false"
                 },
@@ -381,6 +398,14 @@
                 },
                 {
                     "command": "frida.name.copy",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.pid.copy",
+                    "when": "false"
+                },
+                {
+                    "command": "frida.path.copy",
                     "when": "false"
                 },
                 {
@@ -417,23 +442,33 @@
             "view/item/context": [
                 {
                     "command": "frida.remote.remove",
-                    "when": "view == fridaApps && viewItem =~ /^device\\|socket@/",
+                    "when": "view == fridaApps && viewItem =~ /^device\\|remote\\|/",
                     "group": "inline"
                 },
                 {
                     "command": "frida.remote.remove",
-                    "when": "view == fridaPs && viewItem =~ /^device\\|socket@/",
+                    "when": "view == fridaPs && viewItem =~ /^device\\|remote\\|/",
                     "group": "inline"
                 },
                 {
                     "command": "frida.attach",
-                    "when": "view == fridaApps && viewItem == 'app|running'",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|running\\|/",
                     "group": "inline"
                 },
                 {
                     "command": "frida.attach",
                     "when": "view == fridaPs && viewItem =~ /^process\\|/",
                     "group": "inline"
+                },
+                {
+                    "command": "frida.attach.elevated",
+                    "when": "view == fridaApps && viewItem =~ /^app\\|running\\|local\\|/",
+                    "group": "2_frida_process@0"
+                },
+                {
+                    "command": "frida.attach.elevated",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|.*\\|local\\|/",
+                    "group": "2_frida_process@0"
                 },
                 {
                     "command": "frida.spawn",
@@ -466,8 +501,13 @@
                     "group": "1_frida_info@1"
                 },
                 {
+                    "command": "frida.path.copy",
+                    "when": "view == fridaPs && viewItem =~ /^process\\|/",
+                    "group": "1_frida_info@1"
+                },
+                {
                     "command": "frida.kill",
-                    "when": "viewItem =~ /\\|running$/",
+                    "when": "viewItem =~ /^(app|process)\\|running\\|/",
                     "group": "2_frida_process@2"
                 },
                 {
@@ -577,7 +617,7 @@
                 },
                 {
                     "command": "frida.external.shell",
-                    "when": "viewItem =~ /^device\\|\\w+\\|(android|ios)$/ || viewItem =~ /^device\\|\\local/",
+                    "when": "viewItem =~ /^device\\|\\w+\\|(android|ios)$/ || viewItem =~ /^device\\|local\\|/",
                     "group": "1_frida_dev_external@1"
                 },
                 {
