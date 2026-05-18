@@ -13,7 +13,6 @@ export default class ADB {
     if (!this.path) {
       const msg = vscode.l10n.t('Could not find command adb in $PATH');
       logger.appendLine(`Error: ${msg}`);
-      vscode.window.showErrorMessage(msg);
       throw new Error(msg);
     }
   }
@@ -63,7 +62,7 @@ export default class ADB {
     const shellArgs = ['-s', this.device, 'shell', ...cmd];
 
     return new Promise<string>((resolve, reject) => {
-      cp.execFile(shellPath, shellArgs, (err, stdout, stderr) => {
+      cp.execFile(shellPath, shellArgs, (err, stdout) => {
         if (err) {
           reject(err);
         } else {

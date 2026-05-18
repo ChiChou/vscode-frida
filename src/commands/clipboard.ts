@@ -1,4 +1,4 @@
-import { env, l10n } from 'vscode';
+import { env, l10n, window } from 'vscode';
 import { TargetItem, AppItem, ProcessItem, DeviceItem } from "../providers/devices";
 
 export function copy(item: TargetItem) {
@@ -11,10 +11,16 @@ export function copy(item: TargetItem) {
       return item.data.id;
     }
 
-    throw new Error(l10n.t('Unsupported item type'));
+    return undefined;
   }
 
-  env.clipboard.writeText(getText(item));  
+  const text = getText(item);
+  if (text === undefined) {
+    window.showWarningMessage(l10n.t('Unsupported item type'));
+    return;
+  }
+
+  env.clipboard.writeText(text);
 }
 
 export function copyPid(item: AppItem | ProcessItem) {
@@ -23,5 +29,5 @@ export function copyPid(item: AppItem | ProcessItem) {
     return;
   }
 
-  throw new Error(l10n.t('Unsupported item type'));
+  window.showWarningMessage(l10n.t('Unsupported item type'));
 }

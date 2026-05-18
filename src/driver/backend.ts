@@ -24,7 +24,7 @@ export function exec(...args: string[]): Promise<any> {
         logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
         logger.appendLine(stderr);
         logger.appendLine(`Exited with ${err.code}`);
-        reject(new Error(stderr));
+        reject(new Error(stderr.trim() || err.message));
       } else {
         resolve(JSON.parse(stdout));
       }

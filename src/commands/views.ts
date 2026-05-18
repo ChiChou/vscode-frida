@@ -63,7 +63,7 @@ async function fetchAndShow(target: TargetItem, method: string, filename: string
         await openUntitledDocument(filename, xml, 'xml');
       } catch (err: any) {
         logger.appendLine(`Error: failed to load ${method} - ${err.message}`);
-        vscode.window.showErrorMessage(err.message);
+        vscode.window.showErrorMessage(vscode.l10n.t('Failed to load {0}: {1}', filename, err.message));
       }
     }
   );
