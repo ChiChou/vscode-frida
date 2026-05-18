@@ -34,7 +34,7 @@ Alternatively, you can use a package manager like [pipx](https://github.com/pypa
 
 ### Apps and Processes List
 
-List apps and processes on connected devices in a sidebar panel. Right-click to attach, spawn, spawn in suspended mode, kill processes, or copy device/process info to clipboard. Supports local, USB, and remote devices.
+List apps and processes on connected devices in a sidebar panel. Right-click to attach, attach with elevated privileges for local targets, spawn, spawn in suspended mode, kill processes, or copy device/process info to clipboard. Supports local, USB, and remote devices. Local process entries include best-effort metadata such as executable path, owner, parent PID, and arguments when available.
 
 ### Interactive Runtime Panels
 
