@@ -11,7 +11,10 @@
 		"sourceMap": true,
 		"rootDir": "src",
 		"strict": true,
-		"baseUrl": "."
+		"types": [
+			"node",
+			"vscode"
+		]
 	},
 	"exclude": [
 		"node_modules",
