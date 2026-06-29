@@ -96,22 +96,30 @@ export function activate(context: vscode.ExtensionContext) {
 	push(register('frida.view.entitlements', views.entitlements));
 
 	// auto-refresh timer
-	let refreshTimer: ReturnType<typeof setInterval> | undefined;
+	//
+	// Use a self-rescheduling setTimeout rather than setInterval: when the
+	// machine hibernates the timer cannot fire, and on wake setInterval fires
+	// repeatedly to "catch up" on every missed tick, which would reload the
+	// lists endlessly. A setTimeout that only schedules the next tick after the
+	// current one runs has no backlog to catch up on, so it fires at most once.
+	let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 	function startAutoRefresh() {
-		if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = undefined; }
+		if (refreshTimer) { clearTimeout(refreshTimer); refreshTimer = undefined; }
 		const interval = vscode.workspace.getConfiguration('frida').get<number>('refreshInterval', 10000);
 		if (interval > 0) {
-			refreshTimer = setInterval(() => {
+			const tick = () => {
 				appsProvider.refresh();
 				psProvider.refresh();
-			}, interval);
+				refreshTimer = setTimeout(tick, interval);
+			};
+			refreshTimer = setTimeout(tick, interval);
 		}
 	}
 	startAutoRefresh();
 	push(vscode.workspace.onDidChangeConfiguration(e => {
 		if (e.affectsConfiguration('frida.refreshInterval')) { startAutoRefresh(); }
 	}));
-	push({ dispose() { if (refreshTimer) { clearInterval(refreshTimer); } } });
+	push({ dispose() { if (refreshTimer) { clearTimeout(refreshTimer); } } });
 
 	const completionProvider = new FridaCompletionProvider();
 	push(vscode.languages.registerCompletionItemProvider(
