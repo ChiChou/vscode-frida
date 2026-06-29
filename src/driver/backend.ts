@@ -68,7 +68,7 @@ export function rpc(target: TargetItem, method: string, ...args: string[]) {
   } else if (target instanceof ProcessItem) {
     bundleOrPid = ['--pid', target.data.pid.toString()];
   } else {
-    throw new Error(l10n.t('Invalid target {0}', target));
+    throw new Error(l10n.t('Invalid target {0}', String(target.label)));
   }
 
   return exec('rpc', '--device', target.device.id, ...bundleOrPid, method, ...args);

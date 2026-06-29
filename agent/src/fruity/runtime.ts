@@ -179,7 +179,7 @@ export interface Ivar {
 export function copySuperClasses(clazz: ObjC.Object): string[] {
   const proto = [];
   {
-    let cur = clazz;
+    let cur: ObjC.Object | null = clazz;
     while ((cur = cur.$superClass)) proto.unshift(cur.$className);
   }
   return proto;
