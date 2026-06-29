@@ -105,7 +105,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let refreshTimer: ReturnType<typeof setTimeout> | undefined;
 	function startAutoRefresh() {
 		if (refreshTimer) { clearTimeout(refreshTimer); refreshTimer = undefined; }
-		const interval = vscode.workspace.getConfiguration('frida').get<number>('refreshInterval', 10000);
+		const interval = vscode.workspace.getConfiguration('frida').get<number>('refreshInterval', 0);
 		if (interval > 0) {
 			const tick = () => {
 				appsProvider.refresh();

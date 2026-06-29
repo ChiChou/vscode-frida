@@ -50,7 +50,7 @@
                 },
                 "frida.refreshInterval": {
                     "type": "number",
-                    "default": 10000,
+                    "default": 0,
                     "minimum": 0,
                     "description": "%frida.refreshInterval%"
                 }
