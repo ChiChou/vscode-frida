@@ -4,18 +4,12 @@ on:
     tags:
       - v*
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-    runs-on: ${{ matrix.os }}
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-    permissions:
-      contents: write
-      pull-requests: write
-      repository-projects: write
+    runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -23,39 +17,39 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: 24.x
-    - run: npm install
-    - run: npm install -g vsce
+        cache: npm
+        cache-dependency-path: |
+          package-lock.json
+          agent/package-lock.json
+    - name: Install dependencies
+      run: npm ci
     - name: Build Agent
       run: |
         cd agent
-        npm install
+        npm ci
         npm run build
     - name: Package VSIX
-      run: vsce package
-    - name: Get version
-      id: version
-      run: echo "VERSION=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
-    - name: Publish
-      run: npm run deploy
+      run: npx --yes @vscode/vsce package
+    - name: Upload VSIX artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: vsix
+        path: '*.vsix'
+        if-no-files-found: error
+    - name: Create Release and upload VSIX
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: gh release create "$GITHUB_REF_NAME" *.vsix --title "Release $GITHUB_REF_NAME" --notes ""
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download VSIX artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: vsix
+    - name: Publish to Marketplace
+      run: npx --yes @vscode/vsce publish --packagePath *.vsix
       env:
         VSCE_PAT: ${{ secrets.VSCE_PAT }}
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        body: ''
-        draft: false
-        prerelease: false
-    - name: Upload VSIX to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./vscode-frida-${{ steps.version.outputs.VERSION }}.vsix
-        asset_name: vscode-frida-${{ steps.version.outputs.VERSION }}.vsix
-        asset_content_type: application/zip
