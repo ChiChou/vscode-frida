@@ -1,5 +1,7 @@
 # Frida Workbench for VSCode
 
+[![CI](https://github.com/ChiChou/vscode-frida/actions/workflows/ci.yml/badge.svg)](https://github.com/ChiChou/vscode-frida/actions/workflows/ci.yml)
+
 [**Repository**](https://github.com/chichou/vscode-frida) | 
 [**Issues**](https://github.com/ChiChou/vscode-frida/issues) | 
 [**Install**](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
