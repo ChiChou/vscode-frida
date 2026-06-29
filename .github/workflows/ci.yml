@@ -3,8 +3,30 @@ name: CI
 on:
   push:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'types.d.ts'
+      - 'tsconfig.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'agent/src/**'
+      - 'agent/tsconfig.json'
+      - 'agent/package.json'
+      - 'agent/package-lock.json'
+      - '.github/workflows/ci.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'src/**'
+      - 'types.d.ts'
+      - 'tsconfig.json'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'agent/src/**'
+      - 'agent/tsconfig.json'
+      - 'agent/package.json'
+      - 'agent/package-lock.json'
+      - '.github/workflows/ci.yml'
 
 jobs:
   build:
