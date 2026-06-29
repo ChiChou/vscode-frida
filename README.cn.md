@@ -1,5 +1,7 @@
 # 将 Frida 集成到 VSCode
 
+[![CI](https://github.com/ChiChou/vscode-frida/actions/workflows/ci.yml/badge.svg)](https://github.com/ChiChou/vscode-frida/actions/workflows/ci.yml)
+
 [**源码仓库**](https://github.com/chichou/vscode-frida) | 
 [**GitHub Issues**](https://github.com/ChiChou/vscode-frida/issues) | 
 [**安装到 VSCode**](https://marketplace.visualstudio.com/items?itemName=CodeColorist.vscode-frida)
