@@ -5,6 +5,7 @@ import * as ipc from '../driver/backend';
 import { resource } from '../utils';
 import { ProviderType, App, Process, Device, DeviceType } from '../types';
 import { logger } from '../logger';
+import { hostFromDeviceId } from '../driver/remote';
 
 export class DevicesProvider implements vscode.TreeDataProvider<TargetItem> {
 
@@ -106,7 +107,8 @@ export class DeviceItem extends TargetItem {
 
   get contextValue() {
     const { type, os } = this.data;
-    return `device|${type}|${os}`;
+    const configured = type === DeviceType.Remote && hostFromDeviceId(this.data.id) ? '|configured' : '';
+    return `device|${type}|${os}${configured}`;
   }
 
 }

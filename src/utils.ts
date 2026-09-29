@@ -7,6 +7,7 @@ import { AppItem, ProcessItem } from './providers/devices';
 
 import shebang from './shebang';
 import { logger } from './logger';
+import { hostFromDeviceId } from './driver/remote';
 
 export function resource(...paths: string[]): vscode.Uri {
   const file = join(__dirname, '..', 'resources', ...paths);
@@ -118,8 +119,11 @@ export function expandDevParam(node: AppItem | ProcessItem) {
   switch (node.device.type) {
     case DeviceType.Local:
       return [];
-    case DeviceType.Remote:
-      return ['-H', node.device.id.substring('socket@'.length)];
+    case DeviceType.Remote: {
+      const host = hostFromDeviceId(node.device.id);
+      return host ? ['-H', host] : ['--device', node.device.id];
+    }
+    case DeviceType.Simulator:
     case DeviceType.USB:
     // return ['-U'];
     default:

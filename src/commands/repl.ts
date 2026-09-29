@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 
 import { terminate } from '../driver/frida';
-import { all, connect, disconnect } from '../driver/remote';
+import { all, connect, disconnect, hostFromDeviceId } from '../driver/remote';
 import { AppItem, DeviceItem, ProcessItem, TargetItem } from '../providers/devices';
 import { DeviceType } from '../types';
 import { expandDevParam, interpreter, refresh, sudo } from '../utils';
@@ -119,7 +119,10 @@ export async function delRemote(node?: TargetItem) {
       disconnect(selected);
     }
   } else if (node instanceof DeviceItem && node.data.type === DeviceType.Remote) {
-    disconnect(node.data.id.substring('socket@'.length));
+    const host = hostFromDeviceId(node.data.id);
+    if (host) {
+      disconnect(host);
+    }
   }
   refresh();
 }

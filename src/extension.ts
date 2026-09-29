@@ -123,7 +123,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	const completionProvider = new FridaCompletionProvider();
 	push(vscode.languages.registerCompletionItemProvider(
-		[{ language: 'javascript' }, { language: 'typescript' }],
+		[{ language: 'javascript', scheme: '*' }, { language: 'typescript', scheme: '*' }],
 		completionProvider,
 		'.', "'", '"', '`', '['
 	));

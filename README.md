@@ -36,7 +36,7 @@ Alternatively, you can use a package manager like [pipx](https://github.com/pypa
 
 ### Apps and Processes List
 
-List apps and processes on connected devices in a sidebar panel. Right-click to attach, attach with elevated privileges for local targets, spawn, spawn in suspended mode, kill processes, or copy device/process info to clipboard. Supports local, USB, and remote devices. Local process entries include best-effort metadata such as executable path, owner, parent PID, and arguments when available.
+List apps and processes on connected devices in a sidebar panel. Right-click to attach, attach with elevated privileges for local targets, spawn, spawn in suspended mode, kill processes, or copy device/process info to clipboard. Supports local, Apple Simulator, USB, and remote devices. Local process entries include best-effort metadata such as executable path, owner, parent PID, and arguments when available.
 
 ### Interactive Runtime Panels
 
@@ -106,7 +106,7 @@ The file specifies which device and target the LSP should attach to. It requires
 }
 ```
 
-The `device` value corresponds to the Frida device ID — `local` for the host machine, `usb` for a USB-connected device, or a `host:port` string for remote devices.
+The `device` value corresponds to the Frida device ID — `local` for the host machine, a Simulator or USB device ID, or a `host:port` string for remote devices.
 
 The LSP watches this file for changes. Editing or recreating it automatically restarts the language server with the new target.
 

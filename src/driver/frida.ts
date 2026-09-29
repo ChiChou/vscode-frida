@@ -2,18 +2,17 @@ import { l10n } from 'vscode';
 import { execFile } from 'child_process';
 import { interpreter } from '../utils';
 import { logger } from '../logger';
+import { hostFromDeviceId } from './remote';
 
 
 function deviceParam(device: string) {
-  const prefix = 'socket@';
-  return device.startsWith(prefix) ?
-    ['-H', device.substring(prefix.length)] :
-    ['--device', device];
+  const host = hostFromDeviceId(device);
+  return host ? ['-H', host] : ['--device', device];
 }
 
-export async function launch(device: string, bundle: string): Promise<Number> {
+export async function launch(device: string, bundle: string): Promise<number> {
   logger.appendLine(`Launch ${bundle} on device ${device}`);
-  const params = ['-f', bundle, ...deviceParam(device), bundle, '-q', '-e', 'Process.id'];
+  const params = ['-f', bundle, ...deviceParam(device), '-q', '-e', 'Process.id'];
   const py3 = await interpreter();
   const args = ['-m', 'frida_tools.repl', ...params];
 
@@ -50,4 +49,3 @@ export async function terminate(device: string, target: string) {
     });
   });
 }
-

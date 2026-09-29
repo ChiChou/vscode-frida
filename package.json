@@ -442,12 +442,12 @@
             "view/item/context": [
                 {
                     "command": "frida.remote.remove",
-                    "when": "view == fridaApps && viewItem =~ /^device\\|remote\\|/",
+                    "when": "view == fridaApps && viewItem =~ /^device\\|remote\\|.*\\|configured$/",
                     "group": "inline"
                 },
                 {
                     "command": "frida.remote.remove",
-                    "when": "view == fridaPs && viewItem =~ /^device\\|remote\\|/",
+                    "when": "view == fridaPs && viewItem =~ /^device\\|remote\\|.*\\|configured$/",
                     "group": "inline"
                 },
                 {
@@ -665,8 +665,5 @@
     "dependencies": {
         "typescript": "^5.9.3",
         "which": "^5.0.0"
-    },
-    "extensionDependencies": [
-        "ms-python.python"
-    ]
+    }
 }

@@ -7,6 +7,7 @@ export enum ProviderType {
 export enum DeviceType {
   Local = 'local',
   Remote = 'remote',
+  Simulator = 'simulator',
   USB = 'usb',
   TCP = 'tcp', // legacy
 }

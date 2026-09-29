@@ -35,6 +35,16 @@ export function all() {
   return Array.from(remoteHosts);
 }
 
+export function hostFromDeviceId(deviceId: string): string | undefined {
+  const prefix = 'socket@';
+  if (!deviceId.startsWith(prefix)) {
+    return undefined;
+  }
+
+  const host = deviceId.substring(prefix.length);
+  return remoteHosts.has(host) ? host : undefined;
+}
+
 export function asParam() {
   return remoteHosts.size > 0 ? ['--remote', Array.from(remoteHosts).join(',')] : []
 }

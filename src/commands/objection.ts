@@ -32,6 +32,7 @@ export async function explore(target: TargetItem) : Promise<void> {
       device = [];
       vscode.window.showErrorMessage(l10n.t('This command is not applicable to the local device'));
       return;
+    case DeviceType.Simulator:
     case DeviceType.USB:
     default:
       device = [];

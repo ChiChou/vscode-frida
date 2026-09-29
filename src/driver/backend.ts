@@ -19,7 +19,11 @@ export function exec(...args: string[]): Promise<any> {
   const remoteDevices = asParam();
 
   return interpreter().then(path => new Promise((resolve, reject) => {
-    execFile(path, [py, ...remoteDevices, ...args], { maxBuffer: 1024 * 1024 * 20 }, (err, stdout, stderr) => {
+    execFile(path, [py, ...remoteDevices, ...args], {
+      maxBuffer: 1024 * 1024 * 20,
+      timeout: 30_000,
+      killSignal: 'SIGKILL',
+    }, (err, stdout, stderr) => {
       if (err) {
         logger.appendLine(`Error: Failed to execute driver, arguments: ${args.join(' ')}`);
         logger.appendLine(stderr);
